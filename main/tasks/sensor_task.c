@@ -175,6 +175,8 @@ static esp_err_t sample_imu(void) {
     esp_err_t ret;
     
     // Read IMU data
+    // Note: The current_sensor_data.imu_data may not be of the same type as expected by imu_read
+    // We need to use a temporary imu_data_t variable 
     imu_data_t imu_data;
     ret = imu_read(&imu_data);
     if (ret != ESP_OK) {
@@ -200,14 +202,24 @@ static esp_err_t sample_camera(void) {
         current_sensor_data.camera_data_valid = false;
     }
     
+    // Create a temporary camera frame variable of the correct type
+    camera_frame_t frame;
+    
     // Capture new frame
-    ret = camera_capture_frame(&current_sensor_data.camera_data);
+    ret = camera_capture_frame(&frame);
     if (ret != ESP_OK) {
         ESP_LOGW(TAG, "Failed to capture camera frame: %s", esp_err_to_name(ret));
         return ret;
     }
     
+    // Copy the frame data to our sensor data structure
+    current_sensor_data.camera_data.frame_buffer = frame.frame_buffer;
+    current_sensor_data.camera_data.buffer_size = frame.buffer_size;
+    current_sensor_data.camera_data.width = frame.width;
+    current_sensor_data.camera_data.height = frame.height;
+    current_sensor_data.camera_data.timestamp = frame.timestamp;
     current_sensor_data.camera_data_valid = true;
+    
     return ESP_OK;
 }
 

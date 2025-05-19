@@ -5,6 +5,8 @@
 #include "esp_adc_cal.h"
 #include "nvs_flash.h"
 #include "nvs.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h" 
 #include "config/pin_definitions.h"
 #include "util/debug.h"
 

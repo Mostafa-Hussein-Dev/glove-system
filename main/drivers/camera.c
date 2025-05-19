@@ -164,7 +164,7 @@ esp_err_t camera_capture_frame(camera_frame_t *frame) {
     frame->height = current_frame->height;
     frame->format = (current_frame->format == PIXFORMAT_RGB565) ? 
                    CAMERA_FORMAT_RGB565 : CAMERA_FORMAT_JPEG;
-    frame->timestamp = timer_gettime() / 1000;  // Convert to milliseconds
+    frame->timestamp = esp_timer_get_time() / 1000;  // Convert to milliseconds
     
     return ESP_OK;
 }

@@ -17,7 +17,8 @@
     "communication_task.h": "c",
     "system_config.h": "c",
     "output_manager.h": "c",
-    "pin_definitions.h": "c"
+    "pin_definitions.h": "c",
+    "flex_sensor.h": "c"
   },
   "C_Cpp.errorSquiggles": "disabled"
 }

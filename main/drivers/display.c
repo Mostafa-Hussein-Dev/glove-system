@@ -1,7 +1,6 @@
-// File: main/drivers/display.c
-
 #include "drivers/display.h"
 #include <string.h>
+#include <math.h>
 #include "esp_log.h"
 #include "driver/i2c.h"
 #include "esp_timer.h"

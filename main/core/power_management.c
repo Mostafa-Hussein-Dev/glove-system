@@ -153,13 +153,15 @@ esp_err_t power_management_set_mode(power_mode_t mode) {
             power_management_set_peripheral_power(PERIPHERAL_BLE, true);
             power_management_set_peripheral_power(PERIPHERAL_CAMERA, false);
             
-            // Configure automatic light sleep
-            esp_pm_config_esp32s3_t pm_config = {
-                .max_freq_mhz = 160,
-                .min_freq_mhz = 80,
-                .light_sleep_enable = true
-            };
-            esp_pm_configure(&pm_config);
+            {
+                // Configure automatic light sleep
+                esp_pm_config_esp32s3_t balanced_pm_config = {
+                    .max_freq_mhz = 160,
+                    .min_freq_mhz = 80,
+                    .light_sleep_enable = true
+                };
+                esp_pm_configure(&balanced_pm_config);
+            }
             
             // Set standard timeouts
             power_state.inactivity_timeout_ms = INACTIVITY_TIMEOUT_SEC * 1000;
@@ -179,13 +181,15 @@ esp_err_t power_management_set_mode(power_mode_t mode) {
             power_management_set_peripheral_power(PERIPHERAL_BLE, true);
             power_management_set_peripheral_power(PERIPHERAL_CAMERA, false);
             
-            // Configure aggressive automatic light sleep
-            esp_pm_config_t pm_config = {
-                .max_freq_mhz = 80,
-                .min_freq_mhz = 40,
-                .light_sleep_enable = true
-            };
-            esp_pm_configure(&pm_config);
+            {
+                // Configure aggressive automatic light sleep
+                esp_pm_config_esp32s3_t power_save_pm_config = {
+                    .max_freq_mhz = 80,
+                    .min_freq_mhz = 40,
+                    .light_sleep_enable = true
+                };
+                esp_pm_configure(&power_save_pm_config);
+            }
             
             // Set shorter timeouts
             power_state.inactivity_timeout_ms = (INACTIVITY_TIMEOUT_SEC / 2) * 1000;
@@ -205,13 +209,15 @@ esp_err_t power_management_set_mode(power_mode_t mode) {
             power_management_set_peripheral_power(PERIPHERAL_BLE, false);
             power_management_set_peripheral_power(PERIPHERAL_CAMERA, false);
             
-            // Configure very aggressive automatic light sleep
-            esp_pm_config_t pm_config = {
-                .max_freq_mhz = 40,
-                .min_freq_mhz = 40,
-                .light_sleep_enable = true
-            };
-            esp_pm_configure(&pm_config);
+            {
+                // Configure very aggressive automatic light sleep
+                esp_pm_config_esp32s3_t max_save_pm_config = {
+                    .max_freq_mhz = 40,
+                    .min_freq_mhz = 40,
+                    .light_sleep_enable = true
+                };
+                esp_pm_configure(&max_save_pm_config);
+            }
             
             // Set very short timeouts
             power_state.inactivity_timeout_ms = (INACTIVITY_TIMEOUT_SEC / 4) * 1000;
