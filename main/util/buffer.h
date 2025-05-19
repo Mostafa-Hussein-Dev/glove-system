@@ -4,6 +4,10 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "esp_err.h"
+#include "config/system_config.h"
+
+// Define feature buffer size constant
+#define FEATURE_BUFFER_SIZE 100
 
 /**
  * @brief Structure to hold flex sensor data
