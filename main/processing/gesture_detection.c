@@ -1,25 +1,29 @@
 #include "processing/gesture_detection.h"
 #include <string.h>
+#include <stdlib.h>
+#include <math.h>
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "util/buffer.h"
 #include "util/debug.h"
-#include "math.h"
+#include "esp_system.h"
+#include "nvs_flash.h"
+#include "nvs.h"
 
 static const char *TAG = "GESTURE_DETECT";
 
 // Gesture detection state
 static bool gesture_detection_initialized = false;
 
-// Define gesture templates (simplified for demonstration)
-// In a real implementation, these would be learned from training data
-// or loaded from a pre-trained model
-
 // Number of gestures in our vocabulary
-#define NUM_GESTURES 10
+#define MAX_GESTURES 50
+#define CURRENT_GESTURES 10  // Currently implemented gestures
 
-// Simplified gesture templates (placeholder)
+// NVS namespace for gesture templates
+#define GESTURE_NVS_NAMESPACE "gestures"
+
+// Gesture template structure
 typedef struct {
     char name[32];           // Gesture name
     float template_features[FEATURE_BUFFER_SIZE];  // Template feature vector
@@ -27,52 +31,38 @@ typedef struct {
     bool is_dynamic;         // Static vs dynamic gesture
 } gesture_template_t;
 
-// Sample gesture templates
-static gesture_template_t gesture_templates[NUM_GESTURES] = {
-    {
-        .name = "A",
-        .template_features = {0.0f},  // Would be filled with actual values
-        .feature_count = 32,
-        .is_dynamic = false
-    },
-    {
-        .name = "B",
-        .template_features = {0.0f},  // Would be filled with actual values
-        .feature_count = 32,
-        .is_dynamic = false
-    },
-    // More gestures would be defined here
-};
+// Array of gesture templates
+static gesture_template_t gesture_templates[MAX_GESTURES];
+static uint8_t gesture_count = 0;
 
 // Last detected gesture for debouncing
 static char last_detected_gesture[32] = {0};
 static uint32_t last_detection_time = 0;
 static const uint32_t GESTURE_DEBOUNCE_TIME_MS = 500;
 
+// Helper functions
+static esp_err_t save_gesture_templates(void);
+static esp_err_t load_gesture_templates(void);
+static void init_default_gestures(void);
+static float calculate_similarity(const float* features1, const float* features2, uint16_t count);
+
 esp_err_t gesture_detection_init(void) {
-    // In a real implementation, you would load gesture templates or ML model from storage
-    // For this demonstration, we'll use pre-defined templates
+    // Initialize templates array
+    memset(gesture_templates, 0, sizeof(gesture_templates));
+    gesture_count = 0;
     
-    // Initialize gesture templates with some placeholder values
-    // In a real implementation, these would be learned or loaded from storage
-    
-    // Example for 'A' (ASL 'A' is a fist with thumb alongside)
-    for (int i = 0; i < 10; i++) {
-        gesture_templates[0].template_features[i] = 70.0f;  // All fingers curled (high angle values)
+    // Try to load templates from NVS
+    esp_err_t ret = load_gesture_templates();
+    if (ret != ESP_OK) {
+        ESP_LOGW(TAG, "Failed to load gesture templates from NVS, initializing defaults");
+        init_default_gestures();
+        
+        // Save default templates to NVS
+        save_gesture_templates();
     }
-    // Thumb is slightly less curled
-    gesture_templates[0].template_features[0] = 30.0f;
-    gesture_templates[0].template_features[1] = 40.0f;
-    
-    // Example for 'B' (ASL 'B' is a flat hand with fingers together)
-    for (int i = 0; i < 10; i++) {
-        gesture_templates[1].template_features[i] = 0.0f;  // All fingers straight (low angle values)
-    }
-    
-    // More gesture templates would be initialized here
     
     gesture_detection_initialized = true;
-    ESP_LOGI(TAG, "Gesture detection initialized with %d gestures", NUM_GESTURES);
+    ESP_LOGI(TAG, "Gesture detection initialized with %d gestures", gesture_count);
     
     return ESP_OK;
 }
@@ -95,49 +85,30 @@ esp_err_t gesture_detection_process(feature_vector_t *feature_vector, processing
     // Get current time for timestamps and debouncing
     uint32_t current_time = esp_timer_get_time() / 1000;
     
-    // Simplified gesture recognition: we'll use a basic distance metric
-    // In a real implementation, you would use an ML model or more sophisticated algorithm
+    // Simple threshold-based detection for specific gestures
+    // This is a basic approach using heuristics rather than ML
     
     float best_match_score = 0.0f;
     int best_match_index = -1;
     
-    // Compare input features to each template
-    for (int i = 0; i < NUM_GESTURES; i++) {
-        // Skip if template uses more features than we have
-        if (gesture_templates[i].feature_count > feature_vector->feature_count) {
+    // Compare input features to each template using Euclidean distance
+    for (int i = 0; i < gesture_count; i++) {
+        // Skip if the feature counts don't match enough
+        if (gesture_templates[i].feature_count < 10 || feature_vector->feature_count < 10) {
             continue;
         }
         
-        // Calculate a simple similarity score based on feature distances
-        // This is a very basic approach - a real implementation would use 
-        // more sophisticated matching or classification algorithms
-        
-        float similarity = 0.0f;
-        float max_distance = 0.0f;
-        
-        // Compare features (using only the features that both have)
-        uint16_t compare_count = gesture_templates[i].feature_count < feature_vector->feature_count ?
-                               gesture_templates[i].feature_count : feature_vector->feature_count;
-        
-        for (int j = 0; j < compare_count; j++) {
-            // Calculate feature distance (normalized)
-            float feature_dist = fabsf(feature_vector->features[j] - gesture_templates[i].template_features[j]);
-            
-            // Update maximum distance (for later normalization)
-            if (feature_dist > max_distance) {
-                max_distance = feature_dist;
-            }
-            
-            // Accumulate similarity (inverse of distance)
-            similarity += 1.0f / (1.0f + feature_dist);
-        }
-        
-        // Normalize similarity score (0-1 range)
-        float score = similarity / (float)compare_count;
+        // Calculate similarity (higher is better)
+        float similarity = calculate_similarity(
+            feature_vector->features, 
+            gesture_templates[i].template_features,
+            (gesture_templates[i].feature_count < feature_vector->feature_count) ? 
+                gesture_templates[i].feature_count : feature_vector->feature_count
+        );
         
         // Keep track of best match
-        if (score > best_match_score) {
-            best_match_score = score;
+        if (similarity > best_match_score) {
+            best_match_score = similarity;
             best_match_index = i;
         }
     }
@@ -159,6 +130,7 @@ esp_err_t gesture_detection_process(feature_vector_t *feature_vector, processing
         result->confidence = best_match_score;
         result->is_dynamic = gesture_templates[best_match_index].is_dynamic;
         result->duration_ms = 0;  // We're not tracking duration in this simplified version
+        result->timestamp = current_time;
         
         // Save for debouncing
         strncpy(last_detected_gesture, result->gesture_name, sizeof(last_detected_gesture) - 1);
@@ -173,8 +145,233 @@ esp_err_t gesture_detection_process(feature_vector_t *feature_vector, processing
 }
 
 esp_err_t gesture_detection_add_template(const char *name, feature_vector_t *features, bool is_dynamic) {
-    // This would be used for learning new gestures
-    // Not implemented in this simplified version
-    ESP_LOGW(TAG, "Gesture template addition not implemented");
-    return ESP_ERR_NOT_SUPPORTED;
+    if (!gesture_detection_initialized || name == NULL || features == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    
+    // Find if this gesture already exists
+    int index = -1;
+    for (int i = 0; i < gesture_count; i++) {
+        if (strcmp(gesture_templates[i].name, name) == 0) {
+            index = i;
+            break;
+        }
+    }
+    
+    // If not found and we have space, add a new one
+    if (index < 0) {
+        if (gesture_count >= MAX_GESTURES) {
+            ESP_LOGW(TAG, "Cannot add more gestures, reached limit of %d", MAX_GESTURES);
+            return ESP_ERR_NO_MEM;
+        }
+        
+        index = gesture_count;
+        gesture_count++;
+    }
+    
+    // Update template
+    strncpy(gesture_templates[index].name, name, sizeof(gesture_templates[index].name) - 1);
+    
+    uint16_t count = features->feature_count;
+    if (count > FEATURE_BUFFER_SIZE) {
+        count = FEATURE_BUFFER_SIZE;
+    }
+    
+    memcpy(gesture_templates[index].template_features, features->features, count * sizeof(float));
+    gesture_templates[index].feature_count = count;
+    gesture_templates[index].is_dynamic = is_dynamic;
+    
+    // Save the updated templates to NVS
+    save_gesture_templates();
+    
+    ESP_LOGI(TAG, "Template added/updated for gesture: %s", name);
+    return ESP_OK;
+}
+
+// Helper function to calculate similarity between two feature vectors
+static float calculate_similarity(const float* features1, const float* features2, uint16_t count) {
+    if (features1 == NULL || features2 == NULL || count == 0) {
+        return 0.0f;
+    }
+    
+    // Calculate Euclidean distance
+    float sum_sq_diff = 0.0f;
+    for (int i = 0; i < count; i++) {
+        float diff = features1[i] - features2[i];
+        sum_sq_diff += diff * diff;
+    }
+    
+    float distance = sqrtf(sum_sq_diff);
+    
+    // Convert distance to similarity score (0-1 range)
+    // Smaller distance means higher similarity
+    float similarity = 1.0f / (1.0f + distance/10.0f);  // Normalized, adjust divisor as needed
+    
+    return similarity;
+}
+
+// Initialize default gesture templates
+static void init_default_gestures(void) {
+    gesture_count = 0;
+    
+    // ASL Letter A
+    strncpy(gesture_templates[gesture_count].name, "A", sizeof(gesture_templates[0].name) - 1);
+    // Set template values for a fist with thumb alongside
+    for (int i = 0; i < 10; i++) {
+        gesture_templates[gesture_count].template_features[i] = 75.0f;  // All fingers curled
+    }
+    gesture_templates[gesture_count].template_features[0] = 30.0f;  // Thumb less curled
+    gesture_templates[gesture_count].template_features[1] = 40.0f;
+    gesture_templates[gesture_count].feature_count = 32;
+    gesture_templates[gesture_count].is_dynamic = false;
+    gesture_count++;
+    
+    // ASL Letter B
+    strncpy(gesture_templates[gesture_count].name, "B", sizeof(gesture_templates[0].name) - 1);
+    // Set template values for a flat hand with fingers together
+    for (int i = 0; i < 10; i++) {
+        gesture_templates[gesture_count].template_features[i] = 5.0f;  // All fingers extended
+    }
+    gesture_templates[gesture_count].feature_count = 32;
+    gesture_templates[gesture_count].is_dynamic = false;
+    gesture_count++;
+    
+    // ASL Letter C
+    strncpy(gesture_templates[gesture_count].name, "C", sizeof(gesture_templates[0].name) - 1);
+    // Set template values for curved hand
+    for (int i = 0; i < 10; i++) {
+        gesture_templates[gesture_count].template_features[i] = 35.0f;  // All fingers partially curled
+    }
+    gesture_templates[gesture_count].feature_count = 32;
+    gesture_templates[gesture_count].is_dynamic = false;
+    gesture_count++;
+    
+    // Add more default gestures as needed...
+    // ASL Letter O
+    strncpy(gesture_templates[gesture_count].name, "O", sizeof(gesture_templates[0].name) - 1);
+    // Set template values for fingertips touching thumb in O shape
+    for (int i = 0; i < 10; i++) {
+        gesture_templates[gesture_count].template_features[i] = 50.0f;  // All fingers curved to meet thumb
+    }
+    gesture_templates[gesture_count].feature_count = 32;
+    gesture_templates[gesture_count].is_dynamic = false;
+    gesture_count++;
+    
+    // ASL Letter Y
+    strncpy(gesture_templates[gesture_count].name, "Y", sizeof(gesture_templates[0].name) - 1);
+    // Thumb and pinky extended, other fingers closed
+    for (int i = 0; i < 10; i++) {
+        gesture_templates[gesture_count].template_features[i] = 70.0f;  // Most fingers curled
+    }
+    // Thumb and pinky extended
+    gesture_templates[gesture_count].template_features[0] = 10.0f;  // Thumb extended
+    gesture_templates[gesture_count].template_features[1] = 15.0f;
+    gesture_templates[gesture_count].template_features[8] = 10.0f;  // Pinky extended
+    gesture_templates[gesture_count].template_features[9] = 15.0f;
+    gesture_templates[gesture_count].feature_count = 32;
+    gesture_templates[gesture_count].is_dynamic = false;
+    gesture_count++;
+    
+    // Continue with more gestures as needed...
+    
+    ESP_LOGI(TAG, "Initialized %d default gesture templates", gesture_count);
+}
+
+// Save gesture templates to NVS
+static esp_err_t save_gesture_templates(void) {
+    nvs_handle_t nvs_handle;
+    esp_err_t ret;
+    
+    // Open NVS
+    ret = nvs_open(GESTURE_NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Error opening NVS for gestures: %s", esp_err_to_name(ret));
+        return ret;
+    }
+    
+    // Save gesture count
+    ret = nvs_set_u8(nvs_handle, "count", gesture_count);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Error saving gesture count: %s", esp_err_to_name(ret));
+        nvs_close(nvs_handle);
+        return ret;
+    }
+    
+    // Save each gesture template
+    for (int i = 0; i < gesture_count; i++) {
+        char key[16];
+        snprintf(key, sizeof(key), "gesture_%d", i);
+        
+        ret = nvs_set_blob(nvs_handle, key, &gesture_templates[i], sizeof(gesture_template_t));
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Error saving gesture template %d: %s", i, esp_err_to_name(ret));
+            nvs_close(nvs_handle);
+            return ret;
+        }
+    }
+    
+    // Commit changes
+    ret = nvs_commit(nvs_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Error committing NVS: %s", esp_err_to_name(ret));
+    }
+    
+    nvs_close(nvs_handle);
+    ESP_LOGI(TAG, "Saved %d gesture templates to NVS", gesture_count);
+    
+    return ret;
+}
+
+// Load gesture templates from NVS
+static esp_err_t load_gesture_templates(void) {
+    nvs_handle_t nvs_handle;
+    esp_err_t ret;
+    
+    // Open NVS
+    ret = nvs_open(GESTURE_NVS_NAMESPACE, NVS_READONLY, &nvs_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Error opening NVS for gestures: %s", esp_err_to_name(ret));
+        return ret;
+    }
+    
+    // Get gesture count
+    ret = nvs_get_u8(nvs_handle, "count", &gesture_count);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Error reading gesture count: %s", esp_err_to_name(ret));
+        nvs_close(nvs_handle);
+        return ret;
+    }
+    
+    // Check if count is valid
+    if (gesture_count > MAX_GESTURES) {
+        ESP_LOGE(TAG, "Invalid gesture count: %d", gesture_count);
+        nvs_close(nvs_handle);
+        return ESP_ERR_INVALID_STATE;
+    }
+    
+    // Load each gesture template
+    for (int i = 0; i < gesture_count; i++) {
+        char key[16];
+        snprintf(key, sizeof(key), "gesture_%d", i);
+        
+        size_t required_size = sizeof(gesture_template_t);
+        ret = nvs_get_blob(nvs_handle, key, &gesture_templates[i], &required_size);
+        
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Error loading gesture template %d: %s", i, esp_err_to_name(ret));
+            nvs_close(nvs_handle);
+            return ret;
+        }
+        
+        if (required_size != sizeof(gesture_template_t)) {
+            ESP_LOGE(TAG, "Size mismatch for gesture template %d", i);
+            nvs_close(nvs_handle);
+            return ESP_ERR_INVALID_SIZE;
+        }
+    }
+    
+    nvs_close(nvs_handle);
+    ESP_LOGI(TAG, "Loaded %d gesture templates from NVS", gesture_count);
+    
+    return ESP_OK;
 }

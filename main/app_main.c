@@ -368,7 +368,7 @@ static esp_err_t init_processing(void) {
         return ret;
     }
     
-    // Initialize gesture detection
+    // Initialize gesture detection with basic algorithm
     ret = gesture_detection_init();
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to initialize gesture detection: %s", esp_err_to_name(ret));

@@ -84,7 +84,7 @@ static void processing_task(void *arg) {
             
             // Extract features from sensor data
             if (feature_extraction_process(&sensor_data, &sensor_data_buffer, &feature_vector) == ESP_OK) {
-                // Detect gesture based on features
+                // Detect gesture based on features - no ML, just basic algorithm
                 if (gesture_detection_process(&feature_vector, &result) == ESP_OK) {
                     // If a gesture was detected with sufficient confidence
                     if (result.confidence >= CONFIDENCE_THRESHOLD) {
