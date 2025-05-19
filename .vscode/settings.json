@@ -20,5 +20,6 @@
     "pin_definitions.h": "c",
     "flex_sensor.h": "c"
   },
-  "C_Cpp.errorSquiggles": "disabled"
+  "C_Cpp.errorSquiggles": "disabled",
+  "C_Cpp.dimInactiveRegions": false
 }

@@ -42,9 +42,7 @@ esp_err_t touch_init(void) {
         return ret;
     }
     
-    // Set touch pad interrupt threshold
-    // Fixed: Use touch_pad_set_fsm_mode instead of touch_pad_set_trigger_mode
-    // This sets the touch sensor FSM mode which controls trigger behavior
+    // Set touch pad FSM mode
     ret = touch_pad_set_fsm_mode(TOUCH_FSM_MODE_TIMER);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to set touch pad FSM mode: %d", ret);
@@ -53,8 +51,8 @@ esp_err_t touch_init(void) {
     
     // Configure touch pads
     for (int i = 0; i < TOUCH_SENSOR_COUNT; i++) {
-        // Configure touch pad
-        ret = touch_pad_config(touch_pins[i], 0);
+        // Configure touch pad with threshold 0 (will be set during calibration)
+        ret = touch_pad_config(touch_pins[i]);
         if (ret != ESP_OK) {
             ESP_LOGE(TAG, "Failed to configure touch pad %d: %d", i, ret);
             return ret;
@@ -69,66 +67,14 @@ esp_err_t touch_init(void) {
     }
     
     // Register touch interrupt handler
-    ret = touch_pad_isr_register(touch_intr_handler, NULL);
+    ret = touch_pad_isr_register(touch_intr_handler, NULL, TOUCH_PAD_INTR_MASK_ALL);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to register touch interrupt handler: %d", ret);
         return ret;
     }
     
     // Enable touch interrupt
-    touch_pad_intr_enable();
-    
-    touch_initialized = true;
-    ESP_LOGI(TAG, "Touch sensor system initialized");
-    
-    return ESP_OK;
-}
-    esp_err_t ret;
-    
-    if (touch_initialized) {
-        return ESP_OK;  // Already initialized
-    }
-    
-    // Initialize touch pad peripheral
-    ret = touch_pad_init();
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize touch pad: %d", ret);
-        return ret;
-    }
-    
-    // Set touch pad interrupt threshold
-    ret = touch_pad_set_trigger_mode(TOUCH_TRIGGER_BELOW);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to set touch pad trigger mode: %d", ret);
-        return ret;
-    }
-    
-    // Configure touch pads
-    for (int i = 0; i < TOUCH_SENSOR_COUNT; i++) {
-        // Configure touch pad
-        ret = touch_pad_config(touch_pins[i], 0);
-        if (ret != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to configure touch pad %d: %d", i, ret);
-            return ret;
-        }
-    }
-    
-    // Initialize and start calibration
-    ret = touch_calibrate();
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to calibrate touch sensors: %d", ret);
-        return ret;
-    }
-    
-    // Register touch interrupt handler
-    ret = touch_pad_isr_register(touch_intr_handler, NULL);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to register touch interrupt handler: %d", ret);
-        return ret;
-    }
-    
-    // Enable touch interrupt
-    touch_pad_intr_enable();
+    touch_pad_intr_enable(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE);
     
     touch_initialized = true;
     ESP_LOGI(TAG, "Touch sensor system initialized");
@@ -142,7 +88,7 @@ esp_err_t touch_deinit(void) {
     }
     
     // Disable touch interrupt
-    touch_pad_intr_disable();
+    touch_pad_intr_disable(TOUCH_PAD_INTR_MASK_ALL);
     
     // Deinitialize touch pad peripheral
     touch_pad_deinit();
@@ -169,7 +115,7 @@ esp_err_t touch_calibrate(void) {
         const int samples = 10;
         
         for (int j = 0; j < samples; j++) {
-            touch_pad_read(touch_pins[i], &val);
+            touch_pad_read_raw_data(touch_pins[i], &val);
             sum += val;
             vTaskDelay(pdMS_TO_TICKS(10));  // Short delay between readings
         }
@@ -229,10 +175,10 @@ esp_err_t touch_enable(bool enable) {
     
     if (enable) {
         // Enable touch interrupt
-        touch_pad_intr_enable();
+        touch_pad_intr_enable(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE);
     } else {
         // Disable touch interrupt
-        touch_pad_intr_disable();
+        touch_pad_intr_disable(TOUCH_PAD_INTR_MASK_ALL);
     }
     
     touch_enabled = enable;
@@ -266,7 +212,7 @@ esp_err_t touch_update_status(void) {
     
     for (int i = 0; i < TOUCH_SENSOR_COUNT; i++) {
         uint16_t val;
-        touch_pad_read(touch_pins[i], &val);
+        touch_pad_read_raw_data(touch_pins[i], &val);
         
         // Touch detected if value is below threshold
         new_status[i] = (val < touch_thresholds[i]);
@@ -297,7 +243,7 @@ esp_err_t touch_get_values(uint16_t *values_array) {
     
     // Read raw values for each sensor
     for (int i = 0; i < TOUCH_SENSOR_COUNT; i++) {
-        touch_pad_read(touch_pins[i], &values_array[i]);
+        touch_pad_read_raw_data(touch_pins[i], &values_array[i]);
     }
     
     return ESP_OK;

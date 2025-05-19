@@ -2,6 +2,7 @@
 #define UTIL_DEBUG_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "esp_err.h"
 #include "esp_log.h"
 

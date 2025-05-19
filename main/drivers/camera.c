@@ -6,6 +6,7 @@
 #include "freertos/task.h"
 #include "config/pin_definitions.h"
 #include "util/debug.h"
+#include "esp_timer.h"
 
 static const char *TAG = "CAMERA";
 

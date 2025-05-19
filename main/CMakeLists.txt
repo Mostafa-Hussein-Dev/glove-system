@@ -26,11 +26,13 @@ idf_component_register(
         "util/buffer.c"
         "util/debug.c"
     INCLUDE_DIRS "." "config" "core" "drivers" "processing" "communication" "output" "tasks" "util"
-    REQUIRES driver
+    REQUIRES
+    driver
     esp_timer
     esp_adc
     esp_wifi
     bt
+    esp-tls
     esp_system 
     esp32-camera
     spiffs
@@ -42,4 +44,5 @@ idf_component_register(
     esp_eth
     esp_http_client
     esp_https_server
+    freertos
 )
