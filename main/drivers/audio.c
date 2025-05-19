@@ -1,6 +1,7 @@
 #include "drivers/audio.h"
 #include <string.h>
 #include "esp_log.h"
+#include "driver/gpio.h"
 #include "driver/i2s.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"

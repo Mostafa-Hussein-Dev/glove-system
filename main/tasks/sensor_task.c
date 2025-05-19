@@ -194,9 +194,9 @@ static esp_err_t sample_camera(void) {
     
     // First release any previous frame
     if (current_sensor_data.camera_data_valid && 
-        current_sensor_data.camera_data.frame_buffer != NULL) {
+        current_sensor_data.camera_data.buffer != NULL) {
         camera_release_frame();
-        current_sensor_data.camera_data.frame_buffer = NULL;
+        current_sensor_data.camera_data.buffer = NULL;
         current_sensor_data.camera_data_valid = false;
     }
     
@@ -209,7 +209,7 @@ static esp_err_t sample_camera(void) {
     }
     
     // Copy the captured frame data to our sensor data structure
-    current_sensor_data.camera_data.frame_buffer = frame.buffer;
+    current_sensor_data.camera_data.buffer = frame.buffer;
     current_sensor_data.camera_data.buffer_size = frame.buffer_size;
     current_sensor_data.camera_data.width = frame.width;
     current_sensor_data.camera_data.height = frame.height;

@@ -5,12 +5,15 @@
 #include "esp_pm.h"
 #include "esp_timer.h"
 #include "driver/gpio.h"
-#include "driver/adc.h"
-#include "esp_adc_cal.h"
+#include "esp_adc/adc_oneshot.h"
+#include "esp_adc/adc_cali.h"
+#include "esp_adc/adc_cali_scheme.h"
 #include "config/pin_definitions.h"
 #include "util/debug.h"
 #include "drivers/display.h"
 #include "communication/ble_service.h"
+
+#pragma GCC diagnostic ignored "-Wcpp"
 
 static const char *TAG = "POWER_MGMT";
 
@@ -155,7 +158,7 @@ esp_err_t power_management_set_mode(power_mode_t mode) {
             
             {
                 // Configure automatic light sleep
-                esp_pm_config_esp32s3_t balanced_pm_config = {
+                esp_pm_config_t balanced_pm_config = {
                     .max_freq_mhz = 160,
                     .min_freq_mhz = 80,
                     .light_sleep_enable = true
@@ -183,7 +186,7 @@ esp_err_t power_management_set_mode(power_mode_t mode) {
             
             {
                 // Configure aggressive automatic light sleep
-                esp_pm_config_esp32s3_t power_save_pm_config = {
+                esp_pm_config_t power_save_pm_config = {
                     .max_freq_mhz = 80,
                     .min_freq_mhz = 40,
                     .light_sleep_enable = true
@@ -211,7 +214,7 @@ esp_err_t power_management_set_mode(power_mode_t mode) {
             
             {
                 // Configure very aggressive automatic light sleep
-                esp_pm_config_esp32s3_t max_save_pm_config = {
+                esp_pm_config_t max_save_pm_config = {
                     .max_freq_mhz = 40,
                     .min_freq_mhz = 40,
                     .light_sleep_enable = true
