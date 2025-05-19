@@ -2,6 +2,7 @@
 #include <string.h>
 #include "esp_log.h"
 #include "esp_system.h"
+#include "esp_mac.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -10,6 +11,9 @@
 #include "nvs_flash.h"
 #include "esp_spiffs.h"
 #include "driver/i2c.h"
+
+// Include app_main header first
+#include "app_main.h"
 
 // Include all subsystems
 #include "config/system_config.h"

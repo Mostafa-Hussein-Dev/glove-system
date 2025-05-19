@@ -16,6 +16,8 @@
     "freertos.h": "c",
     "communication_task.h": "c",
     "system_config.h": "c",
-    "output_manager.h": "c"
-  }
+    "output_manager.h": "c",
+    "pin_definitions.h": "c"
+  },
+  "C_Cpp.errorSquiggles": "disabled"
 }

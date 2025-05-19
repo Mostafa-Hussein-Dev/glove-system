@@ -1,12 +1,12 @@
 {
     "version":            "1.2",
     "project_name":       "glove-system",
-    "project_version":    "1",
+    "project_version":    "d08931c3-dirty",
     "project_path":       "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system",
     "idf_path":           "C:/Espressif/frameworks/esp-idf-v5.4.1",
     "build_dir":          "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build",
     "config_file":        "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/sdkconfig",
-    "config_defaults":    "",
+    "config_defaults":    "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/sdkconfig.defaults",
     "bootloader_elf":     "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf",
     "app_elf":            "glove-system.elf",
     "app_bin":            "glove-system.bin",
@@ -1190,13 +1190,13 @@
             "dir": "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main",
             "type": "LIBRARY",
             "lib": "__idf_main",
-            "reqs": [],
-            "priv_reqs": [ "spi_flash" ],
+            "reqs": [ "driver", "esp_timer", "esp_adc", "esp_wifi", "bt", "esp_hw_support", "esp_common", "esp_event", "nvs_flash", "esp_netif", "esp_eth", "esp_http_client", "esp_https_server" ],
+            "priv_reqs": [],
             "managed_reqs": [],
             "managed_priv_reqs": [],
             "file": "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/main/libmain.a",
-            "sources": [ "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/hello_world_main.c" ],
-            "include_dirs": []
+            "sources": [ "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/app_main.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/config/system_config.h", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/config/pin_definitions.h", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/core/power_management.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/core/system_monitor.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/drivers/flex_sensor.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/drivers/imu.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/drivers/camera.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/drivers/touch.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/drivers/display.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/drivers/audio.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/drivers/haptic.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/processing/sensor_fusion.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/processing/feature_extraction.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/processing/gesture_detection.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/communication/ble_service.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/output/text_generation.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/output/output_manager.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/tasks/sensor_task.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/tasks/processing_task.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/tasks/output_task.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/tasks/communication_task.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/tasks/power_task.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/util/buffer.c", "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main/util/debug.c" ],
+            "include_dirs": [ ".", "config", "core", "drivers", "processing", "communication", "output", "tasks", "util" ]
         },
         "mbedtls": {
             "alias": "idf::mbedtls",
@@ -2856,11 +2856,11 @@
             "prefix": "idf",
             "dir": "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/main",
             "lib": "__idf_main",
-            "reqs": [],
-            "priv_reqs": [ "spi_flash" ],
+            "reqs": [ "driver", "esp_timer", "esp_adc", "esp_wifi", "bt", "esp_hw_support", "esp_common", "esp_event", "nvs_flash", "esp_netif", "esp_eth", "esp_http_client", "esp_https_server" ],
+            "priv_reqs": [],
             "managed_reqs": [],
             "managed_priv_reqs": [],
-            "include_dirs": []
+            "include_dirs": [ ".", "config", "core", "drivers", "processing", "communication", "output", "tasks", "util" ]
         }
     },
     "debug_prefix_map_gdbinit": "",

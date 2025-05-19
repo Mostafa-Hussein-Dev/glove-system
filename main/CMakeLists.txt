@@ -1,8 +1,7 @@
 idf_component_register(
     SRCS 
         "app_main.c"
-        "config/system_config.h"
-        "config/pin_definitions.h"
+        
         "core/power_management.c"
         "core/system_monitor.c"
         "drivers/flex_sensor.c"
