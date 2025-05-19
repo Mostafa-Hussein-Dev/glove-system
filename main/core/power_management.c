@@ -180,7 +180,7 @@ esp_err_t power_management_set_mode(power_mode_t mode) {
             power_management_set_peripheral_power(PERIPHERAL_CAMERA, false);
             
             // Configure aggressive automatic light sleep
-            esp_pm_config_esp32s3_t pm_config = {
+            esp_pm_config_t pm_config = {
                 .max_freq_mhz = 80,
                 .min_freq_mhz = 40,
                 .light_sleep_enable = true
@@ -206,7 +206,7 @@ esp_err_t power_management_set_mode(power_mode_t mode) {
             power_management_set_peripheral_power(PERIPHERAL_CAMERA, false);
             
             // Configure very aggressive automatic light sleep
-            esp_pm_config_esp32s3_t pm_config = {
+            esp_pm_config_t pm_config = {
                 .max_freq_mhz = 40,
                 .min_freq_mhz = 40,
                 .light_sleep_enable = true
@@ -343,7 +343,7 @@ esp_err_t power_management_set_cpu_frequency(uint32_t frequency_mhz) {
     }
     
     // Set CPU frequency
-    esp_pm_config_esp32s3_t pm_config = {
+    esp_pm_config_t pm_config = {
         .max_freq_mhz = frequency_mhz,
         .min_freq_mhz = frequency_mhz,
         .light_sleep_enable = false

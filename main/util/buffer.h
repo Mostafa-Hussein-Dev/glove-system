@@ -2,6 +2,7 @@
 #define UTIL_BUFFER_H
 
 #include <stdint.h>
+#include <stdbool.h>
 #include "esp_err.h"
 
 /**

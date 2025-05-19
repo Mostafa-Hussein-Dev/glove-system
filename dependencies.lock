@@ -16,6 +16,6 @@ dependencies:
 direct_dependencies:
 - eil/esp_idf_lib_helpers
 - idf
-manifest_hash: c4e67163cfb2745c7bed2e74faaf9ecfdab137f783f3dcae561813ba33e5c00f
+manifest_hash: 6a9efa1d1d93e73dc642b7d5b9789158f67714294628f4c961b9f896ed1c2968
 target: esp32s3
 version: 2.0.0

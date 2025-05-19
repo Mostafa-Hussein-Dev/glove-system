@@ -16,6 +16,20 @@ typedef enum {
 } imu_accel_range_t;
 
 /**
+ * @brief Load IMU calibration data from NVS
+ * 
+ * @return ESP_OK on success, error code otherwise
+ */
+esp_err_t imu_load_calibration(void);
+
+/**
+ * @brief Save IMU calibration data to NVS
+ * 
+ * @return ESP_OK on success, error code otherwise
+ */
+esp_err_t imu_save_calibration(void);
+
+/**
  * @brief IMU gyroscope range settings
  */
 typedef enum {
