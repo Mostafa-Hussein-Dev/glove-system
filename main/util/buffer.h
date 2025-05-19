@@ -5,6 +5,10 @@
 #include <stdbool.h>
 #include "esp_err.h"
 #include "config/system_config.h"
+#include "drivers/imu.h"       // Add this include for imu_data_t
+#include "drivers/camera.h"    // Add this include for camera_frame_t
+#include "drivers/touch.h"     // Include if you have touch_sensor_data_t defined here
+
 
 // Define feature buffer size constant
 #define FEATURE_BUFFER_SIZE 100
@@ -21,23 +25,23 @@ typedef struct {
 /**
  * @brief Structure to hold IMU data
  */
-typedef struct {
-    float accel[3];          // X, Y, Z acceleration
-    float gyro[3];           // X, Y, Z rotation rates
-    float orientation[3];    // Roll, pitch, yaw
-    uint32_t timestamp;      // Acquisition timestamp
-} imu_data_t;
+//typedef struct {
+//    float accel[3];          // X, Y, Z acceleration
+//    float gyro[3];           // X, Y, Z rotation rates
+//    float orientation[3];    // Roll, pitch, yaw
+//    uint32_t timestamp;      // Acquisition timestamp
+//} imu_data_t;
 
 /**
  * @brief Structure to hold camera frame data
  */
-typedef struct {
-    uint8_t* frame_buffer;   // Pointer to image data
-    uint32_t buffer_size;    // Size of the buffer
-    uint16_t width;          // Image width
-    uint16_t height;         // Image height
-    uint32_t timestamp;      // Acquisition timestamp
-} camera_frame_t;
+//typedef struct {
+//    uint8_t* frame_buffer;   // Pointer to image data
+//    uint32_t buffer_size;    // Size of the buffer
+//   uint16_t width;          // Image width
+//   uint16_t height;         // Image height
+//    uint32_t timestamp;      // Acquisition timestamp
+//} camera_frame_t;
 
 /**
  * @brief Structure to hold touch sensor data

@@ -174,7 +174,7 @@ static esp_err_t sample_flex_sensors(void) {
 static esp_err_t sample_imu(void) {
     esp_err_t ret;
     
-    // Read IMU data - Fix the incompatible pointer type
+    // Read IMU data using a temporary imu_data_t structure
     imu_data_t imu_data;
     ret = imu_read(&imu_data);
     if (ret != ESP_OK) {
@@ -200,7 +200,7 @@ static esp_err_t sample_camera(void) {
         current_sensor_data.camera_data_valid = false;
     }
     
-    // Capture new frame - Fix the incompatible pointer type
+    // Capture new frame using a temporary camera_frame_t structure
     camera_frame_t frame;
     ret = camera_capture_frame(&frame);
     if (ret != ESP_OK) {
@@ -208,8 +208,12 @@ static esp_err_t sample_camera(void) {
         return ret;
     }
     
-    // Copy data to sensor data structure
-    memcpy(&current_sensor_data.camera_data, &frame, sizeof(camera_frame_t));
+    // Copy the captured frame data to our sensor data structure
+    current_sensor_data.camera_data.frame_buffer = frame.buffer;
+    current_sensor_data.camera_data.buffer_size = frame.buffer_size;
+    current_sensor_data.camera_data.width = frame.width;
+    current_sensor_data.camera_data.height = frame.height;
+    current_sensor_data.camera_data.timestamp = frame.timestamp;
     current_sensor_data.camera_data_valid = true;
     
     return ESP_OK;

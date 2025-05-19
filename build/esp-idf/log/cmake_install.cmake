@@ -1,4 +1,4 @@
-# Install script for directory: C:/Espressif/frameworks/esp-idf-v5.4.1/components/log
+# Install script for directory: C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/components/log
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

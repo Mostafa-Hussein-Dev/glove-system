@@ -54,7 +54,7 @@ source "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/co
 source "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/components/hal/Kconfig"
 source "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/components/heap/Kconfig"
 source "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/components/ieee802154/Kconfig"
-source "C:/Espressif/frameworks/esp-idf-v5.4.1/components/log/Kconfig"
+source "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/components/log/Kconfig"
 source "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/components/lwip/Kconfig"
 source "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/components/mbedtls/Kconfig"
 source "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/components/mqtt/esp-mqtt/Kconfig"

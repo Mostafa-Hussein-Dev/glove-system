@@ -31,9 +31,10 @@ void buffer_free(sensor_data_buffer_t* buffer) {
     
     // Free camera frame buffers if they exist
     for (size_t i = 0; i < buffer->capacity; i++) {
-        if (buffer->buffer[i].camera_data.frame_buffer != NULL) {
-            free(buffer->buffer[i].camera_data.frame_buffer);
-            buffer->buffer[i].camera_data.frame_buffer = NULL;
+        if (buffer->buffer[i].camera_data_valid && 
+            buffer->buffer[i].camera_data.buffer != NULL) {  // Changed from frame_buffer to buffer
+            free(buffer->buffer[i].camera_data.buffer);      // Changed from frame_buffer to buffer
+            buffer->buffer[i].camera_data.buffer = NULL;     // Changed from frame_buffer to buffer
         }
     }
     
@@ -54,9 +55,9 @@ esp_err_t buffer_push(sensor_data_buffer_t* buffer, const sensor_data_t* data) {
         // Buffer is full, overwrite oldest data
         // First free any camera frame buffer in the oldest slot to prevent memory leak
         if (buffer->buffer[buffer->tail].camera_data_valid && 
-            buffer->buffer[buffer->tail].camera_data.frame_buffer != NULL) {
-            free(buffer->buffer[buffer->tail].camera_data.frame_buffer);
-            buffer->buffer[buffer->tail].camera_data.frame_buffer = NULL;
+            buffer->buffer[buffer->tail].camera_data.buffer != NULL) {  // Changed from frame_buffer to buffer
+            free(buffer->buffer[buffer->tail].camera_data.buffer);      // Changed from frame_buffer to buffer
+            buffer->buffer[buffer->tail].camera_data.buffer = NULL;     // Changed from frame_buffer to buffer
         }
         
         // Move tail forward
@@ -68,14 +69,14 @@ esp_err_t buffer_push(sensor_data_buffer_t* buffer, const sensor_data_t* data) {
     memcpy(&buffer->buffer[buffer->head], data, sizeof(sensor_data_t));
     
     // Special handling for camera frame buffer - need a deep copy
-    if (data->camera_data_valid && data->camera_data.frame_buffer != NULL && data->camera_data.buffer_size > 0) {
-        buffer->buffer[buffer->head].camera_data.frame_buffer = (uint8_t*)malloc(data->camera_data.buffer_size);
-        if (buffer->buffer[buffer->head].camera_data.frame_buffer == NULL) {
+    if (data->camera_data_valid && data->camera_data.buffer != NULL && data->camera_data.buffer_size > 0) {  // Changed from frame_buffer to buffer
+        buffer->buffer[buffer->head].camera_data.buffer = (uint8_t*)malloc(data->camera_data.buffer_size);  // Changed from frame_buffer to buffer
+        if (buffer->buffer[buffer->head].camera_data.buffer == NULL) {  // Changed from frame_buffer to buffer
             ESP_LOGE(TAG, "Failed to allocate memory for camera frame");
             buffer->buffer[buffer->head].camera_data_valid = false;
         } else {
-            memcpy(buffer->buffer[buffer->head].camera_data.frame_buffer, 
-                   data->camera_data.frame_buffer, 
+            memcpy(buffer->buffer[buffer->head].camera_data.buffer,  // Changed from frame_buffer to buffer
+                   data->camera_data.buffer,                         // Changed from frame_buffer to buffer
                    data->camera_data.buffer_size);
         }
     }
@@ -101,8 +102,8 @@ esp_err_t buffer_pop(sensor_data_buffer_t* buffer, sensor_data_t* data) {
     
     // Special handling for camera frame buffer - transfer ownership
     if (buffer->buffer[buffer->tail].camera_data_valid) {
-        data->camera_data.frame_buffer = buffer->buffer[buffer->tail].camera_data.frame_buffer;
-        buffer->buffer[buffer->tail].camera_data.frame_buffer = NULL;
+        data->camera_data.buffer = buffer->buffer[buffer->tail].camera_data.buffer;  // Changed from frame_buffer to buffer
+        buffer->buffer[buffer->tail].camera_data.buffer = NULL;                     // Changed from frame_buffer to buffer
     }
     
     // Move tail forward

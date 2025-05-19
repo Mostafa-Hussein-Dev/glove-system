@@ -108,7 +108,7 @@ esp_err_t touch_calibrate(void) {
     
     // Measure baseline values for each sensor
     for (int i = 0; i < TOUCH_SENSOR_COUNT; i++) {
-        uint16_t val;
+        uint32_t val;
         
         // Read multiple samples to get a stable baseline
         uint32_t sum = 0;
@@ -211,7 +211,7 @@ esp_err_t touch_update_status(void) {
     bool status_changed = false;
     
     for (int i = 0; i < TOUCH_SENSOR_COUNT; i++) {
-        uint16_t val;
+        uint32_t val;
         touch_pad_read_raw_data(touch_pins[i], &val);
         
         // Touch detected if value is below threshold
@@ -243,7 +243,9 @@ esp_err_t touch_get_values(uint16_t *values_array) {
     
     // Read raw values for each sensor
     for (int i = 0; i < TOUCH_SENSOR_COUNT; i++) {
-        touch_pad_read_raw_data(touch_pins[i], &values_array[i]);
+        uint32_t raw_value;
+        touch_pad_read_raw_data(touch_pins[i], &raw_value);
+        values_array[i] = (uint16_t)raw_value; // Convert uint32_t to uint16_t
     }
     
     return ESP_OK;
