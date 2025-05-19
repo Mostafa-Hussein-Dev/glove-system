@@ -1,3 +1,6 @@
+#ifndef SYSTEM_CONFIG_H
+#define SYSTEM_CONFIG_H
+
 #include "esp_err.h"
 #include <stdbool.h>
 #include <stdio.h>

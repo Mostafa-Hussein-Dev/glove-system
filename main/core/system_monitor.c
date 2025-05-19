@@ -67,7 +67,7 @@ esp_err_t system_monitor_print_metrics(void) {
     ESP_LOGI(TAG, "  Task Count: %u", metrics.task_count);
     ESP_LOGI(TAG, "  Stack High-Water: Core 0: %u, Core 1: %u", 
         metrics.stack_high_water[0], metrics.stack_high_water[1]);
-    ESP_LOGI(TAG, "  Uptime: %llu ms", metrics.uptime_ms);
+    ESP_LOGI(TAG, "  Uptime: %" PRIu64 " ms", metrics.uptime_ms);
     
     return ESP_OK;
 }
@@ -148,32 +148,68 @@ static void system_monitor_task(void *pvParameters) {
             for (x = 0; x < uxArraySize; x++) {
                 TaskStatus_t *task = &pxTaskStatusArray[x];
                 
-                // Check if it's the idle task
+#if CONFIG_FREERTOS_UNICORE
+                // In unicore mode, process all tasks as running on core 0
                 if (strcmp(task->pcTaskName, "IDLE") == 0) {
-                    // Core 0 idle task
-                    if (task->xCoreID == 0) {
-                        idle_run_time[0] = task->ulRunTimeCounter;
-                    }
-                    // Core 1 idle task
-                    else if (task->xCoreID == 1) {
-                        idle_run_time[1] = task->ulRunTimeCounter;
-                    }
+                    idle_run_time[0] = task->ulRunTimeCounter;
                 } else {
-                    // Add to the appropriate core's total
-                    if (task->xCoreID == 0) {
-                        task_run_time[0] += task->ulRunTimeCounter;
-                    } else if (task->xCoreID == 1) {
-                        task_run_time[1] += task->ulRunTimeCounter;
-                    }
+                    task_run_time[0] += task->ulRunTimeCounter;
                 }
                 
-                // Check stack high water mark for tasks on specific cores
-                if (task->xCoreID == 0 || task->xCoreID == 1) {
-                    if (task->usStackHighWaterMark < last_metrics.stack_high_water[task->xCoreID] || 
-                        last_metrics.stack_high_water[task->xCoreID] == 0) {
-                        last_metrics.stack_high_water[task->xCoreID] = task->usStackHighWaterMark;
+                // Update stack high water mark for core 0
+                if (task->usStackHighWaterMark < last_metrics.stack_high_water[0] || 
+                    last_metrics.stack_high_water[0] == 0) {
+                    last_metrics.stack_high_water[0] = task->usStackHighWaterMark;
+                }
+#else
+                // Check if the ESP-IDF version supports xCoreID field
+#ifdef CONFIG_ESP_SYSTEM_SINGLE_CORE_MODE
+                // For ESP chips with single core when using newer ESP-IDF
+                if (strcmp(task->pcTaskName, "IDLE") == 0) {
+                    idle_run_time[0] = task->ulRunTimeCounter;
+                } else {
+                    task_run_time[0] += task->ulRunTimeCounter;
+                }
+                
+                // Update stack high water mark for core 0
+                if (task->usStackHighWaterMark < last_metrics.stack_high_water[0] || 
+                    last_metrics.stack_high_water[0] == 0) {
+                    last_metrics.stack_high_water[0] = task->usStackHighWaterMark;
+                }
+#else
+                // For dual-core ESP chips - determine core using task name
+                if (strcmp(task->pcTaskName, "IDLE0") == 0 || 
+                    (strcmp(task->pcTaskName, "IDLE") == 0 && 
+                     strstr(task->pcTaskName, "CPU0") != NULL)) {
+                    // Core 0 idle task
+                    idle_run_time[0] = task->ulRunTimeCounter;
+                } 
+                else if (strcmp(task->pcTaskName, "IDLE1") == 0 || 
+                         (strcmp(task->pcTaskName, "IDLE") == 0 && 
+                          strstr(task->pcTaskName, "CPU1") != NULL)) {
+                    // Core 1 idle task
+                    idle_run_time[1] = task->ulRunTimeCounter;
+                }
+                else {
+                    // For regular tasks, try to determine core from name or use core 0 as default
+                    int core_num = 0;
+                    
+                    if (strstr(task->pcTaskName, "CPU0") != NULL) {
+                        core_num = 0;
+                    } else if (strstr(task->pcTaskName, "CPU1") != NULL) {
+                        core_num = 1;
+                    }
+                    
+                    task_run_time[core_num] += task->ulRunTimeCounter;
+                    
+                    // Update stack high water mark for the task's core
+                    if (task->usStackHighWaterMark < last_metrics.stack_high_water[core_num] || 
+                        last_metrics.stack_high_water[core_num] == 0) {
+                        last_metrics.stack_high_water[core_num] = task->usStackHighWaterMark;
                     }
                 }
+#endif // CONFIG_ESP_SYSTEM_SINGLE_CORE_MODE
+#endif // CONFIG_FREERTOS_UNICORE
             }
             
             // Free the status array
@@ -183,12 +219,18 @@ static void system_monitor_task(void *pvParameters) {
             if (total_run_time_prev > 0) {
                 uint32_t delta_time = total_run_time - total_run_time_prev;
                 uint32_t delta_idle0 = idle_run_time[0] - idle_run_time_prev[0];
-                uint32_t delta_idle1 = idle_run_time[1] - idle_run_time_prev[1];
                 
-                // Calculate the CPU usage for each core and average them
+#if CONFIG_FREERTOS_UNICORE || defined(CONFIG_ESP_SYSTEM_SINGLE_CORE_MODE)
+                // For single core, calculate usage for core 0 only
+                uint32_t usage0 = 100 - ((delta_idle0 * 100) / delta_time);
+                last_metrics.cpu_usage_percent = usage0;
+#else
+                // For dual core, calculate average usage
+                uint32_t delta_idle1 = idle_run_time[1] - idle_run_time_prev[1];
                 uint32_t usage0 = 100 - ((delta_idle0 * 100) / (delta_time / 2));
                 uint32_t usage1 = 100 - ((delta_idle1 * 100) / (delta_time / 2));
                 last_metrics.cpu_usage_percent = (usage0 + usage1) / 2;
+#endif
             }
             
             // Store current values for next calculation
