@@ -1,0 +1,13 @@
+dependencies:
+  idf:
+    version: ">=4.4"
+  tensorflow:
+    version: "2.10.0"
+    git: https://github.com/espressif/tflite-micro-esp-examples.git
+    component: tensorflow
+  esp32-camera:
+    version: "2.0.5"
+    git: https://github.com/espressif/esp32-camera.git
+  ssd1306:
+    version: "1.0.0"
+    git: https://github.com/nopnop2002/esp-idf-ssd1306.git
