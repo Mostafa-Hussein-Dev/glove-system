@@ -13,8 +13,6 @@
 #include "drivers/display.h"
 #include "communication/ble_service.h"
 
-#pragma GCC diagnostic ignored "-Wcpp"
-
 static const char *TAG = "POWER_MGMT";
 
 #define PERIPHERAL_SENSORS   0
@@ -23,8 +21,9 @@ static const char *TAG = "POWER_MGMT";
 #define PERIPHERAL_BLE       3
 #define PERIPHERAL_CAMERA    4
 
-// Battery ADC calibration
-static esp_adc_cal_characteristics_t adc_chars;
+// ADC handles
+static adc_oneshot_unit_handle_t adc_handle;
+static adc_cali_handle_t adc_cali_handle = NULL;
 
 // Power management state
 static struct {
@@ -69,11 +68,37 @@ esp_err_t power_management_init(void) {
     esp_err_t ret;
     
     // Initialize ADC for battery monitoring
-    adc1_config_width(ADC_WIDTH_BIT_12);
-    adc1_config_channel_atten(BATTERY_ADC_CHANNEL, BATTERY_ADC_ATTENUATION);
+    adc_oneshot_unit_init_cfg_t adc_init_config = {
+        .unit_id = BATTERY_ADC_UNIT,
+    };
+    ret = adc_oneshot_new_unit(&adc_init_config, &adc_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize ADC unit: %s", esp_err_to_name(ret));
+        return ret;
+    }
     
-    // Characterize ADC
-    esp_adc_cal_characterize(BATTERY_ADC_UNIT, BATTERY_ADC_ATTENUATION, ADC_WIDTH_BIT_12, 0, &adc_chars);
+    // Configure ADC channel
+    adc_oneshot_chan_cfg_t channel_config = {
+        .atten = BATTERY_ADC_ATTENUATION,
+        .bitwidth = ADC_BITWIDTH_12,
+    };
+    ret = adc_oneshot_config_channel(adc_handle, BATTERY_ADC_CHANNEL, &channel_config);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to configure ADC channel: %s", esp_err_to_name(ret));
+        return ret;
+    }
+    
+    // Initialize calibration
+    adc_cali_line_fitting_config_t cali_config = {
+        .unit_id = BATTERY_ADC_UNIT,
+        .atten = BATTERY_ADC_ATTENUATION,
+        .bitwidth = ADC_BITWIDTH_12,
+    };
+    ret = adc_cali_create_scheme_line_fitting(&cali_config, &adc_cali_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGW(TAG, "ADC calibration failed: %s", esp_err_to_name(ret));
+        // Continue without calibration
+    }
     
     // Configure GPIO for power control
     gpio_config_t io_conf = {
@@ -243,8 +268,26 @@ esp_err_t power_management_get_battery_status(battery_status_t* status) {
     }
     
     // Read battery voltage from ADC
-    uint32_t adc_reading = adc1_get_raw(BATTERY_ADC_CHANNEL);
-    uint32_t voltage_mv = esp_adc_cal_raw_to_voltage(adc_reading, &adc_chars);
+    int adc_reading = 0;
+    esp_err_t ret = adc_oneshot_read(adc_handle, BATTERY_ADC_CHANNEL, &adc_reading);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to read ADC: %s", esp_err_to_name(ret));
+        return ret;
+    }
+    
+    // Convert ADC reading to voltage
+    uint32_t voltage_mv = 0;
+    if (adc_cali_handle) {
+        ret = adc_cali_raw_to_voltage(adc_cali_handle, adc_reading, &voltage_mv);
+        if (ret != ESP_OK) {
+            ESP_LOGW(TAG, "Failed to convert ADC reading to voltage: %s", esp_err_to_name(ret));
+            // Continue with uncalibrated reading
+            voltage_mv = adc_reading * 3300 / 4095; // Simple approximation
+        }
+    } else {
+        // No calibration available, use approximation
+        voltage_mv = adc_reading * 3300 / 4095;
+    }
     
     // Apply voltage divider conversion if necessary
     // Note: This assumes a voltage divider is used to measure battery voltage
