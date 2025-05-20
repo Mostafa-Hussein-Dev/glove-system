@@ -248,7 +248,7 @@ esp_err_t display_draw_text(const char* text, uint8_t x, uint8_t y, display_font
     
     // For simplicity, we'll just use the 6x8 font for now
     uint8_t font_width = 6;
-    uint8_t font_height = 8;
+    //uint8_t font_height = 8;
     
     // Calculate text length in pixels
     size_t text_len = strlen(text);

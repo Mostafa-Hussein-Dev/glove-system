@@ -20,7 +20,9 @@
     "pin_definitions.h": "c",
     "flex_sensor.h": "c",
     "debug.h": "c",
-    "esp_adc_cal.h": "c"
+    "esp_adc_cal.h": "c",
+    "task.h": "c",
+    "queue.h": "c"
   },
   "C_Cpp.errorSquiggles": "disabled",
   "C_Cpp.dimInactiveRegions": false

@@ -10,9 +10,6 @@
 #include "drivers/touch.h"     // Include if you have touch_sensor_data_t defined here
 
 
-// Define feature buffer size constant
-#define FEATURE_BUFFER_SIZE 100
-
 /**
  * @brief Structure to hold flex sensor data
  */

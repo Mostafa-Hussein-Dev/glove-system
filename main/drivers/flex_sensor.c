@@ -29,7 +29,7 @@ static flex_sensor_calibration_t sensor_calibration = {
 };
 
 // ADC channel mapping to finger joints
-static const adc1_channel_t adc_channels[FINGER_JOINT_COUNT] = {
+static const adc_channel_t adc_channels[FINGER_JOINT_COUNT] = {
     FLEX_SENSOR_THUMB_MCP_ADC_CHANNEL,
     FLEX_SENSOR_THUMB_PIP_ADC_CHANNEL,
     FLEX_SENSOR_INDEX_MCP_ADC_CHANNEL,
@@ -43,7 +43,8 @@ static const adc1_channel_t adc_channels[FINGER_JOINT_COUNT] = {
 };
 
 // ADC calibration
-static esp_adc_cal_characteristics_t adc_chars;
+static adc_cali_handle_t adc_cali_handle = NULL;
+static adc_oneshot_unit_handle_t adc_handle = NULL;
 
 // Filter buffers for each sensor
 static uint16_t filter_buffers[FINGER_JOINT_COUNT][FILTER_BUFFER_SIZE];
@@ -95,17 +96,29 @@ esp_err_t flex_sensor_init(void) {
     esp_err_t ret;
     
     // Configure ADC
-    adc1_config_width(ADC_WIDTH_BIT_12);
+    adc_oneshot_unit_init_cfg_t init_config = {
+    .unit_id = FLEX_SENSOR_ADC_UNIT,
+    .ulp_mode = ADC_ULP_MODE_DISABLE,
+    };
+    adc_oneshot_new_unit(&init_config, &adc_handle);
     
     // Configure channels
     for (int i = 0; i < FINGER_JOINT_COUNT; i++) {
-        adc1_config_channel_atten(adc_channels[i], FLEX_SENSOR_ADC_ATTENUATION);
+        adc_oneshot_chan_cfg_t config = {
+            .atten = FLEX_SENSOR_ADC_ATTENUATION,
+            .bitwidth = FLEX_SENSOR_ADC_BIT_WIDTH,
+        };
+        adc_oneshot_config_channel(adc_handle, adc_channels[i], &config);
     }
     
-    // Characterize ADC
-    esp_adc_cal_characterize(FLEX_SENSOR_ADC_UNIT, FLEX_SENSOR_ADC_ATTENUATION, 
-                            FLEX_SENSOR_ADC_BIT_WIDTH, 0, &adc_chars);
-    
+    // Initialize ADC calibration
+    adc_cali_curve_fitting_config_t cali_config = {
+        .unit_id = FLEX_SENSOR_ADC_UNIT,
+        .atten = FLEX_SENSOR_ADC_ATTENUATION,
+        .bitwidth = FLEX_SENSOR_ADC_BIT_WIDTH,
+    };
+    adc_cali_create_scheme_curve_fitting(&cali_config, &adc_cali_handle);
+
     // Initialize filter buffers
     for (int i = 0; i < FINGER_JOINT_COUNT; i++) {
         for (int j = 0; j < FILTER_BUFFER_SIZE; j++) {
@@ -139,7 +152,9 @@ esp_err_t flex_sensor_read_raw(uint16_t* raw_values) {
     
     // Read raw values and apply filtering
     for (int i = 0; i < FINGER_JOINT_COUNT; i++) {
-        uint16_t raw = adc1_get_raw(adc_channels[i]);
+        int raw_value = 0;
+        adc_oneshot_read(adc_handle, adc_channels[i], &raw_value);
+        uint16_t raw = (uint16_t)raw_value;
         raw_values[i] = apply_filter(i, raw);
     }
     
@@ -178,8 +193,10 @@ esp_err_t flex_sensor_read_joint(finger_joint_t joint, uint16_t* raw_value, floa
     }
     
     // Read raw value
-    *raw_value = apply_filter(joint, adc1_get_raw(adc_channels[joint]));
-    
+    int raw_adc_value = 0;
+    adc_oneshot_read(adc_handle, adc_channels[joint], &raw_adc_value);
+    *raw_value = apply_filter(joint, (uint16_t)raw_adc_value);
+
     // Calculate angle
     *angle = sensor_calibration.scale_factor[joint] * (*raw_value) + sensor_calibration.offset[joint];
     

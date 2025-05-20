@@ -17,7 +17,6 @@ static const char *TAG = "GESTURE_DETECT";
 static bool gesture_detection_initialized = false;
 
 // Number of gestures in our vocabulary
-#define MAX_GESTURES 50
 #define CURRENT_GESTURES 10  // Currently implemented gestures
 
 // NVS namespace for gesture templates

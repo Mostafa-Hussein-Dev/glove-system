@@ -89,12 +89,12 @@ esp_err_t power_management_init(void) {
     }
     
     // Initialize calibration
-    adc_cali_line_fitting_config_t cali_config = {
+    adc_cali_curve_fitting_config_t cali_config = {
         .unit_id = BATTERY_ADC_UNIT,
         .atten = BATTERY_ADC_ATTENUATION,
         .bitwidth = ADC_BITWIDTH_12,
     };
-    ret = adc_cali_create_scheme_line_fitting(&cali_config, &adc_cali_handle);
+    ret = adc_cali_create_scheme_curve_fitting(&cali_config, &adc_cali_handle);
     if (ret != ESP_OK) {
         ESP_LOGW(TAG, "ADC calibration failed: %s", esp_err_to_name(ret));
         // Continue without calibration

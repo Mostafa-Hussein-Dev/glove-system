@@ -11,6 +11,7 @@
 #include "core/power_management.h"
 #include "config/system_config.h"
 #include "util/debug.h"
+#include "util/buffer.h"
 
 static const char *TAG = "COMM_TASK";
 
