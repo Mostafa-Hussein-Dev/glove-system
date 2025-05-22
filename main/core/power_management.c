@@ -272,11 +272,11 @@ esp_err_t power_management_get_battery_status(battery_status_t* status) {
     esp_err_t ret = adc_oneshot_read(adc_handle, BATTERY_ADC_CHANNEL, &adc_reading);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to read ADC: %s", esp_err_to_name(ret));
-        return ret;
     }
+    return ret;
     
     // Convert ADC reading to voltage
-    uint32_t voltage_mv = 0;
+    int voltage_mv = 0;
     if (adc_cali_handle) {
         ret = adc_cali_raw_to_voltage(adc_cali_handle, adc_reading, &voltage_mv);
         if (ret != ESP_OK) {

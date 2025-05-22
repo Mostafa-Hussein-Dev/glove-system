@@ -3,6 +3,7 @@
 
 #include "esp_err.h"
 #include <stdbool.h>
+#include <stdio.h>
 
 /**
  * @brief System configuration parameters
@@ -130,4 +131,4 @@ esp_err_t system_config_save(void);
 esp_err_t system_config_load(void);
 esp_err_t system_config_reset_to_default(void);
 
-#endif /* SYSTEM_CONFIG_H */#include <stdio.h>
+#endif /* SYSTEM_CONFIG_H */

@@ -1,8 +1,7 @@
 idf_component_register(
+    COMPILE_OPTIONS "-Wno-error=deprecated-declarations" "-Wno-deprecated-declarations"
     SRCS 
         "app_main.c"
-        "config/system_config.h"
-        "config/pin_definitions.h"
         "core/power_management.c"
         "core/system_monitor.c"
         "drivers/flex_sensor.c"
@@ -25,7 +24,7 @@ idf_component_register(
         "tasks/power_task.c"
         "util/buffer.c"
         "util/debug.c"
-    INCLUDE_DIRS "." "config" "core" "drivers" "processing" "communication" "output" "tasks" "util"
+    INCLUDE_DIRS "." "config" "core" "drivers" "processing" "communication" "output" "tasks" "util" "include"
     REQUIRES
     driver
     esp_timer

@@ -1,14 +1,16 @@
 #ifndef PIN_DEFINITIONS_H
 #define PIN_DEFINITIONS_H
 
+#include "esp_adc/adc_oneshot.h"
+
 /**
  * @brief GPIO pin assignments for all hardware components
  */
 
 /* Flex Sensors ADC Pins (10 sensors, 2 per finger) */
 #define FLEX_SENSOR_ADC_UNIT               ADC_UNIT_1
-#define FLEX_SENSOR_ADC_ATTENUATION        ADC_ATTEN_11DB
-#define FLEX_SENSOR_ADC_BIT_WIDTH          ADC_WIDTH_BIT_12
+#define FLEX_SENSOR_ADC_ATTENUATION        ADC_ATTEN_DB_6
+#define FLEX_SENSOR_ADC_BIT_WIDTH          ADC_BITWIDTH_12
 
 #define FLEX_SENSOR_THUMB_MCP_ADC_CHANNEL  ADC_CHANNEL_0   // GPIO1
 #define FLEX_SENSOR_THUMB_PIP_ADC_CHANNEL  ADC_CHANNEL_1   // GPIO2
@@ -64,7 +66,7 @@
 #define HAPTIC_PIN                  23
 
 /* Battery Monitoring Pin */
-#define BATTERY_ADC_CHANNEL         ADC_CHANNEL_10  // GPIO16
+#define BATTERY_ADC_CHANNEL         ADC_CHANNEL_1  // GPIO16
 #define BATTERY_ADC_UNIT            ADC_UNIT_1
 #define BATTERY_ADC_ATTENUATION     ADC_ATTEN_DB_11
 

@@ -6,6 +6,7 @@
 #include "util/buffer.h"
 #include "util/debug.h"
 #include "math.h"
+#include "drivers/flex_sensor.h"
 
 static const char *TAG = "FEATURE_EXTRACT";
 
