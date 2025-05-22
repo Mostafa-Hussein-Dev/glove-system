@@ -11,3 +11,4 @@ project(glove-system)
 
 # Optional: Suppress specific warning (used for printf-style format mismatch)
 idf_build_set_property(COMPILE_OPTIONS "-Wno-format" APPEND)
+

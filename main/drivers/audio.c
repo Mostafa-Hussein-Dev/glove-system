@@ -12,6 +12,7 @@
 #include "math.h"
 
 static const char *TAG = "AUDIO";
+static i2s_chan_handle_t tx_chan = NULL;
 
 // I2S configuration
 #define I2S_NUM I2S_NUM_0
@@ -59,20 +60,23 @@ esp_err_t audio_init(void) {
         return ESP_OK;  // Already initialized
     }
     
-    // Replace the entire I2S configuration section with:
-    i2s_chan_handle_t tx_handle;  // Add this as a static variable at the top
-
-    i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_0, I2S_ROLE_MASTER);
-    ESP_ERROR_CHECK(i2s_new_channel(&chan_cfg, &tx_handle, NULL));  // TX only
-
+    // Configure I2S channel
+    i2s_chan_config_t chan_cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM, I2S_ROLE_MASTER);
+    ret = i2s_new_channel(&chan_cfg, &tx_chan, NULL);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to create I2S channel: %d", ret);
+        return ret;
+    }
+    
+    // Configure I2S standard
     i2s_std_config_t std_cfg = {
         .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(I2S_SAMPLE_RATE),
-        .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_BITS_PER_SAMPLE, I2S_SLOT_MODE_STEREO),
+        .slot_cfg = I2S_STD_MSB_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_MONO),
         .gpio_cfg = {
             .mclk = I2S_GPIO_UNUSED,
-            .bclk = 27,  // I2S_BCK_PIN
-            .ws = 25,    // I2S_WS_PIN
-            .dout = 26,  // I2S_DATA_OUT_PIN
+            .bclk = I2S_BCK_PIN,
+            .ws = I2S_WS_PIN,
+            .dout = I2S_DATA_OUT_PIN,
             .din = I2S_GPIO_UNUSED,
             .invert_flags = {
                 .mclk_inv = false,
@@ -81,22 +85,19 @@ esp_err_t audio_init(void) {
             },
         },
     };
-    ESP_ERROR_CHECK(i2s_channel_init_std_mode(tx_handle, &std_cfg));
-    ESP_ERROR_CHECK(i2s_channel_enable(tx_handle));
     
-    // Install I2S driver
-    ret = i2s_driver_install(I2S_NUM, &i2s_config, 0, NULL);
+    ret = i2s_channel_init_std_mode(tx_chan, &std_cfg);
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to install I2S driver: %d", ret);
+        ESP_LOGE(TAG, "Failed to initialize I2S standard mode: %d", ret);
+        i2s_del_channel(tx_chan);
         return ret;
     }
     
-    // Set I2S pins
-    ret = i2s_set_pin(I2S_NUM, &pin_config);
+    // Enable I2S channel
+    ret = i2s_channel_enable(tx_chan);
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to set I2S pins: %d", ret);
-        i2s_channel_disable(tx_handle);
-        i2s_del_channel(tx_handle);
+        ESP_LOGE(TAG, "Failed to enable I2S channel: %d", ret);
+        i2s_del_channel(tx_chan);
         return ret;
     }
     
@@ -117,8 +118,8 @@ esp_err_t audio_init(void) {
     audio_command_queue = xQueueCreate(10, sizeof(audio_command_data_t));
     if (audio_command_queue == NULL) {
         ESP_LOGE(TAG, "Failed to create audio command queue");
-        i2s_channel_disable(tx_handle);
-        i2s_del_channel(tx_handle);
+        i2s_channel_disable(tx_chan);
+        i2s_del_channel(tx_chan);
         return ESP_ERR_NO_MEM;
     }
     
@@ -135,8 +136,8 @@ esp_err_t audio_init(void) {
     if (xReturned != pdPASS) {
         ESP_LOGE(TAG, "Failed to create audio task");
         vQueueDelete(audio_command_queue);
-        i2s_channel_disable(tx_handle);
-        i2s_del_channel(tx_handle);
+        i2s_channel_disable(tx_chan);
+        i2s_del_channel(tx_chan);
         return ESP_ERR_NO_MEM;
     }
     
@@ -172,9 +173,12 @@ esp_err_t audio_deinit(void) {
         audio_command_queue = NULL;
     }
     
-    // Uninstall I2S driver
-    i2s_channel_disable(tx_handle);
-    i2s_del_channel(tx_handle);;
+    // Disable and delete I2S channel
+    if (tx_chan != NULL) {
+        i2s_channel_disable(tx_chan);
+        i2s_del_channel(tx_chan);
+        tx_chan = NULL;
+    }
     
     audio_initialized = false;
     ESP_LOGI(TAG, "Audio system deinitialized");
@@ -288,8 +292,8 @@ static void audio_task(void *pvParameters) {
                     
                 case AUDIO_CMD_STOP:
                     // Reset I2S for immediate stop
-                    i2s_channel_disable(tx_handle);
-                    i2s_channel_enable(tx_handle); 
+                    i2s_channel_disable(tx_chan);
+                    i2s_channel_enable(tx_chan); 
                     audio_playback_active = false;
                     break;
                     
@@ -329,12 +333,12 @@ static void audio_play_tone(uint16_t frequency, uint16_t duration_ms) {
         }
         
         // Send to I2S (blocking)
-        i2s_channel_write(tx_handle, audio_buffer, buffer_samples * 4, &i2s_bytes_written, portMAX_DELAY);
+        i2s_channel_write(tx_chan, audio_buffer, buffer_samples * 4, &i2s_bytes_written, portMAX_DELAY);
     }
     
     // Ensure buffer is flushed
-    i2s_channel_disable(tx_handle);
-    i2s_channel_enable(tx_handle); 
+    i2s_channel_disable(tx_chan);
+    i2s_channel_enable(tx_chan); 
 }
 
 // Very simple text-to-speech (just beeps for now - would need a real TTS engine)

@@ -27,7 +27,10 @@
     "ble_service.h": "c",
     "cstdint": "c",
     "adc.h": "c",
-    "adc_oneshot.h": "c"
+    "adc_oneshot.h": "c",
+    "esp_err.h": "c",
+    "power_management.h": "c",
+    "esp_gatts_api.h": "c"
   },
   "C_Cpp.errorSquiggles": "disabled",
   "C_Cpp.dimInactiveRegions": false

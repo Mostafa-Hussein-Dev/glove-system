@@ -2,6 +2,7 @@ idf_component_register(
     COMPILE_OPTIONS "-Wno-error=deprecated-declarations" "-Wno-deprecated-declarations"
     SRCS 
         "app_main.c"
+        "config/system_config.c"
         "core/power_management.c"
         "core/system_monitor.c"
         "drivers/flex_sensor.c"
@@ -45,3 +46,7 @@ idf_component_register(
     esp_https_server
     freertos
 )
+
+# Suppress unused-but-set-variable warning for this file
+set_source_files_properties(core/system_monitor.c PROPERTIES COMPILE_FLAGS "-Wno-unused-but-set-variable")
+

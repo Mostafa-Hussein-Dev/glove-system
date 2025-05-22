@@ -103,7 +103,6 @@ esp_err_t feature_extraction_process(sensor_data_t *sensor_data,
         // Get past samples for temporal analysis
         sensor_data_t past_data[5];
         for (int i = 0; i < 5; i++) {
-            sensor_data_t temp_data;
             if (i == 0) {
                 // Current data is first
                 memcpy(&past_data[0], sensor_data, sizeof(sensor_data_t));

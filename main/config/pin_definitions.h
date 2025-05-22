@@ -9,7 +9,7 @@
 
 /* Flex Sensors ADC Pins (10 sensors, 2 per finger) */
 #define FLEX_SENSOR_ADC_UNIT               ADC_UNIT_1
-#define FLEX_SENSOR_ADC_ATTENUATION        ADC_ATTEN_DB_6
+#define FLEX_SENSOR_ADC_ATTENUATION        ADC_ATTEN_DB_12
 #define FLEX_SENSOR_ADC_BIT_WIDTH          ADC_BITWIDTH_12
 
 #define FLEX_SENSOR_THUMB_MCP_ADC_CHANNEL  ADC_CHANNEL_0   // GPIO1
@@ -68,7 +68,7 @@
 /* Battery Monitoring Pin */
 #define BATTERY_ADC_CHANNEL         ADC_CHANNEL_1  // GPIO16
 #define BATTERY_ADC_UNIT            ADC_UNIT_1
-#define BATTERY_ADC_ATTENUATION     ADC_ATTEN_DB_11
+#define BATTERY_ADC_ATTENUATION     ADC_ATTEN_DB_12
 
 /* Power Control Pins */
 #define SENSOR_POWER_CTRL_PIN       17  // Controls power to sensors
