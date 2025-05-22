@@ -1,13 +1,19 @@
 #include "drivers/imu.h"
 #include <string.h>
 #include "esp_log.h"
-#include "driver/i2c.h"
+#include "driver/i2c_master.h"
 #include "esp_timer.h"
 #include "math.h"
 #include "nvs_flash.h"
 #include "nvs.h"
 #include "config/pin_definitions.h"
 #include "util/debug.h"
+#include "util/i2c_utils.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+static i2c_master_bus_handle_t i2c_bus_handle = NULL;
+static i2c_master_dev_handle_t imu_dev_handle = NULL;
 
 static const char *TAG = "IMU";
 
@@ -98,11 +104,11 @@ static imu_motion_detection_config_t motion_config = {
 // I2C utilities for MPU6050
 static esp_err_t mpu6050_write_byte(uint8_t reg_addr, uint8_t data) {
     uint8_t write_buf[2] = {reg_addr, data};
-    return i2c_master_write_to_device(I2C_MASTER_NUM, MPU6050_ADDR, write_buf, sizeof(write_buf), pdMS_TO_TICKS(100));
+    return i2c_write_device(imu_dev_handle, write_buf, sizeof(write_buf), 100);
 }
 
 static esp_err_t mpu6050_read_bytes(uint8_t reg_addr, uint8_t *data, size_t len) {
-    return i2c_master_write_read_device(I2C_MASTER_NUM, MPU6050_ADDR, &reg_addr, 1, data, len, pdMS_TO_TICKS(100));
+    return i2c_write_read_device(imu_dev_handle, &reg_addr, 1, data, len, 100);
 }
 
 static esp_err_t calculate_calibration_factors(void) {
@@ -118,7 +124,36 @@ esp_err_t imu_init(void) {
     esp_err_t ret;
     uint8_t who_am_i;
     
-    // Initialize I2C if not already initialized (done in app_main for shared I2C bus)
+    // Initialize I2C master bus if not already done (shared with display)
+    if (i2c_bus_handle == NULL) {
+        i2c_master_bus_config_t i2c_mst_config = {
+            .clk_source = I2C_CLK_SRC_DEFAULT,
+            .i2c_port = I2C_MASTER_NUM,
+            .scl_io_num = I2C_MASTER_SCL_IO,
+            .sda_io_num = I2C_MASTER_SDA_IO,
+            .glitch_ignore_cnt = 7,
+            .flags.enable_internal_pullup = true,
+        };
+        
+        ret = i2c_new_master_bus(&i2c_mst_config, &i2c_bus_handle);
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to create I2C master bus: %s", esp_err_to_name(ret));
+            return ret;
+        }
+    }
+    
+    // Add IMU device to I2C bus
+    i2c_device_config_t dev_cfg = {
+        .dev_addr_length = I2C_ADDR_BIT_LEN_7,
+        .device_address = MPU6050_ADDR,
+        .scl_speed_hz = I2C_MASTER_FREQ_HZ,
+    };
+    
+    ret = i2c_master_bus_add_device(i2c_bus_handle, &dev_cfg, &imu_dev_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to add IMU device to I2C bus: %s", esp_err_to_name(ret));
+        return ret;
+    }
     
     // Verify device identity
     ret = mpu6050_read_bytes(MPU6050_REG_WHO_AM_I, &who_am_i, 1);

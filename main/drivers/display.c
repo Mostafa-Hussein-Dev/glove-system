@@ -2,12 +2,18 @@
 #include <string.h>
 #include <math.h>
 #include "esp_log.h"
-#include "driver/i2c.h"
+#include "driver/i2c_master.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "config/pin_definitions.h"
 #include "util/debug.h"
+#include "util/i2c_utils.h"
+#include "driver/gpio.h"
+
+// Display device handle
+static i2c_master_bus_handle_t i2c_bus_handle = NULL;
+static i2c_master_dev_handle_t display_dev_handle = NULL;
 
 static const char *TAG = "DISPLAY";
 
@@ -65,6 +71,37 @@ static esp_err_t ssd1306_update_full();
 
 esp_err_t display_init(void) {
     esp_err_t ret;
+    
+    // Initialize I2C master bus if not already done
+    if (i2c_bus_handle == NULL) {
+        i2c_master_bus_config_t i2c_mst_config = {
+            .clk_source = I2C_CLK_SRC_DEFAULT,
+            .i2c_port = I2C_MASTER_NUM,
+            .scl_io_num = I2C_MASTER_SCL_IO,
+            .sda_io_num = I2C_MASTER_SDA_IO,
+            .glitch_ignore_cnt = 7,
+            .flags.enable_internal_pullup = true,
+        };
+        
+        ret = i2c_new_master_bus(&i2c_mst_config, &i2c_bus_handle);
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to create I2C master bus: %s", esp_err_to_name(ret));
+            return ret;
+        }
+    }
+    
+    // Add display device to I2C bus
+    i2c_device_config_t dev_cfg = {
+        .dev_addr_length = I2C_ADDR_BIT_LEN_7,
+        .device_address = SSD1306_ADDR,
+        .scl_speed_hz = I2C_MASTER_FREQ_HZ,
+    };
+    
+    ret = i2c_master_bus_add_device(i2c_bus_handle, &dev_cfg, &display_dev_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to add display device to I2C bus: %s", esp_err_to_name(ret));
+        return ret;
+    }
     
     // Reset display if reset pin defined
     if (DISPLAY_RST_PIN >= 0) {
@@ -670,7 +707,7 @@ esp_err_t display_flip_horizontal(bool flip) {
 
 static esp_err_t ssd1306_write_command(uint8_t command) {
     uint8_t write_buf[2] = {SSD1306_COMMAND, command};
-    return i2c_master_write_to_device(I2C_MASTER_NUM, SSD1306_ADDR, write_buf, sizeof(write_buf), pdMS_TO_TICKS(10));
+    return i2c_master_transmit(display_dev_handle, write_buf, sizeof(write_buf), pdMS_TO_TICKS(100));
 }
 
 static esp_err_t ssd1306_write_data(uint8_t* data, size_t len) {
@@ -686,7 +723,7 @@ static esp_err_t ssd1306_write_data(uint8_t* data, size_t len) {
     memcpy(temp_buf + 1, data, len);
     
     // Send data
-    esp_err_t ret = i2c_master_write_to_device(I2C_MASTER_NUM, SSD1306_ADDR, temp_buf, len + 1, pdMS_TO_TICKS(10));
+    esp_err_t ret = i2c_master_transmit(display_dev_handle, temp_buf, len + 1, pdMS_TO_TICKS(100));
     
     // Free temp buffer
     free(temp_buf);

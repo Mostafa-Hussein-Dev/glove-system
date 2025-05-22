@@ -25,6 +25,7 @@ idf_component_register(
         "tasks/power_task.c"
         "util/buffer.c"
         "util/debug.c"
+        "util/i2c_utils.c"
     INCLUDE_DIRS "." "config" "core" "drivers" "processing" "communication" "output" "tasks" "util" "include"
     REQUIRES
     driver

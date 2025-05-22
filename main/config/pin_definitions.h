@@ -23,10 +23,12 @@
 #define FLEX_SENSOR_PINKY_MCP_ADC_CHANNEL  ADC_CHANNEL_8   // GPIO9
 #define FLEX_SENSOR_PINKY_PIP_ADC_CHANNEL  ADC_CHANNEL_9   // GPIO10
 
+
+
 /* IMU (MPU6050) I2C Pins */
 #define I2C_MASTER_NUM              I2C_NUM_0
-#define I2C_MASTER_SDA_IO           21
-#define I2C_MASTER_SCL_IO           22
+#define I2C_MASTER_SDA_IO           20
+#define I2C_MASTER_SCL_IO           21
 #define I2C_MASTER_FREQ_HZ          400000
 #define IMU_INT_PIN                 4
 

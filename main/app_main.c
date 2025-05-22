@@ -10,7 +10,7 @@
 #include "freertos/event_groups.h"
 #include "nvs_flash.h"
 #include "esp_spiffs.h"
-#include "driver/i2c.h"
+#include "driver/i2c_master.h"
 
 // Include app_main header first
 #include "app_main.h"
@@ -42,6 +42,9 @@
 #include "util/buffer.h"
 
 static const char *TAG = "APP_MAIN";
+
+// Global I2C master bus handle (declare as extern in header if needed by other files)
+extern i2c_master_bus_handle_t i2c_master_bus;
 
 // Global system configuration
 system_config_t g_system_config;
@@ -220,30 +223,27 @@ static esp_err_t init_spiffs(void) {
     return ESP_OK;
 }
 
+// Global I2C master bus handle
+i2c_master_bus_handle_t i2c_master_bus = NULL;
+
 static esp_err_t init_i2c(void) {
-    // Configure I2C controller for the common bus (IMU, display)
-    i2c_config_t i2c_conf = {
-        .mode = I2C_MODE_MASTER,
-        .sda_io_num = I2C_MASTER_SDA_IO,
+    // Configure I2C master bus
+    i2c_master_bus_config_t i2c_mst_config = {
+        .clk_source = I2C_CLK_SRC_DEFAULT,
+        .i2c_port = I2C_MASTER_NUM,
         .scl_io_num = I2C_MASTER_SCL_IO,
-        .sda_pullup_en = GPIO_PULLUP_ENABLE,
-        .scl_pullup_en = GPIO_PULLUP_ENABLE,
-        .master.clk_speed = I2C_MASTER_FREQ_HZ
+        .sda_io_num = I2C_MASTER_SDA_IO,
+        .glitch_ignore_cnt = 7,
+        .flags.enable_internal_pullup = true,
     };
     
-    esp_err_t ret = i2c_param_config(I2C_MASTER_NUM, &i2c_conf);
+    esp_err_t ret = i2c_new_master_bus(&i2c_mst_config, &i2c_master_bus);
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to configure I2C parameters: %s", esp_err_to_name(ret));
+        ESP_LOGE(TAG, "Failed to create I2C master bus: %s", esp_err_to_name(ret));
         return ret;
     }
     
-    ret = i2c_driver_install(I2C_MASTER_NUM, I2C_MODE_MASTER, 0, 0, 0);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to install I2C driver: %s", esp_err_to_name(ret));
-        return ret;
-    }
-    
-    ESP_LOGI(TAG, "I2C master initialized successfully");
+    ESP_LOGI(TAG, "I2C master bus initialized successfully");
     return ESP_OK;
 }
 
