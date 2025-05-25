@@ -125,21 +125,13 @@ esp_err_t imu_init(void) {
     uint8_t who_am_i;
     
     // Initialize I2C master bus if not already done (shared with display)
+    // Use the global I2C bus created in app_main
+    extern i2c_master_bus_handle_t i2c_master_bus;
+    i2c_bus_handle = i2c_master_bus;
+
     if (i2c_bus_handle == NULL) {
-        i2c_master_bus_config_t i2c_mst_config = {
-            .clk_source = I2C_CLK_SRC_DEFAULT,
-            .i2c_port = I2C_MASTER_NUM,
-            .scl_io_num = I2C_MASTER_SCL_IO,
-            .sda_io_num = I2C_MASTER_SDA_IO,
-            .glitch_ignore_cnt = 7,
-            .flags.enable_internal_pullup = true,
-        };
-        
-        ret = i2c_new_master_bus(&i2c_mst_config, &i2c_bus_handle);
-        if (ret != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to create I2C master bus: %s", esp_err_to_name(ret));
-            return ret;
-        }
+        ESP_LOGE(TAG, "Global I2C master bus not initialized");
+        return ESP_ERR_INVALID_STATE;
     }
     
     // Add IMU device to I2C bus

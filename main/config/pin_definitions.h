@@ -27,8 +27,8 @@
 
 /* IMU (MPU6050) I2C Pins */
 #define I2C_MASTER_NUM              I2C_NUM_0
-#define I2C_MASTER_SDA_IO           20
-#define I2C_MASTER_SCL_IO           21
+#define I2C_MASTER_SDA_IO           21
+#define I2C_MASTER_SCL_IO           20
 #define I2C_MASTER_FREQ_HZ          400000
 #define IMU_INT_PIN                 4
 

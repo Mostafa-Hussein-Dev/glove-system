@@ -7,6 +7,7 @@
 #include "freertos/event_groups.h"
 #include "esp_mac.h"
 #include "config/system_config.h"
+#include "driver/i2c_master.h"
 
 /**
  * @brief System event bits for the event group
@@ -25,6 +26,11 @@
  * @brief Global system configuration
  */
 extern system_config_t g_system_config;
+
+/**
+ * @brief Global I2C master bus handle
+ */
+extern i2c_master_bus_handle_t i2c_master_bus;
 
 /**
  * @brief Global queue handlers

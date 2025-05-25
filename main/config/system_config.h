@@ -120,6 +120,7 @@ typedef struct {
     bool touch_enabled;
     bool camera_enabled;
     bool calibration_required;
+    bool imu_enabled;
 } system_config_t;
 
 /* Global configuration variable (declared in app_main.c) */
