@@ -39,8 +39,8 @@
 #define CAMERA_HREF_PIN             12
 #define CAMERA_D0_PIN               11
 #define CAMERA_D1_PIN               10
-#define CAMERA_D2_PIN               9
-#define CAMERA_D3_PIN               8
+#define CAMERA_D2_PIN               9 
+#define CAMERA_D3_PIN               8 
 #define CAMERA_D4_PIN               7
 #define CAMERA_D5_PIN               6
 #define CAMERA_D6_PIN               5
@@ -54,18 +54,18 @@
 #define TOUCH_PINKY_PIN             13
 
 /* OLED Display Pins (I2C shared with IMU) */
-#define DISPLAY_RST_PIN             18
+#define DISPLAY_RST_PIN             -1 // WAS GPIO 18
 // SDA and SCL shared with I2C_MASTER
 
 /* Audio Output (I2S) Pins */
 #define I2S_MCLK_PIN                0  // Not used for MAX98357A
-#define I2S_BCK_PIN                 27
-#define I2S_WS_PIN                  25
-#define I2S_DATA_OUT_PIN            26
+#define I2S_BCK_PIN                 4  //DEFAULT 27
+#define I2S_WS_PIN                  5  //DEFAULT 25
+#define I2S_DATA_OUT_PIN            6   //DEFAULT 26
 #define I2S_SD_PIN                  19  // Shutdown control for MAX98357A
 
 /* Haptic Feedback Motor Pin */
-#define HAPTIC_PIN                  23
+#define HAPTIC_PIN                  15
 
 /* Battery Monitoring Pin */
 #define BATTERY_ADC_CHANNEL         ADC_CHANNEL_1  // GPIO16

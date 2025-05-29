@@ -45,6 +45,7 @@ idf_component_register(
     esp_eth
     esp_http_client
     esp_https_server
+    esp_lcd
     freertos
 )
 

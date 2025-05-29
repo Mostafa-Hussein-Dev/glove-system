@@ -33,7 +33,10 @@
     "esp_gatts_api.h": "c",
     "stdio.h": "c",
     "touch.h": "c",
-    "i2c_utils.h": "c"
+    "i2c_utils.h": "c",
+    "esp_lcd_panel_ops.h": "c",
+    "esp_lcd_panel_vendor.h": "c",
+    "*.inc": "c"
   },
   "C_Cpp.errorSquiggles": "disabled",
   "C_Cpp.dimInactiveRegions": false

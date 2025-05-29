@@ -58,6 +58,8 @@ esp_err_t touch_init(void) {
             return ret;
         }
     }
+
+    touch_initialized = true;
     
     // Initialize and start calibration
     ret = touch_calibrate();
@@ -76,7 +78,7 @@ esp_err_t touch_init(void) {
     // Enable touch interrupt
     touch_pad_intr_enable(TOUCH_PAD_INTR_MASK_ACTIVE | TOUCH_PAD_INTR_MASK_INACTIVE);
     
-    touch_initialized = true;
+    
     ESP_LOGI(TAG, "Touch sensor system initialized");
     
     return ESP_OK;

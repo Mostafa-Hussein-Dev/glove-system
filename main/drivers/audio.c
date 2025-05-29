@@ -67,6 +67,9 @@ esp_err_t audio_init(void) {
         ESP_LOGE(TAG, "Failed to create I2S channel: %d", ret);
         return ret;
     }
+
+    ESP_LOGI(TAG, "Configuring I2S pins: BCK=%d, WS=%d, DOUT=%d",
+         I2S_BCK_PIN, I2S_WS_PIN, I2S_DATA_OUT_PIN);
     
     // Configure I2S standard
     i2s_std_config_t std_cfg = {

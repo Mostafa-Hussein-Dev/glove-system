@@ -108,6 +108,13 @@ esp_err_t app_init(void) {
         ESP_LOGE(TAG, "Failed to initialize I2C: %s", esp_err_to_name(ret));
         return ret;
     }
+
+    // Initialize drivers
+    ret = init_drivers();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize drivers: %s", esp_err_to_name(ret));
+        return ret;
+    }
     
     // Initialize system configuration
     ret = init_system_config();
@@ -130,12 +137,8 @@ esp_err_t app_init(void) {
         return ret;
     }
     
-    // Initialize drivers
-    ret = init_drivers();
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize drivers: %s", esp_err_to_name(ret));
-        return ret;
-    }
+    
+    
     
     // Initialize processing modules
     ret = init_processing();
@@ -158,12 +161,14 @@ esp_err_t app_init(void) {
         return ret;
     }
     
+    /*
     // Initialize system tasks
     ret = init_tasks();
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to initialize tasks: %s", esp_err_to_name(ret));
         return ret;
     }
+    */
     
     // Set system initialization complete
     xEventGroupSetBits(g_system_event_group, SYSTEM_EVENT_INIT_COMPLETE);
@@ -230,8 +235,8 @@ static esp_err_t init_i2c(void) {
         .i2c_port = I2C_MASTER_NUM,
         .scl_io_num = I2C_MASTER_SCL_IO,
         .sda_io_num = I2C_MASTER_SDA_IO,
-        .glitch_ignore_cnt = 7,
         .flags.enable_internal_pullup = true,
+
     };
     
     esp_err_t ret = i2c_new_master_bus(&i2c_mst_config, &i2c_master_bus);
@@ -277,20 +282,22 @@ static esp_err_t init_system_config(void) {
 
 static esp_err_t init_drivers(void) {
     esp_err_t ret;
-    
+
     // Initialize display first (it will use the existing I2C bus)
     ret = display_init();
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to initialize display: %s", esp_err_to_name(ret));
         return ret;
     }
-
+    
+    /*
     // Initialize flex sensors
     ret = flex_sensor_init();
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to initialize flex sensors: %s", esp_err_to_name(ret));
         return ret;
     }
+    */
     
     // Initialize IMU (it will use the existing I2C bus)
     ret = imu_init();
@@ -346,6 +353,7 @@ static esp_err_t init_drivers(void) {
     
     ESP_LOGI(TAG, "All drivers initialized successfully");
     return ESP_OK;
+    
 }
 
 static esp_err_t init_processing(void) {
@@ -483,6 +491,7 @@ static esp_err_t init_tasks(void) {
         ESP_LOGE(TAG, "Failed to initialize power task: %s", esp_err_to_name(ret));
         return ret;
     }
+
     
     ESP_LOGI(TAG, "All tasks initialized successfully");
     return ESP_OK;
