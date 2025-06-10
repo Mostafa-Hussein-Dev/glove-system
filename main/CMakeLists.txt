@@ -26,7 +26,7 @@ idf_component_register(
         "util/buffer.c"
         "util/debug.c"
         "util/i2c_utils.c"
-    INCLUDE_DIRS "." "config" "core" "drivers" "processing" "communication" "output" "tasks" "util" "include"
+    INCLUDE_DIRS "." "config" "core" "drivers" "processing" "communication" "output" "tasks" "util" 
     REQUIRES
     driver
     esp_timer

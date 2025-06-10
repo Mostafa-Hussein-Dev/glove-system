@@ -6,30 +6,25 @@
 #include <stdbool.h>
 
 /**
- * @brief Finger joint identifiers
+ * @brief Finger identifiers (5 sensors total, 1 per finger)
  */
 typedef enum {
-    FINGER_THUMB_MCP = 0,    // Thumb metacarpophalangeal joint
-    FINGER_THUMB_PIP,        // Thumb proximal interphalangeal joint
-    FINGER_INDEX_MCP,        // Index finger metacarpophalangeal joint
-    FINGER_INDEX_PIP,        // Index finger proximal interphalangeal joint
-    FINGER_MIDDLE_MCP,       // Middle finger metacarpophalangeal joint
-    FINGER_MIDDLE_PIP,       // Middle finger proximal interphalangeal joint
-    FINGER_RING_MCP,         // Ring finger metacarpophalangeal joint
-    FINGER_RING_PIP,         // Ring finger proximal interphalangeal joint
-    FINGER_PINKY_MCP,        // Pinky finger metacarpophalangeal joint
-    FINGER_PINKY_PIP,        // Pinky finger proximal interphalangeal joint
-    FINGER_JOINT_COUNT       // Total number of finger joints
-} finger_joint_t;
+    FINGER_THUMB = 0,        // Thumb finger
+    FINGER_INDEX,            // Index finger
+    FINGER_MIDDLE,           // Middle finger
+    FINGER_RING,             // Ring finger
+    FINGER_PINKY,            // Pinky finger
+    FINGER_COUNT             // Total number of fingers (5)
+} finger_t;
 
 /**
  * @brief Calibration data for flex sensors
  */
 typedef struct {
-    uint16_t flat_value[FINGER_JOINT_COUNT];  // ADC value when finger is flat (0 degrees)
-    uint16_t bent_value[FINGER_JOINT_COUNT];  // ADC value when finger is bent (90 degrees)
-    float scale_factor[FINGER_JOINT_COUNT];   // Scaling factor for angle calculation
-    float offset[FINGER_JOINT_COUNT];         // Offset for angle calculation
+    uint16_t flat_value[FINGER_COUNT];    // ADC value when finger is flat (0 degrees)
+    uint16_t bent_value[FINGER_COUNT];    // ADC value when finger is bent (90 degrees)
+    float scale_factor[FINGER_COUNT];     // Scaling factor for angle calculation
+    float offset[FINGER_COUNT];           // Offset for angle calculation
 } flex_sensor_calibration_t;
 
 /**
@@ -42,7 +37,7 @@ esp_err_t flex_sensor_init(void);
 /**
  * @brief Read raw ADC values from all flex sensors
  * 
- * @param raw_values Array to store raw ADC values (10 values)
+ * @param raw_values Array to store raw ADC values (5 values)
  * @return ESP_OK on success, error code otherwise
  */
 esp_err_t flex_sensor_read_raw(uint16_t* raw_values);
@@ -50,20 +45,20 @@ esp_err_t flex_sensor_read_raw(uint16_t* raw_values);
 /**
  * @brief Read calibrated angle values from all flex sensors
  * 
- * @param angles Array to store angle values in degrees (10 values)
+ * @param angles Array to store angle values in degrees (5 values)
  * @return ESP_OK on success, error code otherwise
  */
 esp_err_t flex_sensor_read_angles(float* angles);
 
 /**
- * @brief Read raw and angle values for a specific finger joint
+ * @brief Read raw and angle values for a specific finger
  * 
- * @param joint Finger joint identifier
+ * @param finger Finger identifier
  * @param raw_value Pointer to store raw ADC value
  * @param angle Pointer to store angle value in degrees
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t flex_sensor_read_joint(finger_joint_t joint, uint16_t* raw_value, float* angle);
+esp_err_t flex_sensor_read_finger(finger_t finger, uint16_t* raw_value, float* angle);
 
 /**
  * @brief Calibrate flex sensors using current position as flat (0 degrees)

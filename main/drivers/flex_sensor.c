@@ -20,95 +20,98 @@ static const char *TAG = "FLEX_SENSOR";
 // Filter buffer size for moving average
 #define FILTER_BUFFER_SIZE 5
 
-// Flex sensor calibration data
+// Flex sensor calibration data (5 sensors instead of 10)
 static flex_sensor_calibration_t sensor_calibration = {
-    .flat_value = {2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000},  // Default values when flat (0 degrees)
-    .bent_value = {3500, 3500, 3500, 3500, 3500, 3500, 3500, 3500, 3500, 3500},  // Default values when bent (90 degrees)
-    .scale_factor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
-    .offset = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}
+    .flat_value = {2000, 2000, 2000, 2000, 2000},  // Default values when flat (0 degrees)
+    .bent_value = {3500, 3500, 3500, 3500, 3500},  // Default values when bent (90 degrees)
+    .scale_factor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+    .offset = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f}
 };
 
-// ADC channel mapping to finger joints
-static const adc_channel_t adc_channels[FINGER_JOINT_COUNT] = {
-    FLEX_SENSOR_THUMB_MCP_ADC_CHANNEL,
-    FLEX_SENSOR_THUMB_PIP_ADC_CHANNEL,
-    FLEX_SENSOR_INDEX_MCP_ADC_CHANNEL,
-    FLEX_SENSOR_INDEX_PIP_ADC_CHANNEL,
-    FLEX_SENSOR_MIDDLE_MCP_ADC_CHANNEL,
-    FLEX_SENSOR_MIDDLE_PIP_ADC_CHANNEL,
-    FLEX_SENSOR_RING_MCP_ADC_CHANNEL,
-    FLEX_SENSOR_RING_PIP_ADC_CHANNEL,
-    FLEX_SENSOR_PINKY_MCP_ADC_CHANNEL,
-    FLEX_SENSOR_PINKY_PIP_ADC_CHANNEL
+// ADC channel mapping to fingers (5 channels instead of 10)
+static const adc_channel_t adc_channels[FINGER_COUNT] = {
+    FLEX_SENSOR_THUMB_ADC_CHANNEL,
+    FLEX_SENSOR_INDEX_ADC_CHANNEL,
+    FLEX_SENSOR_MIDDLE_ADC_CHANNEL,
+    FLEX_SENSOR_RING_ADC_CHANNEL,
+    FLEX_SENSOR_PINKY_ADC_CHANNEL
 };
 
 // ADC calibration
 static adc_cali_handle_t adc_cali_handle = NULL;
 static adc_oneshot_unit_handle_t adc_handle = NULL;
 
-// Filter buffers for each sensor
-static uint16_t filter_buffers[FINGER_JOINT_COUNT][FILTER_BUFFER_SIZE];
-static uint8_t filter_index[FINGER_JOINT_COUNT] = {0};
+// Filter buffers for each sensor (5 sensors instead of 10)
+static uint16_t filter_buffers[FINGER_COUNT][FILTER_BUFFER_SIZE];
+static uint8_t filter_index[FINGER_COUNT] = {0};
 static bool filtering_enabled = true;
 
 // Function to calculate calibration scaling factors
 static void calculate_calibration_factors(void) {
-    for (int i = 0; i < FINGER_JOINT_COUNT; i++) {
+    for (int i = 0; i < FINGER_COUNT; i++) {
         // Ensure the difference between flat and bent values is significant
-        if (abs((int)sensor_calibration.bent_value[i] - (int)sensor_calibration.flat_value[i]) < 100) {
-            ESP_LOGW(TAG, "Calibration values for joint %d are too close", i);
-            // Set default values
-            sensor_calibration.flat_value[i] = 2000;
-            sensor_calibration.bent_value[i] = 3500;
+        if (abs((int)sensor_calibration.bent_value[i] - (int)sensor_calibration.flat_value[i]) > 200) {
+            // Calculate linear scaling factors
+            sensor_calibration.scale_factor[i] = 90.0f / 
+                (sensor_calibration.bent_value[i] - sensor_calibration.flat_value[i]);
+            sensor_calibration.offset[i] = -sensor_calibration.scale_factor[i] * 
+                sensor_calibration.flat_value[i];
+        } else {
+            // Use default values if calibration range is too small
+            sensor_calibration.scale_factor[i] = 0.06f;  // 90 degrees / 1500 ADC units
+            sensor_calibration.offset[i] = -120.0f;
+            ESP_LOGW(TAG, "Finger %d calibration range too small, using defaults", i);
         }
-        
-        // Calculate scale factor and offset for angle calculation
-        // Angle = scale_factor * raw_value + offset
-        sensor_calibration.scale_factor[i] = 90.0f / (sensor_calibration.bent_value[i] - sensor_calibration.flat_value[i]);
-        sensor_calibration.offset[i] = -sensor_calibration.scale_factor[i] * sensor_calibration.flat_value[i];
-        
-        ESP_LOGI(TAG, "Joint %d calibration: flat=%u, bent=%u, scale=%.4f, offset=%.4f", 
-            i, sensor_calibration.flat_value[i], sensor_calibration.bent_value[i], 
-            sensor_calibration.scale_factor[i], sensor_calibration.offset[i]);
     }
 }
 
-// Function to apply moving average filter
-static uint16_t apply_filter(finger_joint_t joint, uint16_t raw_value) {
+// Apply digital filter to sensor readings
+static uint16_t apply_filter(int sensor_idx, uint16_t raw_value) {
     if (!filtering_enabled) {
         return raw_value;
     }
     
-    // Add current value to filter buffer
-    filter_buffers[joint][filter_index[joint]] = raw_value;
-    filter_index[joint] = (filter_index[joint] + 1) % FILTER_BUFFER_SIZE;
+    // Add new value to filter buffer
+    filter_buffers[sensor_idx][filter_index[sensor_idx]] = raw_value;
+    filter_index[sensor_idx] = (filter_index[sensor_idx] + 1) % FILTER_BUFFER_SIZE;
     
-    // Calculate mean
+    // Calculate moving average
     uint32_t sum = 0;
     for (int i = 0; i < FILTER_BUFFER_SIZE; i++) {
-        sum += filter_buffers[joint][i];
+        sum += filter_buffers[sensor_idx][i];
     }
     
     return (uint16_t)(sum / FILTER_BUFFER_SIZE);
 }
 
 esp_err_t flex_sensor_init(void) {
+    ESP_LOGI(TAG, "Initializing flex sensors (5 sensors)...");
+    
     esp_err_t ret;
     
-    // Configure ADC
+    // Configure ADC oneshot
     adc_oneshot_unit_init_cfg_t init_config = {
-    .unit_id = FLEX_SENSOR_ADC_UNIT,
-    .ulp_mode = ADC_ULP_MODE_DISABLE,
+        .unit_id = FLEX_SENSOR_ADC_UNIT,
     };
-    adc_oneshot_new_unit(&init_config, &adc_handle);
+    ret = adc_oneshot_new_unit(&init_config, &adc_handle);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize ADC unit: %s", esp_err_to_name(ret));
+        return ret;
+    }
     
-    // Configure channels
-    for (int i = 0; i < FINGER_JOINT_COUNT; i++) {
-        adc_oneshot_chan_cfg_t config = {
-            .atten = FLEX_SENSOR_ADC_ATTENUATION,
-            .bitwidth = FLEX_SENSOR_ADC_BIT_WIDTH,
-        };
-        adc_oneshot_config_channel(adc_handle, adc_channels[i], &config);
+    // Configure ADC channels for all 5 flex sensors
+    adc_oneshot_chan_cfg_t config = {
+        .bitwidth = FLEX_SENSOR_ADC_BIT_WIDTH,
+        .atten = FLEX_SENSOR_ADC_ATTENUATION,
+    };
+    
+    for (int i = 0; i < FINGER_COUNT; i++) {
+        ret = adc_oneshot_config_channel(adc_handle, adc_channels[i], &config);
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Failed to configure ADC channel %d: %s", 
+                     adc_channels[i], esp_err_to_name(ret));
+            return ret;
+        }
     }
     
     // Initialize ADC calibration
@@ -120,7 +123,7 @@ esp_err_t flex_sensor_init(void) {
     adc_cali_create_scheme_curve_fitting(&cali_config, &adc_cali_handle);
 
     // Initialize filter buffers
-    for (int i = 0; i < FINGER_JOINT_COUNT; i++) {
+    for (int i = 0; i < FINGER_COUNT; i++) {
         for (int j = 0; j < FILTER_BUFFER_SIZE; j++) {
             filter_buffers[i][j] = 0;
         }
@@ -135,13 +138,13 @@ esp_err_t flex_sensor_init(void) {
     }
     
     // Read initial values to fill filter buffers
-    uint16_t raw_values[FINGER_JOINT_COUNT];
+    uint16_t raw_values[FINGER_COUNT];
     for (int i = 0; i < 10; i++) {
         flex_sensor_read_raw(raw_values);
         vTaskDelay(pdMS_TO_TICKS(10));
     }
     
-    ESP_LOGI(TAG, "Flex sensors initialized");
+    ESP_LOGI(TAG, "Flex sensors initialized (5 sensors)");
     return ESP_OK;
 }
 
@@ -151,7 +154,7 @@ esp_err_t flex_sensor_read_raw(uint16_t* raw_values) {
     }
     
     // Read raw values and apply filtering
-    for (int i = 0; i < FINGER_JOINT_COUNT; i++) {
+    for (int i = 0; i < FINGER_COUNT; i++) {
         int raw_value = 0;
         adc_oneshot_read(adc_handle, adc_channels[i], &raw_value);
         uint16_t raw = (uint16_t)raw_value;
@@ -166,14 +169,14 @@ esp_err_t flex_sensor_read_angles(float* angles) {
         return ESP_ERR_INVALID_ARG;
     }
     
-    uint16_t raw_values[FINGER_JOINT_COUNT];
+    uint16_t raw_values[FINGER_COUNT];
     esp_err_t ret = flex_sensor_read_raw(raw_values);
     if (ret != ESP_OK) {
         return ret;
     }
     
     // Calculate angles using calibration data
-    for (int i = 0; i < FINGER_JOINT_COUNT; i++) {
+    for (int i = 0; i < FINGER_COUNT; i++) {
         angles[i] = sensor_calibration.scale_factor[i] * raw_values[i] + sensor_calibration.offset[i];
         
         // Constrain angles to 0-90 degrees
@@ -187,18 +190,18 @@ esp_err_t flex_sensor_read_angles(float* angles) {
     return ESP_OK;
 }
 
-esp_err_t flex_sensor_read_joint(finger_joint_t joint, uint16_t* raw_value, float* angle) {
-    if (joint >= FINGER_JOINT_COUNT || raw_value == NULL || angle == NULL) {
+esp_err_t flex_sensor_read_finger(finger_t finger, uint16_t* raw_value, float* angle) {
+    if (finger >= FINGER_COUNT || raw_value == NULL || angle == NULL) {
         return ESP_ERR_INVALID_ARG;
     }
     
-    // Read raw value
-    int raw_adc_value = 0;
-    adc_oneshot_read(adc_handle, adc_channels[joint], &raw_adc_value);
-    *raw_value = apply_filter(joint, (uint16_t)raw_adc_value);
-
+    // Read raw value for the specific finger
+    int raw;
+    adc_oneshot_read(adc_handle, adc_channels[finger], &raw);
+    *raw_value = apply_filter(finger, (uint16_t)raw);
+    
     // Calculate angle
-    *angle = sensor_calibration.scale_factor[joint] * (*raw_value) + sensor_calibration.offset[joint];
+    *angle = sensor_calibration.scale_factor[finger] * (*raw_value) + sensor_calibration.offset[finger];
     
     // Constrain angle to 0-90 degrees
     if (*angle < 0.0f) {
@@ -211,22 +214,54 @@ esp_err_t flex_sensor_read_joint(finger_joint_t joint, uint16_t* raw_value, floa
 }
 
 esp_err_t flex_sensor_calibrate_flat(void) {
-    ESP_LOGI(TAG, "Calibrating flat position...");
+    ESP_LOGI(TAG, "Calibrating flat position for 5 flex sensors...");
     
-    // Read current values as flat position
-    return flex_sensor_read_raw(sensor_calibration.flat_value);
+    uint16_t raw_values[FINGER_COUNT];
+    
+    // Take multiple readings and average them
+    uint32_t sum[FINGER_COUNT] = {0};
+    for (int i = 0; i < 20; i++) {
+        flex_sensor_read_raw(raw_values);
+        for (int j = 0; j < FINGER_COUNT; j++) {
+            sum[j] += raw_values[j];
+        }
+        vTaskDelay(pdMS_TO_TICKS(50));
+    }
+    
+    // Store averaged flat values
+    for (int i = 0; i < FINGER_COUNT; i++) {
+        sensor_calibration.flat_value[i] = sum[i] / 20;
+        ESP_LOGI(TAG, "Finger %d flat value: %d", i, sensor_calibration.flat_value[i]);
+    }
+    
+    // Recalculate calibration factors
+    calculate_calibration_factors();
+    
+    return ESP_OK;
 }
 
 esp_err_t flex_sensor_calibrate_bent(void) {
-    ESP_LOGI(TAG, "Calibrating bent position...");
+    ESP_LOGI(TAG, "Calibrating bent position for 5 flex sensors...");
     
-    // Read current values as bent position
-    esp_err_t ret = flex_sensor_read_raw(sensor_calibration.bent_value);
-    if (ret != ESP_OK) {
-        return ret;
+    uint16_t raw_values[FINGER_COUNT];
+    
+    // Take multiple readings and average them
+    uint32_t sum[FINGER_COUNT] = {0};
+    for (int i = 0; i < 20; i++) {
+        flex_sensor_read_raw(raw_values);
+        for (int j = 0; j < FINGER_COUNT; j++) {
+            sum[j] += raw_values[j];
+        }
+        vTaskDelay(pdMS_TO_TICKS(50));
     }
     
-    // Calculate calibration factors
+    // Store averaged bent values
+    for (int i = 0; i < FINGER_COUNT; i++) {
+        sensor_calibration.bent_value[i] = sum[i] / 20;
+        ESP_LOGI(TAG, "Finger %d bent value: %d", i, sensor_calibration.bent_value[i]);
+    }
+    
+    // Recalculate calibration factors
     calculate_calibration_factors();
     
     return ESP_OK;
@@ -244,7 +279,7 @@ esp_err_t flex_sensor_save_calibration(void) {
         return ret;
     }
     
-    // Write calibration data to NVS
+    // Save calibration data to NVS
     ret = nvs_set_blob(nvs_handle, FLEX_SENSOR_NVS_KEY, &sensor_calibration, sizeof(flex_sensor_calibration_t));
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Error writing to NVS: %s", esp_err_to_name(ret));
@@ -252,13 +287,15 @@ esp_err_t flex_sensor_save_calibration(void) {
         return ret;
     }
     
-    // Commit the changes
     ret = nvs_commit(nvs_handle);
+    nvs_close(nvs_handle);
+    
     if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Error committing NVS changes: %s", esp_err_to_name(ret));
+        ESP_LOGE(TAG, "Error committing NVS: %s", esp_err_to_name(ret));
+    } else {
+        ESP_LOGI(TAG, "Flex sensor calibration saved");
     }
     
-    nvs_close(nvs_handle);
     return ret;
 }
 
@@ -294,8 +331,8 @@ esp_err_t flex_sensor_load_calibration(void) {
 esp_err_t flex_sensor_reset_calibration(void) {
     ESP_LOGI(TAG, "Resetting flex sensor calibration to defaults...");
     
-    // Set default calibration values
-    for (int i = 0; i < FINGER_JOINT_COUNT; i++) {
+    // Set default calibration values for 5 sensors
+    for (int i = 0; i < FINGER_COUNT; i++) {
         sensor_calibration.flat_value[i] = 2000;
         sensor_calibration.bent_value[i] = 3500;
     }
@@ -323,10 +360,10 @@ esp_err_t flex_sensor_set_filtering(bool enable) {
     
     // If filtering is being enabled, reset filter buffers
     if (enable) {
-        uint16_t raw_values[FINGER_JOINT_COUNT];
+        uint16_t raw_values[FINGER_COUNT];
         flex_sensor_read_raw(raw_values);
         
-        for (int i = 0; i < FINGER_JOINT_COUNT; i++) {
+        for (int i = 0; i < FINGER_COUNT; i++) {
             for (int j = 0; j < FILTER_BUFFER_SIZE; j++) {
                 filter_buffers[i][j] = raw_values[i];
             }
