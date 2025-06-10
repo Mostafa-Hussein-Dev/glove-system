@@ -60,52 +60,88 @@ esp_err_t sensor_fusion_process(sensor_data_t *new_data, sensor_data_buffer_t *d
         
         // Apply small corrections to flex sensor readings based on orientation
         // This is just an illustrative example - real fusion would be more complex
-        for (int i = 0; i < FINGER_COUNT; i++) {  // Changed from FINGER_JOINT_COUNT to FINGER_COUNT
+        for (int i = 0; i < FINGER_COUNT; i++) {
             // Small adjustment based on gravity's effect on sensor when hand tilted
-            float orientation_factor = 1.0f - (fabs(roll) + fabs(pitch)) * 0.001f;
-            orientation_factor = fmaxf(0.95f, fminf(1.05f, orientation_factor));
+            float orientation_factor = 1.0f - (fabs(roll) + fabs(pitch)) * 0.001f; // Very small correction
             
-            // Apply orientation correction
+            // Apply correction to flex sensor angle
             new_data->flex_data.angles[i] *= orientation_factor;
             
-            // Ensure angles stay within valid range
-            new_data->flex_data.angles[i] = fmaxf(0.0f, fminf(90.0f, new_data->flex_data.angles[i]));
+            // Clamp to valid range
+            if (new_data->flex_data.angles[i] < 0.0f) {
+                new_data->flex_data.angles[i] = 0.0f;
+            } else if (new_data->flex_data.angles[i] > 90.0f) {
+                new_data->flex_data.angles[i] = 90.0f;
+            }
         }
         
-        ESP_LOGD(TAG, "Applied orientation correction: roll=%.2f, pitch=%.2f", roll, pitch);
-    }
-    
-    // Apply temporal smoothing using historical data
-    if (data_buffer->count > 1) {
-        sensor_data_t prev_data;
-        if (buffer_get(data_buffer, data_buffer->count - 2, &prev_data) == ESP_OK) {
-            // Simple temporal smoothing for flex sensors
-            if (new_data->flex_data_valid && prev_data.flex_data_valid) {
-                for (int i = 0; i < FINGER_COUNT; i++) {  // Changed from FINGER_JOINT_COUNT to FINGER_COUNT
-                    float smoothed_angle = 0.8f * new_data->flex_data.angles[i] + 
-                                         0.2f * prev_data.flex_data.angles[i];
-                    new_data->flex_data.angles[i] = smoothed_angle;
+        // Temporal fusion: if we have historical data, smooth the changes
+        size_t buffer_size = buffer_get_size(data_buffer);
+        if (buffer_size > 1) {
+            // Get the previous data point for temporal smoothing
+            sensor_data_t prev_data;
+            esp_err_t ret = buffer_get(data_buffer, buffer_size - 2, &prev_data);
+            if (ret == ESP_OK && prev_data.flex_data_valid) {
+                // Apply temporal smoothing (simple low-pass filter)
+                const float temporal_alpha = 0.8f; // Smoothing factor
+                
+                for (int i = 0; i < FINGER_COUNT; i++) {
+                    new_data->flex_data.angles[i] = temporal_alpha * new_data->flex_data.angles[i] +
+                                                   (1.0f - temporal_alpha) * prev_data.flex_data.angles[i];
                 }
             }
         }
     }
     
-    // Store current data as last fused data
-    memcpy(&last_fused_data, new_data, sizeof(sensor_data_t));
+    // Perform IMU data fusion if we have multiple IMU samples
+    if (new_data->imu_data_valid) {
+        size_t buffer_size = buffer_get_size(data_buffer);
+        if (buffer_size > 0) {
+            // Simple complementary filter for orientation
+            sensor_data_t prev_data;
+            esp_err_t ret = buffer_get(data_buffer, buffer_size - 1, &prev_data);
+            if (ret == ESP_OK && prev_data.imu_data_valid) {
+                // Time difference for integration
+                float dt = (new_data->imu_data.timestamp - prev_data.imu_data.timestamp) / 1000.0f; // Convert to seconds
+                
+                if (dt > 0 && dt < 0.1f) { // Reasonable time delta (less than 100ms)
+                    // Integrate gyroscope data for orientation estimate
+                    float gyro_roll = prev_data.imu_data.orientation[0] + new_data->imu_data.gyro[0] * dt;
+                    float gyro_pitch = prev_data.imu_data.orientation[1] + new_data->imu_data.gyro[1] * dt;
+                    float gyro_yaw = prev_data.imu_data.orientation[2] + new_data->imu_data.gyro[2] * dt;
+                    
+                    // Complementary filter: combine gyro integration with accelerometer
+                    const float gyro_weight = 0.98f; // Trust gyro more for short-term
+                    const float accel_weight = 0.02f; // Trust accelerometer for long-term
+                    
+                    // Calculate accelerometer-based roll and pitch (yaw cannot be determined from accel alone)
+                    float accel_roll = atan2(new_data->imu_data.accel[1], new_data->imu_data.accel[2]) * 180.0f / M_PI;
+                    float accel_pitch = atan2(-new_data->imu_data.accel[0], 
+                                             sqrt(new_data->imu_data.accel[1] * new_data->imu_data.accel[1] + 
+                                                  new_data->imu_data.accel[2] * new_data->imu_data.accel[2])) * 180.0f / M_PI;
+                    
+                    // Fuse gyro and accelerometer data
+                    new_data->imu_data.orientation[0] = gyro_weight * gyro_roll + accel_weight * accel_roll;
+                    new_data->imu_data.orientation[1] = gyro_weight * gyro_pitch + accel_weight * accel_pitch;
+                    new_data->imu_data.orientation[2] = gyro_yaw; // Yaw relies purely on gyro integration
+                }
+            }
+        }
+    }
     
-    ESP_LOGD(TAG, "Sensor fusion processed - Flex angles: [%.1f, %.1f, %.1f, %.1f, %.1f]",
-             new_data->flex_data.angles[0], new_data->flex_data.angles[1], 
-             new_data->flex_data.angles[2], new_data->flex_data.angles[3], 
-             new_data->flex_data.angles[4]);
+    // Update last fused data
+    memcpy(&last_fused_data, new_data, sizeof(sensor_data_t));
     
     return ESP_OK;
 }
 
-esp_err_t sensor_fusion_get_last_data(sensor_data_t *data) {
+esp_err_t sensor_fusion_get_latest(sensor_data_t *data) {
     if (!sensor_fusion_initialized || data == NULL) {
         return ESP_ERR_INVALID_STATE;
     }
     
+    // Copy the latest fused data
     memcpy(data, &last_fused_data, sizeof(sensor_data_t));
+    
     return ESP_OK;
 }

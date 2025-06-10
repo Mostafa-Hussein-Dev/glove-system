@@ -24,9 +24,9 @@ esp_err_t buffer_init(sensor_data_buffer_t* buffer, size_t capacity) {
     return ESP_OK;
 }
 
-void buffer_free(sensor_data_buffer_t* buffer) {
+esp_err_t buffer_free(sensor_data_buffer_t* buffer) {
     if (buffer == NULL || buffer->buffer == NULL) {
-        return;
+        return ESP_ERR_INVALID_ARG;
     }
     
     // Free camera frame buffers if they exist
@@ -44,6 +44,8 @@ void buffer_free(sensor_data_buffer_t* buffer) {
     buffer->size = 0;
     buffer->head = 0;
     buffer->tail = 0;
+
+    return ESP_OK;
 }
 
 esp_err_t buffer_push(sensor_data_buffer_t* buffer, const sensor_data_t* data) {
@@ -113,6 +115,31 @@ esp_err_t buffer_pop(sensor_data_buffer_t* buffer, sensor_data_t* data) {
     return ESP_OK;
 }
 
+esp_err_t buffer_get(const sensor_data_buffer_t* buffer, size_t index, sensor_data_t* data) {
+    if (buffer == NULL || data == NULL || buffer->buffer == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    
+    if (buffer_is_empty(buffer) || index >= buffer->size) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    
+    // Calculate the actual index in the circular buffer
+    // index 0 = oldest data (at tail), index (size-1) = newest data
+    size_t actual_index = (buffer->tail + index) % buffer->capacity;
+    
+    // Copy data from the specified position
+    memcpy(data, &buffer->buffer[actual_index], sizeof(sensor_data_t));
+    
+    // Special handling for camera frame buffer - make a copy of the pointer
+    // Note: This creates a shared pointer - be careful with memory management
+    if (buffer->buffer[actual_index].camera_data_valid) {
+        data->camera_data.buffer = buffer->buffer[actual_index].camera_data.buffer;
+    }
+    
+    return ESP_OK;
+}
+
 bool buffer_is_empty(const sensor_data_buffer_t* buffer) {
     if (buffer == NULL) {
         return true;
@@ -133,3 +160,4 @@ size_t buffer_get_size(const sensor_data_buffer_t* buffer) {
     }
     return buffer->size;
 }
+

@@ -7,6 +7,7 @@
 #include "util/debug.h"
 #include "math.h"
 #include "drivers/flex_sensor.h"
+#include "drivers/touch.h"
 
 static const char *TAG = "FEATURE_EXTRACT";
 
@@ -44,7 +45,7 @@ esp_err_t feature_extraction_process(sensor_data_t *sensor_data,
     // Extract features from flex sensor data
     if (sensor_data->flex_data_valid) {
         // Direct features: finger joint angles
-        for (int i = 0; i < FINGER_JOINT_COUNT; i++) {
+        for (int i = 0; i < FINGER_COUNT; i++) {
             // Each joint angle is a feature
             feature_vector->features[i] = sensor_data->flex_data.angles[i];
         }

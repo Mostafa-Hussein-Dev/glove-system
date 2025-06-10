@@ -3,50 +3,27 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include "esp_err.h"
 #include "config/system_config.h"
-#include "drivers/imu.h"       // Add this include for imu_data_t
-#include "drivers/camera.h"    // Add this include for camera_frame_t
-#include "drivers/touch.h"     // Include if you have touch_sensor_data_t defined here
+#include "drivers/imu.h"       // For imu_data_t
+#include "drivers/camera.h"    // For camera_frame_t
 
 /**
- * @brief Structure to hold flex sensor data (5 sensors instead of 10)
+ * @brief Structure to hold flex sensor data
  */
 typedef struct {
-    uint16_t raw_values[5];   // Raw ADC values (5 sensors)
-    float angles[5];          // Calculated bend angles (5 sensors)
+    uint16_t raw_values[5];  // Raw ADC values (10 sensors)
+    float angles[5];         // Calculated bend angles
     uint32_t timestamp;       // Acquisition timestamp
 } flex_sensor_data_t;
-
-
-/**
- * @brief Structure to hold IMU data
- */
-typedef struct {
-    float accel[3];          // X, Y, Z acceleration
-    float gyro[3];           // X, Y, Z rotation rates
-    float orientation[3];    // Roll, pitch, yaw
-    uint32_t timestamp;      // Acquisition timestamp
-} imu_data_t;
-
-/**
- * @brief Structure to hold camera frame data
- */
-typedef struct {
-    uint8_t* frame_buffer;   // Pointer to image data
-    uint32_t buffer_size;    // Size of the buffer
-   uint16_t width;          // Image width
-   uint16_t height;         // Image height
-    uint32_t timestamp;      // Acquisition timestamp
-} camera_frame_t;
-
 
 /**
  * @brief Structure to hold touch sensor data
  */
 typedef struct {
-    bool touch_status[5];     // Status of 5 touch sensors
-    uint32_t timestamp;       // Acquisition timestamp
+    bool touch_status[5];    // Status of 5 touch sensors
+    uint32_t timestamp;      // Acquisition timestamp
 } touch_sensor_data_t;
 
 /**
@@ -109,47 +86,49 @@ typedef struct output_command_s {
         struct {
             char text[64];
             uint8_t size;
-            uint8_t x;
-            uint8_t y;
-        } display_text;
+            uint8_t line;
+            bool clear_first;
+        } display;
+        
         struct {
             char text[128];
-            float volume;
-        } speak_text;
+            uint8_t priority;
+        } speak;
+        
         struct {
-            uint16_t duration_ms;
+            uint8_t pattern;
             uint8_t intensity;
+            uint16_t duration_ms;
         } haptic;
+        
         struct {
-            uint8_t mode;
+            output_mode_t mode;
         } set_mode;
+        
         struct {
-            uint8_t battery_percent;
-            float voltage;
-        } battery_info;
+            uint8_t percentage;
+            bool show_graphic;
+        } battery;
+        
         struct {
-            char error_message[64];
-            uint8_t error_code;
-        } error_info;
-        struct {
-            char status_text[64];
-            uint8_t status_code;
-        } status_info;
-    };
-    uint32_t timestamp;
+            system_error_t error_code;
+            char error_text[64];
+        } error;
+    } data;
 } output_command_t;
 
 /**
  * @brief System command types
  */
 typedef enum {
-    SYSTEM_CMD_SLEEP,
-    SYSTEM_CMD_WAKE,
-    SYSTEM_CMD_CALIBRATE,
-    SYSTEM_CMD_RESET,
-    SYSTEM_CMD_POWER_SAVE,
-    SYSTEM_CMD_NORMAL_MODE,
-    SYSTEM_CMD_DEBUG_MODE
+    SYS_CMD_CHANGE_STATE,
+    SYS_CMD_CALIBRATE,
+    SYS_CMD_SET_POWER_MODE,
+    SYS_CMD_ENABLE_BLE,
+    SYS_CMD_DISABLE_BLE,
+    SYS_CMD_RESTART,
+    SYS_CMD_SLEEP,
+    SYS_CMD_FACTORY_RESET
 } system_command_type_t;
 
 /**
@@ -159,71 +138,64 @@ typedef struct system_command_s {
     system_command_type_t type;
     union {
         struct {
-            uint8_t calibration_type;  // 0: flat, 1: bent, 2: full
-        } calibrate;
+            system_state_t new_state;
+        } change_state;
+        
         struct {
-            uint8_t power_level;       // 0-100
-        } power_save;
-    };
-    uint32_t timestamp;
+            bool enable_power_save;
+        } power_mode;
+        
+        struct {
+            uint16_t sleep_duration_sec;
+        } sleep;
+    } data;
 } system_command_t;
 
 /**
- * @brief Circular buffer for sensor data history
+ * @brief Circular buffer for sensor data storage
  */
 typedef struct {
-    sensor_data_t *data;      // Buffer array
-    uint16_t size;            // Buffer size
-    uint16_t head;            // Head index
-    uint16_t tail;            // Tail index
-    uint16_t count;           // Current element count
-    bool full;                // Buffer full flag
+    sensor_data_t* buffer;
+    size_t capacity;
+    size_t size;
+    size_t head;
+    size_t tail;
 } sensor_data_buffer_t;
 
 /**
- * @brief Initialize a sensor data buffer
+ * @brief Initialize a circular buffer for sensor data
  * 
  * @param buffer Pointer to buffer structure
- * @param size Maximum number of elements
+ * @param capacity Maximum number of elements in buffer
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t buffer_init(sensor_data_buffer_t *buffer, uint16_t size);
+esp_err_t buffer_init(sensor_data_buffer_t* buffer, size_t capacity);
 
 /**
- * @brief Free a sensor data buffer
+ * @brief Free and cleanup circular buffer
  * 
  * @param buffer Pointer to buffer structure
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t buffer_free(sensor_data_buffer_t *buffer);
+esp_err_t buffer_free(sensor_data_buffer_t* buffer);
 
 /**
- * @brief Push data to buffer
+ * @brief Push data into the circular buffer
  * 
  * @param buffer Pointer to buffer structure
- * @param data Pointer to data to push
+ * @param data Pointer to data to be stored
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t buffer_push(sensor_data_buffer_t *buffer, const sensor_data_t *data);
+esp_err_t buffer_push(sensor_data_buffer_t* buffer, const sensor_data_t* data);
 
 /**
- * @brief Pop data from buffer
+ * @brief Pop data from the circular buffer
  * 
  * @param buffer Pointer to buffer structure
- * @param data Pointer to store popped data
- * @return ESP_OK on success, error code otherwise
+ * @param data Pointer to store retrieved data
+ * @return ESP_OK on success, ESP_ERR_NOT_FOUND if buffer is empty
  */
-esp_err_t buffer_pop(sensor_data_buffer_t *buffer, sensor_data_t *data);
-
-/**
- * @brief Get data at specific index without removing it
- * 
- * @param buffer Pointer to buffer structure
- * @param index Index (0 = oldest, count-1 = newest)
- * @param data Pointer to store data
- * @return ESP_OK on success, error code otherwise
- */
-esp_err_t buffer_get(sensor_data_buffer_t *buffer, uint16_t index, sensor_data_t *data);
+esp_err_t buffer_pop(sensor_data_buffer_t* buffer, sensor_data_t* data);
 
 /**
  * @brief Check if buffer is empty
@@ -231,7 +203,7 @@ esp_err_t buffer_get(sensor_data_buffer_t *buffer, uint16_t index, sensor_data_t
  * @param buffer Pointer to buffer structure
  * @return true if empty, false otherwise
  */
-bool buffer_is_empty(sensor_data_buffer_t *buffer);
+bool buffer_is_empty(const sensor_data_buffer_t* buffer);
 
 /**
  * @brief Check if buffer is full
@@ -239,22 +211,32 @@ bool buffer_is_empty(sensor_data_buffer_t *buffer);
  * @param buffer Pointer to buffer structure
  * @return true if full, false otherwise
  */
-bool buffer_is_full(sensor_data_buffer_t *buffer);
+bool buffer_is_full(const sensor_data_buffer_t* buffer);
 
 /**
- * @brief Get current element count
+ * @brief Get current size of buffer
  * 
  * @param buffer Pointer to buffer structure
- * @return Number of elements in buffer
+ * @return Current number of elements in buffer
  */
-uint16_t buffer_count(sensor_data_buffer_t *buffer);
+size_t buffer_get_size(const sensor_data_buffer_t* buffer);
 
 /**
- * @brief Clear buffer
+ * @brief Clear all data from buffer
  * 
  * @param buffer Pointer to buffer structure
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t buffer_clear(sensor_data_buffer_t *buffer);
+esp_err_t buffer_clear(sensor_data_buffer_t* buffer);
+
+/**
+ * @brief Get data at a specific index without removing it
+ * 
+ * @param buffer Pointer to buffer structure
+ * @param index Index of data to retrieve (0 = oldest, size-1 = newest)
+ * @param data Pointer to store retrieved data
+ * @return ESP_OK on success, ESP_ERR_INVALID_ARG if index is out of bounds
+ */
+esp_err_t buffer_get(const sensor_data_buffer_t* buffer, size_t index, sensor_data_t* data);
 
 #endif /* UTIL_BUFFER_H */
