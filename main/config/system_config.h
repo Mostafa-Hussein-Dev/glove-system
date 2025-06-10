@@ -17,11 +17,11 @@
 #define POWER_TASK_PRIORITY         (6)
 
 /* Task stack sizes */
-#define SENSOR_TASK_STACK_SIZE        (4096)
-#define PROCESSING_TASK_STACK_SIZE    (8192)
-#define OUTPUT_TASK_STACK_SIZE        (4096)
-#define COMMUNICATION_TASK_STACK_SIZE (4096)
-#define POWER_TASK_STACK_SIZE         (2048)
+#define SENSOR_TASK_STACK_SIZE        (8192)
+#define PROCESSING_TASK_STACK_SIZE    (12288)
+#define OUTPUT_TASK_STACK_SIZE        (6144)
+#define COMMUNICATION_TASK_STACK_SIZE (6144)
+#define POWER_TASK_STACK_SIZE         (4096)
 
 /* Core assignments */
 #define SENSOR_TASK_CORE           (0)

@@ -30,21 +30,21 @@
 #define CAMERA_PCLK_PIN             14
 #define CAMERA_VSYNC_PIN            13
 #define CAMERA_HREF_PIN             12
-#define CAMERA_D0_PIN               11
-#define CAMERA_D1_PIN               10
-#define CAMERA_D2_PIN               9 
-#define CAMERA_D3_PIN               8 
-#define CAMERA_D4_PIN               7
-#define CAMERA_D5_PIN               6
-#define CAMERA_D6_PIN               5
-#define CAMERA_D7_PIN               4
+#define CAMERA_D0_PIN               35   
+#define CAMERA_D1_PIN               36   
+#define CAMERA_D2_PIN               37    
+#define CAMERA_D3_PIN               38    
+#define CAMERA_D4_PIN               39   
+#define CAMERA_D5_PIN               40   
+#define CAMERA_D6_PIN               41   
+#define CAMERA_D7_PIN               42   
 
 /* Touch Sensor Pins (Using ESP32-S3 Touch Sensors) */
-#define TOUCH_THUMB_PIN             9
-#define TOUCH_INDEX_PIN             10
-#define TOUCH_MIDDLE_PIN            11
-#define TOUCH_RING_PIN              12
-#define TOUCH_PINKY_PIN             13
+#define TOUCH_THUMB_PIN             TOUCH_PAD_NUM7   
+#define TOUCH_INDEX_PIN             TOUCH_PAD_NUM8     
+#define TOUCH_MIDDLE_PIN            TOUCH_PAD_NUM9   
+#define TOUCH_RING_PIN              TOUCH_PAD_NUM10   
+#define TOUCH_PINKY_PIN             TOUCH_PAD_NUM11
 
 /* OLED Display Pins (I2C shared with IMU) */
 #define DISPLAY_RST_PIN             -1 // WAS GPIO 18
@@ -52,10 +52,10 @@
 
 /* Audio Output (I2S) Pins */
 #define I2S_MCLK_PIN                0  // Not used for MAX98357A
-#define I2S_BCK_PIN                 4  //DEFAULT 27
-#define I2S_WS_PIN                  5  //DEFAULT 25
-#define I2S_DATA_OUT_PIN            6   //DEFAULT 26
-#define I2S_SD_PIN                  19  // Shutdown control for MAX98357A
+#define I2S_BCK_PIN                 45  
+#define I2S_WS_PIN                  46  
+#define I2S_DATA_OUT_PIN            47  
+#define I2S_SD_PIN                  48  
 
 /* Haptic Feedback Motor Pin */
 #define HAPTIC_PIN                  15

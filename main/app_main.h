@@ -55,4 +55,30 @@ extern EventGroupHandle_t g_system_event_group;
  */
 esp_err_t app_init(void);
 
+/**
+ * @brief Check if the system is running in debug mode
+ * 
+ * @return true if debug mode is enabled, false otherwise
+ */
+bool app_is_debug_mode(void);
+
+/**
+ * @brief Enable debug mode at runtime
+ * 
+ * This function can be called to switch to debug mode during runtime.
+ * Note: This will stop all running tasks and switch to debug mode.
+ * 
+ * @return ESP_OK on success, error code otherwise
+ */
+esp_err_t app_enable_debug_mode(void);
+
+/**
+ * @brief Disable debug mode and start normal operation
+ * 
+ * This function switches from debug mode to normal operation mode.
+ * 
+ * @return ESP_OK on success, error code otherwise
+ */
+esp_err_t app_disable_debug_mode(void);
+
 #endif /* APP_MAIN_H */

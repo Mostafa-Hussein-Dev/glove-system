@@ -1,7 +1,7 @@
 {
     "version":            "1.2",
     "project_name":       "bootloader",
-    "project_version":    "a12c401b-dirty",
+    "project_version":    "579a21a1-dirty",
     "project_path":       "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/components/bootloader/subproject",
     "idf_path":           "C:/Espressif/frameworks/esp-idf-v5.4.1",
     "build_dir":          "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader",

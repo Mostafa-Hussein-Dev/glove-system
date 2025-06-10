@@ -40,6 +40,7 @@ idf_component_register(
     esp_hw_support
     esp_common
     esp_event
+    spi_flash
     nvs_flash
     esp_netif
     esp_eth

@@ -21,7 +21,7 @@
 #define FONT_WIDTH 6
 #define FONT_HEIGHT 8
 
-static const char *TAG = "DISPLAY";
+//static const char *TAG = "DISPLAY";
 
 static esp_lcd_panel_handle_t ssd1306_panel = NULL;
 static esp_lcd_panel_io_handle_t ssd1306_io = NULL;
@@ -32,10 +32,10 @@ static bool display_powered_on = false;
 static void ssd1306_set_pixel(uint8_t x, uint8_t y, uint8_t color);
 
 // Forward function declarations
-static esp_err_t ssd1306_write_command(uint8_t command);
-static esp_err_t ssd1306_write_data(uint8_t* data, size_t len);
+esp_err_t ssd1306_write_command(uint8_t command);
+esp_err_t ssd1306_write_data(uint8_t* data, size_t len);
 static void ssd1306_set_pixel(uint8_t x, uint8_t y, uint8_t color);
-static esp_err_t ssd1306_update_full();
+esp_err_t ssd1306_update_full();
 
 esp_err_t display_init(void) {
     esp_err_t ret;

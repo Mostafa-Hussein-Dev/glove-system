@@ -27,7 +27,7 @@ esp_err_t system_monitor_init(void) {
     BaseType_t xReturned = xTaskCreate(
         system_monitor_task,
         "system_monitor",
-        2048,  // Stack size
+        4096,  // Stack size increased from 2048 to 4096
         NULL,
         2,     // Priority (low)
         &monitor_task_handle);
@@ -37,7 +37,7 @@ esp_err_t system_monitor_init(void) {
         return ESP_FAIL;
     }
     
-    ESP_LOGI(TAG, "System monitor initialized");
+    ESP_LOGI(TAG, "System monitor initialized with 4KB stack");
     return ESP_OK;
 }
 
@@ -104,146 +104,96 @@ void* system_monitor_get_task_handle(void) {
     return (void*)monitor_task_handle;
 }
 
-// System monitor task function
+// System monitor task function - FIXED VERSION
 static void system_monitor_task(void *pvParameters) {
-    uint32_t task_run_time_prev[2] = {0, 0};  // Previous run time for cores
     uint32_t idle_run_time_prev[2] = {0, 0};  // Previous idle task run time for cores
     uint32_t total_run_time_prev = 0;         // Previous total run time
     
+    // Wait for initial stabilization
+    vTaskDelay(pdMS_TO_TICKS(2000));
+    
     while (1) {
         // Get current metrics
-        
-        // Heap metrics
         last_metrics.free_heap = esp_get_free_heap_size();
         last_metrics.min_free_heap = esp_get_minimum_free_heap_size();
-        
-        // Task count
         last_metrics.task_count = uxTaskGetNumberOfTasks();
-        
-        // Uptime
         last_metrics.uptime_ms = esp_timer_get_time() / 1000;
         
-        // CPU usage calculation
-        uint32_t task_run_time[2] = {0, 0};       // Run time for all tasks per core
-        uint32_t idle_run_time[2] = {0, 0};       // Run time for idle tasks per core
-        uint32_t total_run_time = 0;             // Total run time
+        // CPU usage calculation with proper bounds checking
+        uint32_t idle_run_time[2] = {0, 0};  // Run time for idle tasks per core
+        uint32_t total_run_time = 0;         // Total run time
         
-        // Get runtime stats
-        TaskStatus_t *pxTaskStatusArray;
-        volatile UBaseType_t uxArraySize, x;
-        uint32_t ulTotalRunTime;
-        
-        // Get the number of tasks
-        uxArraySize = uxTaskGetNumberOfTasks();
-        
-        // Allocate a TaskStatus_t structure for each task
-        pxTaskStatusArray = pvPortMalloc(uxArraySize * sizeof(TaskStatus_t));
+        // Get runtime stats if available
+        UBaseType_t task_count = uxTaskGetNumberOfTasks();
+        TaskStatus_t *pxTaskStatusArray = pvPortMalloc(task_count * sizeof(TaskStatus_t));
         
         if (pxTaskStatusArray != NULL) {
-            // Generate raw status information about each task
-            uxArraySize = uxTaskGetSystemState(pxTaskStatusArray, uxArraySize, &ulTotalRunTime);
-            total_run_time = ulTotalRunTime;
+            UBaseType_t actual_tasks = uxTaskGetSystemState(pxTaskStatusArray, task_count, &total_run_time);
             
-            // Calculate run time for each core
-            for (x = 0; x < uxArraySize; x++) {
-                TaskStatus_t *task = &pxTaskStatusArray[x];
+            // Process each task to find IDLE tasks
+            for (UBaseType_t i = 0; i < actual_tasks; i++) {
+                TaskStatus_t *task = &pxTaskStatusArray[i];
                 
-#if CONFIG_FREERTOS_UNICORE
-                // In unicore mode, process all tasks as running on core 0
-                if (strcmp(task->pcTaskName, "IDLE") == 0) {
+                // Check for IDLE tasks and update stack high water marks
+                if (strcmp(task->pcTaskName, "IDLE") == 0 || 
+                    strcmp(task->pcTaskName, "IDLE0") == 0) {
                     idle_run_time[0] = task->ulRunTimeCounter;
-                } else {
-                    task_run_time[0] += task->ulRunTimeCounter;
-                }
-                
-                // Update stack high water mark for core 0
-                if (task->usStackHighWaterMark < last_metrics.stack_high_water[0] || 
-                    last_metrics.stack_high_water[0] == 0) {
-                    last_metrics.stack_high_water[0] = task->usStackHighWaterMark;
-                }
-#else
-                // Check if the ESP-IDF version supports xCoreID field
-#ifdef CONFIG_ESP_SYSTEM_SINGLE_CORE_MODE
-                // For ESP chips with single core when using newer ESP-IDF
-                if (strcmp(task->pcTaskName, "IDLE") == 0) {
-                    idle_run_time[0] = task->ulRunTimeCounter;
-                } else {
-                    task_run_time[0] += task->ulRunTimeCounter;
-                }
-                
-                // Update stack high water mark for core 0
-                if (task->usStackHighWaterMark < last_metrics.stack_high_water[0] || 
-                    last_metrics.stack_high_water[0] == 0) {
-                    last_metrics.stack_high_water[0] = task->usStackHighWaterMark;
-                }
-#else
-                // For dual-core ESP chips - determine core using task name
-                if (strcmp(task->pcTaskName, "IDLE0") == 0 || 
-                    (strcmp(task->pcTaskName, "IDLE") == 0 && 
-                     strstr(task->pcTaskName, "CPU0") != NULL)) {
-                    // Core 0 idle task
-                    idle_run_time[0] = task->ulRunTimeCounter;
-                } 
-                else if (strcmp(task->pcTaskName, "IDLE1") == 0 || 
-                         (strcmp(task->pcTaskName, "IDLE") == 0 && 
-                          strstr(task->pcTaskName, "CPU1") != NULL)) {
-                    // Core 1 idle task
+                } else if (strcmp(task->pcTaskName, "IDLE1") == 0) {
                     idle_run_time[1] = task->ulRunTimeCounter;
                 }
-                else {
-                    // For regular tasks, try to determine core from name or use core 0 as default
-                    int core_num = 0;
-                    
-                    if (strstr(task->pcTaskName, "CPU0") != NULL) {
-                        core_num = 0;
-                    } else if (strstr(task->pcTaskName, "CPU1") != NULL) {
-                        core_num = 1;
-                    }
-                    
-                    task_run_time[core_num] += task->ulRunTimeCounter;
-                    
-                    // Update stack high water mark for the task's core
-                    if (task->usStackHighWaterMark < last_metrics.stack_high_water[core_num] || 
-                        last_metrics.stack_high_water[core_num] == 0) {
-                        last_metrics.stack_high_water[core_num] = task->usStackHighWaterMark;
-                    }
+                
+                // Update stack high water marks
+                if (task->usStackHighWaterMark < last_metrics.stack_high_water[0] || 
+                    last_metrics.stack_high_water[0] == 0) {
+                    last_metrics.stack_high_water[0] = task->usStackHighWaterMark;
                 }
-#endif // CONFIG_ESP_SYSTEM_SINGLE_CORE_MODE
-#endif // CONFIG_FREERTOS_UNICORE
             }
             
-            // Free the status array
+            // Free the task status array
             vPortFree(pxTaskStatusArray);
             
-            // Calculate CPU usage if we have previous values
-            if (total_run_time_prev > 0) {
+            // **FIXED CPU CALCULATION WITH PROPER BOUNDS CHECKING**
+            if (total_run_time_prev > 0 && total_run_time > total_run_time_prev) {
                 uint32_t delta_time = total_run_time - total_run_time_prev;
-                uint32_t delta_idle0 = idle_run_time[0] - idle_run_time_prev[0];
                 
-#if CONFIG_FREERTOS_UNICORE || defined(CONFIG_ESP_SYSTEM_SINGLE_CORE_MODE)
-                // For single core, calculate usage for core 0 only
-                uint32_t usage0 = 100 - ((delta_idle0 * 100) / delta_time);
-                last_metrics.cpu_usage_percent = usage0;
-#else
-                // For dual core, calculate average usage
-                uint32_t delta_idle1 = idle_run_time[1] - idle_run_time_prev[1];
-                uint32_t usage0 = 100 - ((delta_idle0 * 100) / (delta_time / 2));
-                uint32_t usage1 = 100 - ((delta_idle1 * 100) / (delta_time / 2));
-                last_metrics.cpu_usage_percent = (usage0 + usage1) / 2;
-#endif
+                if (delta_time > 0) {  // Prevent division by zero
+                    uint32_t delta_idle0 = (idle_run_time[0] > idle_run_time_prev[0]) ? 
+                                          (idle_run_time[0] - idle_run_time_prev[0]) : 0;
+                    
+                    // Calculate CPU usage with overflow protection
+                    if (delta_idle0 <= delta_time) {  // Ensure idle time doesn't exceed total time
+                        uint32_t idle_percentage = (delta_idle0 * 100) / delta_time;
+                        if (idle_percentage > 100) idle_percentage = 100;  // Clamp to 100%
+                        
+                        last_metrics.cpu_usage_percent = 100 - idle_percentage;
+                        
+                        // Additional bounds check
+                        if (last_metrics.cpu_usage_percent > 100) {
+                            last_metrics.cpu_usage_percent = 0;  // Handle any remaining overflow
+                        }
+                    } else {
+                        // If idle time somehow exceeds total time, set CPU usage to 0
+                        last_metrics.cpu_usage_percent = 0;
+                    }
+                } else {
+                    last_metrics.cpu_usage_percent = 0;  // No time passed
+                }
+            } else {
+                last_metrics.cpu_usage_percent = 0;  // First run or invalid data
             }
-            
-            // Store current values for next calculation
-            task_run_time_prev[0] = task_run_time[0];
-            task_run_time_prev[1] = task_run_time[1];
-            idle_run_time_prev[0] = idle_run_time[0];
-            idle_run_time_prev[1] = idle_run_time[1];
-            total_run_time_prev = total_run_time;
+        } else {
+            // If malloc failed, set safe defaults
+            last_metrics.cpu_usage_percent = 0;
+            ESP_LOGW(TAG, "Failed to allocate memory for task status array");
         }
         
-        // CPU temperature (example - not supported on all ESP32 versions/boards)
-        // This is a placeholder - the actual implementation would depend on hardware support
-        last_metrics.cpu_temperature = 45.0f;  // Fixed placeholder value
+        // Store current values for next calculation
+        idle_run_time_prev[0] = idle_run_time[0];
+        idle_run_time_prev[1] = idle_run_time[1];
+        total_run_time_prev = total_run_time;
+        
+        // Set fixed temperature placeholder
+        last_metrics.cpu_temperature = 45.0f;
         
         // Periodically log the metrics (every 30 seconds)
         static uint32_t log_counter = 0;
@@ -252,7 +202,7 @@ static void system_monitor_task(void *pvParameters) {
             log_counter = 0;
         }
         
-        // Run health check
+        // Run health check with fixed CPU usage calculation
         esp_err_t health_result = system_monitor_health_check();
         if (health_result != ESP_OK) {
             ESP_LOGW(TAG, "Health check failed with error %s", esp_err_to_name(health_result));
