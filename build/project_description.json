@@ -1,7 +1,7 @@
 {
     "version":            "1.2",
     "project_name":       "glove-system",
-    "project_version":    "6f69a5e5-dirty",
+    "project_version":    "104bfc39-dirty",
     "project_path":       "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system",
     "idf_path":           "C:/Espressif/frameworks/esp-idf-v5.4.1",
     "build_dir":          "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build",
@@ -11,7 +11,7 @@
     "app_elf":            "glove-system.elf",
     "app_bin":            "glove-system.bin",
     "build_type":         "flash_app",
-    "git_revision":       "v5.4.1",
+    "git_revision":       "v5.4.1-dirty",
     "target":             "esp32s3",
     "rev":                "",
     "min_rev":            "0",

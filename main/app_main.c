@@ -161,14 +161,14 @@ esp_err_t app_init(void) {
         return ret;
     }
     
-    /*
+    
     // Initialize system tasks
     ret = init_tasks();
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to initialize tasks: %s", esp_err_to_name(ret));
         return ret;
     }
-    */
+    
     
     // Set system initialization complete
     xEventGroupSetBits(g_system_event_group, SYSTEM_EVENT_INIT_COMPLETE);
@@ -511,6 +511,30 @@ void app_main(void)
     
     ESP_LOGI(TAG, "Application initialized successfully, system running");
     
+    imu_data_t imu_data;
+
+    while (true) {
+        esp_err_t ret = imu_read(&imu_data);
+        if (ret == ESP_OK) {
+            ESP_LOGI(TAG, "Accel (m/s²): X=%.2f Y=%.2f Z=%.2f", 
+                     imu_data.accel[0], imu_data.accel[1], imu_data.accel[2]);
+
+            ESP_LOGI(TAG, "Gyro (°/s): X=%.2f Y=%.2f Z=%.2f", 
+                     imu_data.gyro[0], imu_data.gyro[1], imu_data.gyro[2]);
+
+            ESP_LOGI(TAG, "Temp (°C): %.2f", imu_data.temp);
+
+            ESP_LOGI(TAG, "Orientation (deg): Roll=%.2f Pitch=%.2f Yaw=%.2f", 
+                     imu_data.orientation[0], imu_data.orientation[1], imu_data.orientation[2]);
+
+            ESP_LOGI(TAG, "Timestamp (ms): %lu", imu_data.timestamp);
+        } else {
+            ESP_LOGE(TAG, "Failed to read IMU data: %s", esp_err_to_name(ret));
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(100));  // Delay 100 ms
+    }
+
     // Main application code runs in FreeRTOS tasks
     // No need for further code here as all functionality is handled by tasks
     
