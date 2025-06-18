@@ -37,7 +37,8 @@
     "esp_lcd_panel_ops.h": "c",
     "esp_lcd_panel_vendor.h": "c",
     "*.inc": "c",
-    "imu.h": "c"
+    "imu.h": "c",
+    "semphr.h": "c"
   },
   "C_Cpp.errorSquiggles": "disabled",
   "C_Cpp.dimInactiveRegions": false

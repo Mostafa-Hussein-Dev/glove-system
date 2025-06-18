@@ -143,7 +143,7 @@ static void sensor_task(void *arg) {
         }
         
         // Short delay to prevent CPU hogging
-        vTaskDelay(pdMS_TO_TICKS(5));
+        vTaskDelay(pdMS_TO_TICKS(50));
     }
 }
 

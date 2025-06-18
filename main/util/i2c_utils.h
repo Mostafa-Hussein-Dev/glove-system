@@ -3,9 +3,14 @@
 
 #include "esp_err.h"
 #include "driver/i2c_master.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
 
 // Global I2C master bus handle
 extern i2c_master_bus_handle_t i2c_master_bus;
+
+//Global I2C mutex
+extern SemaphoreHandle_t g_i2c_mutex;
 
 /**
  * @brief Create an I2C device handle for a specific device

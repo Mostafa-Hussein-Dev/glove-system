@@ -22,7 +22,7 @@
 #define I2C_MASTER_NUM              I2C_NUM_0
 #define I2C_MASTER_SDA_IO           21
 #define I2C_MASTER_SCL_IO           20
-#define I2C_MASTER_FREQ_HZ          400000
+#define I2C_MASTER_FREQ_HZ          50000
 #define IMU_INT_PIN                 16
 
 /* Camera Interface Pins */
@@ -61,8 +61,8 @@
 #define HAPTIC_PIN                  18
 
 /* Battery Monitoring Pin */
-#define BATTERY_ADC_CHANNEL         ADC_CHANNEL_5  // GPIO6 (changed from GPIO16)
-#define BATTERY_ADC_UNIT            ADC_UNIT_1
+#define BATTERY_ADC_CHANNEL         ADC_CHANNEL_9  // GPIO20 (changed from GPIO6)
+#define BATTERY_ADC_UNIT            ADC_UNIT_2
 #define BATTERY_ADC_ATTENUATION     ADC_ATTEN_DB_12
 
 /* Power Control Pins */

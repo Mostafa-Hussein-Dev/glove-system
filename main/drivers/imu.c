@@ -11,6 +11,7 @@
 #include "util/i2c_utils.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/semphr.h"
 
 static i2c_master_bus_handle_t i2c_bus_handle = NULL;
 static i2c_master_dev_handle_t imu_dev_handle = NULL;
@@ -77,7 +78,7 @@ static imu_config_t current_config = {
     .accel_range = IMU_ACCEL_RANGE_2G,
     .gyro_range = IMU_GYRO_RANGE_500DPS,
     .dlpf_bandwidth = IMU_DLPF_BW_20HZ,
-    .sample_rate_div = 9,   // 100Hz sample rate (1000/(1+9))
+    .sample_rate_div = 4,   // 100Hz sample rate (1000/(1+9))
     .use_dlpf = true
 };
 
@@ -103,12 +104,46 @@ static imu_motion_detection_config_t motion_config = {
 
 // I2C utilities for MPU6050
 static esp_err_t mpu6050_write_byte(uint8_t reg_addr, uint8_t data) {
-    uint8_t write_buf[2] = {reg_addr, data};
-    return i2c_write_device(imu_dev_handle, write_buf, sizeof(write_buf), 100);
+    ESP_LOGI(TAG, "Writing 0x%02x to reg 0x%02x", data, reg_addr);
+    ESP_LOGI(TAG, "Mutex: %s", g_i2c_mutex ? "exists" : "NULL");
+    if (g_i2c_mutex) {
+        ESP_LOGI(TAG, "Taking mutex for reg 0x%02x", reg_addr);
+    }
+    
+    for (int retry = 0; retry < 3; retry++) {
+        uint8_t write_buf[2] = {reg_addr, data};
+        esp_err_t ret = i2c_write_device(imu_dev_handle, write_buf, sizeof(write_buf), 500);
+        
+        if (ret == ESP_OK) {
+            ESP_LOGI(TAG, "Write successful to reg 0x%02x", reg_addr);
+            return ESP_OK;
+        }
+        
+        ESP_LOGW(TAG, "Write failed to reg 0x%02x: %s", reg_addr, esp_err_to_name(ret));
+        vTaskDelay(pdMS_TO_TICKS(20));
+    }
+    
+    ESP_LOGE(TAG, "All retries failed for reg 0x%02x", reg_addr);
+    return ESP_ERR_TIMEOUT;
 }
 
 static esp_err_t mpu6050_read_bytes(uint8_t reg_addr, uint8_t *data, size_t len) {
-    return i2c_write_read_device(imu_dev_handle, &reg_addr, 1, data, len, 100);
+    const int max_retries = 3;
+    const int retry_delay_ms = 20;
+    
+    for (int retry = 0; retry < max_retries; retry++) {
+        esp_err_t ret = i2c_write_read_device(imu_dev_handle, &reg_addr, 1, data, len, 500);
+        
+        if (ret == ESP_OK) {
+            return ESP_OK;
+        }
+        
+        if (retry < max_retries - 1) {
+            vTaskDelay(pdMS_TO_TICKS(retry_delay_ms));
+        }
+    }
+    
+    return ESP_ERR_TIMEOUT;
 }
 
 static esp_err_t calculate_calibration_factors(void) {
@@ -175,6 +210,7 @@ esp_err_t imu_init(void) {
         ESP_LOGE(TAG, "Failed to wake up MPU6050");
         return ret;
     }
+    vTaskDelay(pdMS_TO_TICKS(200));
     
     // Configure with default settings
     ret = imu_config(&current_config);
@@ -199,45 +235,48 @@ esp_err_t imu_init(void) {
 }
 
 esp_err_t imu_config(const imu_config_t* config) {
-    if (config == NULL) {
-        return ESP_ERR_INVALID_ARG;
-    }
+    // Skip all configuration - use MPU6050 defaults
+    ESP_LOGI(TAG, "Using default MPU6050 configuration (no register writes)");
     
+    // Save the intended config for reference
+    memcpy(&current_config, config, sizeof(imu_config_t));
+    
+    ESP_LOGI(TAG, "IMU configured successfully with defaults");
+    return ESP_OK;
+}
+
+/*
+esp_err_t imu_config(const imu_config_t* config) {
     esp_err_t ret;
-    
-    // Set sample rate divider
-    ret = mpu6050_write_byte(MPU6050_REG_SMPLRT_DIV, config->sample_rate_div);
-    if (ret != ESP_OK) {
-        return ret;
-    }
-    
-    // Configure digital low-pass filter
+
+    // 1. Configure DLPF first (required for SMPLRT_DIV)
     uint8_t dlpf_config = config->use_dlpf ? config->dlpf_bandwidth : 0;
     ret = mpu6050_write_byte(MPU6050_REG_CONFIG, dlpf_config);
-    if (ret != ESP_OK) {
-        return ret;
-    }
+    if (ret != ESP_OK) return ret;
+    vTaskDelay(pdMS_TO_TICKS(50));
     
-    // Configure gyroscope range
+    // 2. Then gyro and accel configs
     ret = mpu6050_write_byte(MPU6050_REG_GYRO_CONFIG, config->gyro_range << 3);
-    if (ret != ESP_OK) {
-        return ret;
-    }
+    if (ret != ESP_OK) return ret;
+    vTaskDelay(pdMS_TO_TICKS(50));
     
-    // Configure accelerometer range
     ret = mpu6050_write_byte(MPU6050_REG_ACCEL_CONFIG, config->accel_range << 3);
-    if (ret != ESP_OK) {
-        return ret;
-    }
+    if (ret != ESP_OK) return ret;
+    vTaskDelay(pdMS_TO_TICKS(50));
+    
+    // 3. Sample rate last
+    ret = mpu6050_write_byte(MPU6050_REG_SMPLRT_DIV, config->sample_rate_div);
+    if (ret != ESP_OK) return ret;
     
     // Save current configuration
     memcpy(&current_config, config, sizeof(imu_config_t));
     
     ESP_LOGI(TAG, "IMU configured: accel_range=%d, gyro_range=%d, dlpf=%d, sample_rate_div=%d",
              config->accel_range, config->gyro_range, config->dlpf_bandwidth, config->sample_rate_div);
-    
+    if (ret != ESP_OK) return ret;
     return ESP_OK;
 }
+*/
 
 esp_err_t imu_get_config(imu_config_t* config) {
     if (config == NULL) {

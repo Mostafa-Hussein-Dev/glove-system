@@ -31,10 +31,10 @@
 #define POWER_TASK_CORE            (0)
 
 /* Sampling rates */
-#define FLEX_SENSOR_SAMPLE_RATE_HZ  (50)
-#define IMU_SAMPLE_RATE_HZ          (100)
-#define CAMERA_FRAME_RATE_HZ        (15)
-#define TOUCH_SAMPLE_RATE_HZ        (20)
+#define FLEX_SENSOR_SAMPLE_RATE_HZ  (25)
+#define IMU_SAMPLE_RATE_HZ          (10)
+#define CAMERA_FRAME_RATE_HZ        (5)
+#define TOUCH_SAMPLE_RATE_HZ        (10)
 
 /* Queue sizes */
 #define SENSOR_QUEUE_SIZE           (10)

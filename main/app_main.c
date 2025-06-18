@@ -13,6 +13,7 @@
 #include "driver/i2c_master.h"
 #include "esp_chip_info.h"   
 #include "esp_flash.h"
+#include "freertos/semphr.h"
 
 // Include app_main header first
 #include "app_main.h"
@@ -50,6 +51,9 @@ static const char *TAG = "APP_MAIN";
 
 // Global I2C master bus handle (defined here, declared in util/i2c_utils.h)
 i2c_master_bus_handle_t i2c_master_bus = NULL;
+
+// Global I2C mutex
+SemaphoreHandle_t g_i2c_mutex = NULL;
 
 // Global system configuration
 system_config_t g_system_config;
@@ -244,23 +248,34 @@ static esp_err_t init_spiffs(void) {
 }
 
 static esp_err_t init_i2c(void) {
+    esp_err_t ret;
+    
+    // Create I2C mutex FIRST
+    g_i2c_mutex = xSemaphoreCreateMutex();
+    if (g_i2c_mutex == NULL) {
+        ESP_LOGE(TAG, "Failed to create I2C mutex");
+        return ESP_ERR_NO_MEM;
+    }
+
     // Configure I2C master bus (ONLY ONCE HERE)
     i2c_master_bus_config_t i2c_mst_config = {
         .clk_source = I2C_CLK_SRC_DEFAULT,
         .i2c_port = I2C_MASTER_NUM,
         .scl_io_num = I2C_MASTER_SCL_IO,
         .sda_io_num = I2C_MASTER_SDA_IO,
+        .glitch_ignore_cnt = 7,
         .flags.enable_internal_pullup = true,
 
     };
     
-    esp_err_t ret = i2c_new_master_bus(&i2c_mst_config, &i2c_master_bus);
+    ret = i2c_new_master_bus(&i2c_mst_config, &i2c_master_bus);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to create I2C master bus: %s", esp_err_to_name(ret));
         return ret;
     }
     
     ESP_LOGI(TAG, "I2C master bus initialized successfully");
+    vTaskDelay(pdMS_TO_TICKS(200)); 
     return ESP_OK;
 }
 
