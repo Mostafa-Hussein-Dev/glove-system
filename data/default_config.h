@@ -29,10 +29,10 @@ static const system_config_t DEFAULT_SYSTEM_CONFIG = {
  * These are the default values used when no calibration data is available.
  */
 static const flex_sensor_calibration_t DEFAULT_FLEX_CALIBRATION = {
-    .flat_value = {2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000, 2000},
-    .bent_value = {3500, 3500, 3500, 3500, 3500, 3500, 3500, 3500, 3500, 3500},
-    .scale_factor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
-    .offset = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}
+    .flat_value = {2450, 2450, 2450, 2450, 2450},
+    .bent_value = {3400, 3400, 3400, 3400, 3400},
+    .scale_factor = {1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
+    .offset = {0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}
 };
 
 /**

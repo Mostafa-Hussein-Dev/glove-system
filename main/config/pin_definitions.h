@@ -9,7 +9,7 @@
 
 /* Flex Sensors ADC Pins (5 sensors, 1 per finger) */
 #define FLEX_SENSOR_ADC_UNIT               ADC_UNIT_1
-#define FLEX_SENSOR_ADC_ATTENUATION        ADC_ATTEN_DB_12
+#define FLEX_SENSOR_ADC_ATTENUATION        ADC_ATTEN_DB_6
 #define FLEX_SENSOR_ADC_BIT_WIDTH          ADC_BITWIDTH_12
 
 #define FLEX_SENSOR_THUMB_ADC_CHANNEL      ADC_CHANNEL_0   // GPIO1
@@ -23,7 +23,7 @@
 #define I2C_MASTER_SDA_IO           21
 #define I2C_MASTER_SCL_IO           20
 #define I2C_MASTER_FREQ_HZ          400000
-#define IMU_INT_PIN                 4
+#define IMU_INT_PIN                 16
 
 /* Camera Interface Pins */
 #define CAMERA_XCLK_PIN             15
@@ -58,7 +58,7 @@
 #define I2S_SD_PIN                  48  
 
 /* Haptic Feedback Motor Pin */
-#define HAPTIC_PIN                  15
+#define HAPTIC_PIN                  18
 
 /* Battery Monitoring Pin */
 #define BATTERY_ADC_CHANNEL         ADC_CHANNEL_5  // GPIO6 (changed from GPIO16)

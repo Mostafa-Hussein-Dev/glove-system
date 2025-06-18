@@ -46,7 +46,7 @@
 static const char *TAG = "APP_MAIN";
 
 // You can change this to true to enable debug mode
-#define DEBUG_MODE_ENABLED true
+#define DEBUG_MODE_ENABLED false
 
 // Global I2C master bus handle (defined here, declared in util/i2c_utils.h)
 i2c_master_bus_handle_t i2c_master_bus = NULL;
@@ -521,7 +521,7 @@ static void debug_mode_run(void) {
     ESP_LOGI(TAG, "=== STARTING DEBUG MODE ===");
     
     // Display system information
-    debug_display_system_info();
+    //debug_display_system_info();
     
     uint32_t loop_count = 0;
     uint32_t last_full_test_time = 0;
@@ -529,7 +529,8 @@ static void debug_mode_run(void) {
     while (1) {
         uint32_t current_time = esp_timer_get_time() / 1000; // Convert to milliseconds
         
-        ESP_LOGI(TAG, "\n=== DEBUG LOOP %lu ===", loop_count++);
+        ESP_LOGI("INIT", "\033[2J\033[H"); 
+        ESP_LOGI(TAG, "=== DEBUG LOOP %lu ===\n", loop_count++);
         
         // Test all sensors every loop
         ESP_LOGI(TAG, "Testing Flex Sensors...");
@@ -569,7 +570,7 @@ static void debug_mode_run(void) {
         ESP_LOGI(TAG, "=== DEBUG LOOP %lu COMPLETE ===\n", loop_count - 1);
         
         // Wait 2 seconds between test cycles
-        vTaskDelay(pdMS_TO_TICKS(2000));
+        vTaskDelay(pdMS_TO_TICKS(20));
     }
 }
 

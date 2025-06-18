@@ -120,6 +120,16 @@ static esp_err_t calculate_calibration_factors(void) {
     return ESP_OK;
 }
 
+static float normalize_angle(float angle) {
+    while (angle > 180.0f) {
+        angle -= 360.0f;
+    }
+    while (angle < -180.0f) {
+        angle += 360.0f;
+    }
+    return angle;
+}
+
 esp_err_t imu_init(void) {
     esp_err_t ret;
     uint8_t who_am_i;
@@ -306,12 +316,34 @@ esp_err_t imu_read(imu_data_t* data) {
     
     // Update timestamp
     uint32_t current_time_us = esp_timer_get_time();
-    float dt = (current_time_us - prev_time_us) / 1000000.0f;  // Convert to seconds
-    prev_time_us = current_time_us;
     data->timestamp = current_time_us / 1000;  // Convert to milliseconds
     
+    // Handle first reading - initialize orientation from accelerometer
+    if (prev_time_us == 0) {
+        // Calculate initial orientation from accelerometer only
+        data->orientation[0] = atan2f(data->accel[1], data->accel[2]) * 180.0f / M_PI;  // Roll
+        data->orientation[1] = atan2f(-data->accel[0], sqrtf(data->accel[1] * data->accel[1] + data->accel[2] * data->accel[2])) * 180.0f / M_PI;  // Pitch
+        data->orientation[2] = 0.0f;  // Yaw starts at 0
+        
+        // Store for next iteration
+        memcpy(prev_orientation, data->orientation, sizeof(prev_orientation));
+        prev_time_us = current_time_us;
+        
+        ESP_LOGI("IMU", "Initial orientation: Roll=%.1f, Pitch=%.1f, Yaw=%.1f", 
+                 data->orientation[0], data->orientation[1], data->orientation[2]);
+        return ESP_OK;
+    }
+    
+    // Calculate time delta
+    float dt = (current_time_us - prev_time_us) / 1000000.0f;  // Convert to seconds
+    prev_time_us = current_time_us;
+    
     // Calculate orientation using complementary filter
-    imu_calculate_orientation(data->accel, data->gyro, dt, prev_orientation, data->orientation);
+    ret = imu_calculate_orientation(data->accel, data->gyro, dt, prev_orientation, data->orientation);
+    if (ret != ESP_OK) {
+        ESP_LOGE("IMU", "Failed to calculate orientation");
+        return ret;
+    }
     
     // Update previous orientation
     memcpy(prev_orientation, data->orientation, sizeof(prev_orientation));
@@ -322,34 +354,44 @@ esp_err_t imu_read(imu_data_t* data) {
 esp_err_t imu_calibrate(void) {
     ESP_LOGI(TAG, "Starting IMU calibration (keep device still)...");
     
+    vTaskDelay(pdMS_TO_TICKS(500));
+
     // Initialize accumulators
     int32_t accel_sum[3] = {0, 0, 0};
     int32_t gyro_sum[3] = {0, 0, 0};
-    const int num_samples = 100;
+    const int num_samples = 1000;
     
-    // Collect samples
-    for (int i = 0; i < num_samples; i++) {
+    // Collect samples with outlier rejection
+    int valid_samples = 0;
+    for (int i = 0; i < num_samples && valid_samples < 800; i++) {
         imu_raw_data_t raw_data;
         esp_err_t ret = imu_read_raw(&raw_data);
-        if (ret != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to read IMU data during calibration");
-            return ret;
-        }
+        if (ret != ESP_OK) continue;
         
-        // Accumulate values
+        // Simple outlier rejection (reject samples too far from expected values)
+        bool is_outlier = false;
         for (int j = 0; j < 3; j++) {
-            accel_sum[j] += raw_data.accel_raw[j];
-            gyro_sum[j] += raw_data.gyro_raw[j];
+            if (abs(raw_data.gyro_raw[j]) > 1000) { // Reject high gyro values during calibration
+                is_outlier = true;
+                break;
+            }
         }
         
-        // Short delay between samples
-        vTaskDelay(pdMS_TO_TICKS(10));
+        if (!is_outlier) {
+            for (int j = 0; j < 3; j++) {
+                accel_sum[j] += raw_data.accel_raw[j];
+                gyro_sum[j] += raw_data.gyro_raw[j];
+            }
+            valid_samples++;
+        }
+        
+        vTaskDelay(pdMS_TO_TICKS(5)); // 5ms between samples
     }
     
-    // Calculate average values
+    // Calculate averages
     for (int i = 0; i < 3; i++) {
-        calibration.accel_offset[i] = accel_sum[i] / num_samples;
-        calibration.gyro_offset[i] = gyro_sum[i] / num_samples;
+        calibration.accel_offset[i] = accel_sum[i] / valid_samples;
+        calibration.gyro_offset[i] = gyro_sum[i] / valid_samples;
     }
     
     // For accelerometer, we only want to remove offset from X and Y axes
@@ -546,25 +588,74 @@ esp_err_t imu_reset(void) {
     return ESP_OK;
 }
 
-esp_err_t imu_calculate_orientation(const float accel[3], const float gyro[3], 
-                                   float dt, const float previous_orientation[3], 
-                                   float new_orientation[3]) {
+esp_err_t imu_calculate_orientation(const float accel[3], const float gyro[3], float dt, const float previous_orientation[3], float new_orientation[3]) {
     if (accel == NULL || gyro == NULL || previous_orientation == NULL || new_orientation == NULL) {
         return ESP_ERR_INVALID_ARG;
+    }
+    
+    // Validate time delta - if invalid, calculate orientation from accelerometer only
+    if (dt <= 0.0f || dt > 0.1f) {
+        // Invalid time delta, calculate orientation from accelerometer only
+        new_orientation[0] = atan2f(accel[1], accel[2]) * 180.0f / M_PI;  // Roll from accelerometer
+        new_orientation[1] = atan2f(-accel[0], sqrtf(accel[1] * accel[1] + accel[2] * accel[2])) * 180.0f / M_PI; // Pitch from accelerometer  
+        new_orientation[2] = previous_orientation[2]; // Keep previous yaw
+        return ESP_OK;
     }
     
     // Complementary filter constants
     const float alpha = 0.98f;  // Weight for gyro data
     
-    // Calculate pitch and roll from accelerometer data
-    float accel_pitch = atan2f(accel[0], sqrtf(accel[1] * accel[1] + accel[2] * accel[2])) * 180.0f / M_PI;
+    // FIX 1: Correct pitch calculation (add negative sign)
+    float accel_pitch = atan2f(-accel[0], sqrtf(accel[1] * accel[1] + accel[2] * accel[2])) * 180.0f / M_PI;
     float accel_roll = atan2f(accel[1], accel[2]) * 180.0f / M_PI;
     
-    // Calculate new orientation with complementary filter
-    // Gyro data is integrated to get change in angle
+    // FIX 3: Dynamic gyro bias compensation for yaw
+    static float gyro_z_bias_estimate = 0.0f;
+    static float gyro_z_history[10] = {0}; // Rolling average
+    static int history_index = 0;
+    
+    // Update rolling average of gyro Z
+    gyro_z_history[history_index] = gyro[2];
+    history_index = (history_index + 1) % 10;
+    
+    // Calculate average
+    float gyro_z_avg = 0.0f;
+    for (int i = 0; i < 10; i++) {
+        gyro_z_avg += gyro_z_history[i];
+    }
+    gyro_z_avg /= 10.0f;
+    
+    // If gyro readings are consistently small (likely bias), update bias estimate
+    if (fabs(gyro_z_avg) < 2.0f && fabs(gyro[0]) < 5.0f && fabs(gyro[1]) < 5.0f) {
+        gyro_z_bias_estimate = 0.95f * gyro_z_bias_estimate + 0.05f * gyro_z_avg;
+    }
+    
+    // Apply bias compensation to yaw calculation
+    float corrected_gyro_z = gyro[2] - gyro_z_bias_estimate;
+    new_orientation[2] = previous_orientation[2] + corrected_gyro_z * dt;
+    
+    // Apply complementary filter to roll and pitch only
     new_orientation[0] = alpha * (previous_orientation[0] + gyro[0] * dt) + (1.0f - alpha) * accel_roll;
     new_orientation[1] = alpha * (previous_orientation[1] + gyro[1] * dt) + (1.0f - alpha) * accel_pitch;
-    new_orientation[2] = previous_orientation[2] + gyro[2] * dt;  // Yaw is only from gyro
+    
+    // FIX 2: Normalize all angles to prevent drift
+    new_orientation[0] = normalize_angle(new_orientation[0]);  // Roll
+    new_orientation[1] = normalize_angle(new_orientation[1]);  // Pitch
+    new_orientation[2] = normalize_angle(new_orientation[2]);  // Yaw
+    
+    // FIX 3: Yaw drift compensation
+    static uint32_t last_yaw_reset = 0;
+    uint32_t current_time = esp_timer_get_time() / 1000; // Convert to ms
+    
+    // Check if hand is stationary (low angular velocity)
+    float angular_motion = sqrtf(gyro[0]*gyro[0] + gyro[1]*gyro[1] + gyro[2]*gyro[2]);
+    
+    // Reset yaw when stationary for 3 seconds
+    if (angular_motion < 3.0f && (current_time - last_yaw_reset) > 3000) {
+        new_orientation[2] = 0.0f; // Reset yaw to reference
+        last_yaw_reset = current_time;
+        ESP_LOGI("IMU", "Yaw drift reset (stationary)");
+    }
     
     return ESP_OK;
 }
