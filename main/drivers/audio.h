@@ -38,6 +38,15 @@ esp_err_t audio_deinit(void);
 esp_err_t audio_play_beep(uint16_t frequency, uint16_t duration_ms);
 
 /**
+ * @brief Play a  tone
+ * 
+ * @param frequency Tone frequency in Hz
+ * @param duration_ms Duration in milliseconds
+ * @return ESP_OK on success, error code otherwise
+ */
+esp_err_t audio_play_tone(uint16_t frequency, uint16_t duration_ms);
+
+/**
  * @brief Speak text using TTS
  * 
  * @param text Text to speak

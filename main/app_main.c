@@ -47,7 +47,7 @@
 static const char *TAG = "APP_MAIN";
 
 // You can change this to true to enable debug mode
-#define DEBUG_MODE_ENABLED false
+#define DEBUG_MODE_ENABLED true
 
 // Global I2C master bus handle (defined here, declared in util/i2c_utils.h)
 i2c_master_bus_handle_t i2c_master_bus = NULL;
@@ -557,6 +557,8 @@ static void debug_mode_run(void) {
         ESP_LOGI(TAG, "Testing Touch Sensors...");
         debug_test_touch_sensors();
         
+        
+
         // Test output devices every 10 seconds
         /*
         if (current_time - last_full_test_time > 10000) {
@@ -578,9 +580,12 @@ static void debug_mode_run(void) {
                 last_camera_test = current_time;
             }
             
+           
             last_full_test_time = current_time;
+            
         }
-        */    
+        */
+           
         
         ESP_LOGI(TAG, "=== DEBUG LOOP %lu COMPLETE ===\n", loop_count - 1);
         
@@ -699,7 +704,7 @@ static void debug_test_display(void) {
 
 static void debug_test_audio(void) {
     // Test a short beep or tone
-    esp_err_t ret = audio_play_beep(1000, 100); // 1kHz tone for 100ms
+    esp_err_t ret = audio_play_beep(5000, 100); // 1kHz tone for 100ms
     if (ret == ESP_OK) {
         ESP_LOGI(TAG, "✓ Audio OK: Test tone played");
     } else {

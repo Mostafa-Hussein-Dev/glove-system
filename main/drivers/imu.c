@@ -16,6 +16,8 @@
 static i2c_master_bus_handle_t i2c_bus_handle = NULL;
 static i2c_master_dev_handle_t imu_dev_handle = NULL;
 
+extern SemaphoreHandle_t g_i2c_mutex;
+
 static const char *TAG = "IMU";
 
 // MPU6050 I2C address

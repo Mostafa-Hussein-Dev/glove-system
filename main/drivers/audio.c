@@ -22,7 +22,7 @@ static i2s_chan_handle_t tx_chan = NULL;
 #define I2S_DMA_BUFFER_COUNT 8
 
 // Audio task parameters
-#define AUDIO_TASK_STACK_SIZE 2048
+#define AUDIO_TASK_STACK_SIZE 4096
 #define AUDIO_TASK_PRIORITY 10
 
 // Audio buffer for playback
@@ -50,7 +50,7 @@ typedef struct {
 
 // Forward declarations
 static void audio_task(void *pvParameters);
-static void audio_play_tone(uint16_t frequency, uint16_t duration_ms);
+esp_err_t audio_play_tone(uint16_t frequency, uint16_t duration_ms);
 static void audio_speak_text(const char *text);
 
 esp_err_t audio_init(void) {
@@ -208,6 +208,84 @@ esp_err_t audio_play_beep(uint16_t frequency, uint16_t duration_ms) {
     return ESP_OK;
 }
 
+esp_err_t audio_play_tone(uint16_t frequency, uint16_t duration_ms) {
+   if (!audio_initialized) {
+       ESP_LOGE(TAG, "Audio system not initialized");
+       return ESP_ERR_INVALID_STATE;
+   }
+   
+   if (tx_chan == NULL) {
+       ESP_LOGE(TAG, "I2S channel not available");
+       return ESP_ERR_INVALID_STATE;
+   }
+   
+   if (frequency == 0 || duration_ms == 0) {
+       ESP_LOGW(TAG, "Invalid parameters: freq=%d, duration=%d", frequency, duration_ms);
+       return ESP_ERR_INVALID_ARG;
+   }
+   
+   size_t i2s_bytes_written = 0;
+   esp_err_t ret = ESP_OK;
+   
+   // Calculate parameters
+   uint32_t sample_count = I2S_SAMPLE_RATE * duration_ms / 1000;
+   float volume_scale = (float)audio_volume / 100.0f;
+   float volume_factor = 32767.0f * volume_scale;
+   
+   // Calculate wave parameters
+   float angular_frequency = 2.0f * M_PI * frequency / I2S_SAMPLE_RATE;
+   
+   ESP_LOGI(TAG, "Playing tone: %dHz for %dms (%lu samples)", frequency, duration_ms, sample_count);
+   
+   // Generate sine wave and send to I2S
+   for (uint32_t i = 0; i < sample_count; i += AUDIO_BUFFER_SIZE / 2) {
+       uint32_t buffer_samples = (i + AUDIO_BUFFER_SIZE / 2 < sample_count) ? 
+                                 AUDIO_BUFFER_SIZE / 2 : (sample_count - i);
+       
+       // Generate samples for both channels
+       for (uint32_t j = 0; j < buffer_samples; j++) {
+           float sample_value = sinf((i + j) * angular_frequency);
+           int16_t sample = (int16_t)(sample_value * volume_factor);
+           
+           // Fill left and right channels with the same data
+           audio_buffer[j*2] = sample;      // Left channel
+           audio_buffer[j*2+1] = sample;    // Right channel
+       }
+       
+       // Send to I2S with timeout and error checking
+       ret = i2s_channel_write(tx_chan, audio_buffer, buffer_samples * 4, 
+                              &i2s_bytes_written, pdMS_TO_TICKS(1000));
+       
+       if (ret != ESP_OK) {
+           ESP_LOGE(TAG, "I2S write failed: %s", esp_err_to_name(ret));
+           break;
+       }
+       
+       if (i2s_bytes_written != buffer_samples * 4) {
+           ESP_LOGW(TAG, "Incomplete I2S write: expected %lu, wrote %zu", 
+                    buffer_samples * 4, i2s_bytes_written);
+       }
+   }
+   
+   // Flush buffer with error handling
+   esp_err_t disable_ret = i2s_channel_disable(tx_chan);
+   if (disable_ret != ESP_OK) {
+       ESP_LOGW(TAG, "Failed to disable I2S channel: %s", esp_err_to_name(disable_ret));
+   }
+   
+   esp_err_t enable_ret = i2s_channel_enable(tx_chan);
+   if (enable_ret != ESP_OK) {
+       ESP_LOGE(TAG, "Failed to re-enable I2S channel: %s", esp_err_to_name(enable_ret));
+       return enable_ret;
+   }
+   
+   if (ret == ESP_OK) {
+       ESP_LOGI(TAG, "Tone playback completed successfully");
+   }
+   
+   return ret;
+}
+
 esp_err_t audio_speak(const char *text) {
     if (!audio_initialized || text == NULL) {
         return ESP_ERR_INVALID_STATE;
@@ -306,42 +384,6 @@ static void audio_task(void *pvParameters) {
             }
         }
     }
-}
-
-// Generate and play a simple tone
-static void audio_play_tone(uint16_t frequency, uint16_t duration_ms) {
-    size_t i2s_bytes_written = 0;
-    
-    // Calculate parameters
-    uint32_t sample_count = I2S_SAMPLE_RATE * duration_ms / 1000;
-    float volume_scale = (float)audio_volume / 100.0f;
-    float volume_factor = 32767.0f * volume_scale;  // Scale to int16_t range
-    
-    // Calculate wave parameters
-    float angular_frequency = 2.0f * M_PI * frequency / I2S_SAMPLE_RATE;
-    
-    // Generate sine wave and send to I2S
-    for (uint32_t i = 0; i < sample_count; i += AUDIO_BUFFER_SIZE / 2) {  // Divide by 2 because we need to generate both L and R channels
-        uint32_t buffer_samples = (i + AUDIO_BUFFER_SIZE / 2 < sample_count) ? 
-                                  AUDIO_BUFFER_SIZE / 2 : (sample_count - i);
-        
-        // Generate samples for both channels
-        for (uint32_t j = 0; j < buffer_samples; j++) {
-            float sample_value = sinf((i + j) * angular_frequency);
-            int16_t sample = (int16_t)(sample_value * volume_factor);
-            
-            // Fill left and right channels with the same data
-            audio_buffer[j*2] = sample;      // Left channel
-            audio_buffer[j*2+1] = sample;    // Right channel
-        }
-        
-        // Send to I2S (blocking)
-        i2s_channel_write(tx_chan, audio_buffer, buffer_samples * 4, &i2s_bytes_written, portMAX_DELAY);
-    }
-    
-    // Ensure buffer is flushed
-    i2s_channel_disable(tx_chan);
-    i2s_channel_enable(tx_chan); 
 }
 
 // Very simple text-to-speech (just beeps for now - would need a real TTS engine)

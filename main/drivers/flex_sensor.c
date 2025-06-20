@@ -104,7 +104,7 @@ static const char *TAG = "FLEX_SENSOR";
 #define SAMPLES_PER_READ 8
 #define CALIBRATION_SAMPLES 50
 #define MIN_CALIBRATION_RANGE 300
-#define MAX_NOISE_THRESHOLD 800  // Increased from 100 to allow larger changes
+#define MAX_NOISE_THRESHOLD 4095  // Increased from 100 to allow larger changes
 #define SENSOR_TIMEOUT_MS 100
 #define STABILITY_THRESHOLD 20
 
@@ -252,14 +252,14 @@ static esp_err_t init_adc_unit(void) {
 static esp_err_t init_calibration_defaults(void) {
     // Initialize with reasonable defaults
     for (int i = 0; i < FINGER_COUNT; i++) {
-        sensor_calibration.flat_value[i] = 1500;
-        sensor_calibration.bent_value[i] = 3000;
+        sensor_calibration.flat_value[i] = 1100;
+        sensor_calibration.bent_value[i] = 2450;
         sensor_calibration.direction[i] = SENSOR_DIRECTION_INCREASING;
-        sensor_calibration.scale_factor[i] = 0.06f;  // 90 degrees / 1500 ADC units
-        sensor_calibration.offset[i] = -90.0f;
-        sensor_calibration.min_value[i] = 100;
-        sensor_calibration.max_value[i] = 4000;
-        sensor_calibration.calibrated[i] = false;
+        sensor_calibration.scale_factor[i] = 90.0f / 4095.0f;
+        sensor_calibration.offset[i] = 0.0f;
+        sensor_calibration.min_value[i] = 800;
+        sensor_calibration.max_value[i] = 4095;
+        sensor_calibration.calibrated[i] = true;
         
         // Initialize health status
         sensor_health.sensor_connected[i] = false;
@@ -308,7 +308,7 @@ static uint16_t apply_filter(int sensor_idx, uint16_t raw_value) {
     // Adaptive outlier rejection
     if (filter_filled[sensor_idx]) {
         uint32_t sum = 0;
-        uint16_t min_val = 4095, max_val = 0;
+        uint16_t min_val = 4095, max_val = 750;
         
         // Calculate average and range of recent samples
         for (int i = 0; i < FILTER_BUFFER_SIZE; i++) {
@@ -378,13 +378,14 @@ accept_value:
 }
 
 esp_err_t flex_sensor_read_raw(uint16_t* raw_values) {
-    if (!driver_initialized || raw_values == NULL) {
-        return ESP_ERR_INVALID_STATE;
-    }
-    
-    esp_err_t overall_result = ESP_OK;
-    
-    for (int i = 0; i < FINGER_COUNT; i++) {
+   if (!driver_initialized || raw_values == NULL) {
+       return ESP_ERR_INVALID_STATE;
+   }
+   
+   esp_err_t overall_result = ESP_OK;
+
+   /*
+   for (int i = 0; i < FINGER_COUNT; i++) {
         uint16_t raw_value;
         esp_err_t ret = read_adc_with_validation(adc_channels[i], &raw_value);
         
@@ -399,14 +400,30 @@ esp_err_t flex_sensor_read_raw(uint16_t* raw_values) {
         } else {
             sensor_health.read_errors[i]++;
             sensor_health.sensor_connected[i] = false;
-            raw_values[i] = filter_filled[i] ? 
+            raw_values[i] = filter_filled[i] ?
                 apply_filter(i, filter_buffers[i][filter_index[i]]) : 
                 sensor_calibration.flat_value[i];
             overall_result = ESP_FAIL;
         }
     }
+    */
     
-    return overall_result;
+    for (int i = 0; i < FINGER_COUNT; i++) {
+       int temp_value;
+       esp_err_t ret = adc_oneshot_read(adc_handle, adc_channels[i], &temp_value);
+       
+       if (ret == ESP_OK) {
+           raw_values[i] = (uint16_t)temp_value;
+           sensor_health.sensor_connected[i] = true;
+       } else {
+           raw_values[i] = 0;
+           sensor_health.read_errors[i]++;
+           sensor_health.sensor_connected[i] = false;
+           overall_result = ESP_FAIL;
+       }
+   }
+   
+   return overall_result;
 }
 
 esp_err_t flex_sensor_read_angles(float* angles) {
@@ -420,13 +437,7 @@ esp_err_t flex_sensor_read_angles(float* angles) {
     // Convert to angles even if some sensors failed
     for (int i = 0; i < FINGER_COUNT; i++) {
         if (sensor_calibration.calibrated[i]) {
-            float raw_angle = sensor_calibration.scale_factor[i] * raw_values[i] + 
-                             sensor_calibration.offset[i];
-            
-            // Apply direction correction
-            if (sensor_calibration.direction[i] == SENSOR_DIRECTION_DECREASING) {
-                raw_angle = 90.0f - raw_angle;
-            }
+            float raw_angle = (float)raw_values[i] * 90.0f / 4095.0f;
             
             // Constrain to valid range
             angles[i] = fmaxf(0.0f, fminf(90.0f, raw_angle));
