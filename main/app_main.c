@@ -662,6 +662,7 @@ static void debug_test_ble_camera(void) {
     // Attempt to connect
     ESP_LOGI(TAG, "Attempting to connect to ESP32 CAMERA...");
     ret = ble_camera_connect(DEVICE_NAME);
+    debug_camera_state();
     if (ret != ESP_OK) {
         ESP_LOGW(TAG, "⚠ BLE Camera: Connection failed (camera may not be available)");
         return;

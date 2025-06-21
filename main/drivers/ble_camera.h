@@ -57,5 +57,6 @@ esp_err_t ble_camera_set_resolution(uint8_t width, uint8_t height);
 esp_err_t ble_camera_set_quality(uint8_t quality); // 0-63 for JPEG
 bool ble_camera_is_connected(void);
 bool ble_camera_frame_available(void);
+void debug_camera_state(void);
 
 #endif /* DRIVERS_BLE_CAMERA_H */
