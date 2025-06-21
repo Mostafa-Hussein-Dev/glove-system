@@ -21,6 +21,8 @@ static const char* TAG = "BLE_CAMERA";
 #define BLE_CAMERA_CHAR_CONTROL_UUID    0x2A31
 #define BLE_CAMERA_CHAR_STATUS_UUID     0x2A32
 
+#define ESP_APP_ID  0x55
+
 // Camera state
 static bool camera_initialized = false;
 static ble_camera_status_t camera_status = BLE_CAMERA_STATUS_DISCONNECTED;
@@ -81,33 +83,19 @@ esp_err_t ble_camera_init(void) {
         ESP_LOGE(TAG, "Failed to create frame queue");
         return ESP_FAIL;
     }
+    ESP_LOGI(TAG, "Frame queue created successfully");
 
-    // Increase CPU frequency for BLE data processing
-    esp_pm_config_t config = {
-        .max_freq_mhz = 160,
-        .min_freq_mhz = 80,   // Higher minimum for BLE stability
-        .light_sleep_enable = false  // Disable sleep during camera use
-    };
-    esp_pm_configure(&config);
-
-    // Initialize data structures
-    memset(&camera_stats, 0, sizeof(camera_stats));
-    memset(&current_frame, 0, sizeof(current_frame));
-    camera_status = BLE_CAMERA_STATUS_DISCONNECTED;
-    gattc_if = ESP_GATT_IF_NONE;
-    conn_id = 0;
-    memset(target_device_name, 0, sizeof(target_device_name));
-    
     esp_err_t ret;
     
-    // Release Classic Bluetooth memory (BLE only)
     ret = esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
     if (ret) {
         ESP_LOGI(TAG, "BT classic memory release: %s", esp_err_to_name(ret));
     }
     
-    // Initialize Bluetooth controller
+    // Initialize Bluetooth controller with matching config
     esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
+    
+
     ret = esp_bt_controller_init(&bt_cfg);
     if (ret) {
         ESP_LOGE(TAG, "BT controller init failed: %s", esp_err_to_name(ret));
@@ -138,8 +126,8 @@ esp_err_t ble_camera_init(void) {
         esp_bt_controller_deinit();
         goto cleanup;
     }
+
     
-    // Register BLE callbacks
     ret = esp_ble_gap_register_callback(gap_event_handler);
     if (ret) {
         ESP_LOGE(TAG, "GAP callback register failed: %s", esp_err_to_name(ret));
@@ -152,25 +140,10 @@ esp_err_t ble_camera_init(void) {
         goto cleanup_bt;
     }
     
-    ret = esp_ble_gattc_app_register(0);
+    // CRITICAL: Register with specific app_id (match server)
+    ret = esp_ble_gattc_app_register(ESP_APP_ID);
     if (ret) {
         ESP_LOGE(TAG, "GATTC app register failed: %s", esp_err_to_name(ret));
-        goto cleanup_bt;
-    }
-    
-    // Configure scan parameters
-    esp_ble_scan_params_t scan_params = {
-        .scan_type              = BLE_SCAN_TYPE_ACTIVE,
-        .own_addr_type          = BLE_ADDR_TYPE_PUBLIC,
-        .scan_filter_policy     = BLE_SCAN_FILTER_ALLOW_ALL,
-        .scan_interval          = 0x50,
-        .scan_window            = 0x30,
-        .scan_duplicate         = BLE_SCAN_DUPLICATE_DISABLE
-    };
-    
-    ret = esp_ble_gap_set_scan_params(&scan_params);
-    if (ret) {
-        ESP_LOGE(TAG, "Scan params set failed: %s", esp_err_to_name(ret));
         goto cleanup_bt;
     }
     
@@ -180,36 +153,28 @@ esp_err_t ble_camera_init(void) {
         ESP_LOGW(TAG, "MTU set failed: %s", esp_err_to_name(ret));
     }
 
-    ret = esp_ble_gattc_register_callback(gattc_event_handler);
-        if (ret != ESP_OK) {
-            ESP_LOGE(TAG, "GATT client callback register failed: %s", esp_err_to_name(ret));
-            return ret;
-        }
-
-        ret = esp_ble_gattc_app_register(0);  // Register with app_id = 0
-        if (ret != ESP_OK) {
-            ESP_LOGE(TAG, "GATT client app register failed: %s", esp_err_to_name(ret));
-            return ret;
-        }
-
-    camera_initialized = true;
-    ESP_LOGI(TAG, "BLE camera client initialized successfully");
     
+    ESP_LOGI(TAG, "BLE camera client initialized successfully");
+    camera_initialized = true;
     return ESP_OK;
 
-cleanup_bt:
-    esp_bluedroid_disable();
-    esp_bluedroid_deinit();
-    esp_bt_controller_disable();
-    esp_bt_controller_deinit();
+    cleanup_bt:
+        esp_bluedroid_disable();
+        esp_bluedroid_deinit();
+        esp_bt_controller_disable();
+        esp_bt_controller_deinit();
 
-cleanup:
-    if (frame_mutex) {
-        vSemaphoreDelete(frame_mutex);
-        frame_mutex = NULL;
-    }
-    
-    return ret;
+    cleanup:
+        if (frame_mutex) {
+            vSemaphoreDelete(frame_mutex);
+            frame_mutex = NULL;
+        }
+        if (frame_queue) {
+            vQueueDelete(frame_queue);
+            frame_queue = NULL;
+        }
+
+    return ESP_FAIL;
 }
 
 esp_err_t ble_camera_deinit(void) {
@@ -240,6 +205,11 @@ esp_err_t ble_camera_deinit(void) {
         vSemaphoreDelete(frame_mutex);
         frame_mutex = NULL;
     }
+
+    if (frame_queue) {
+        vQueueDelete(frame_queue);
+        frame_queue = NULL;
+    }
     
     camera_initialized = false;
     ESP_LOGI(TAG, "BLE camera deinitialized");
@@ -253,28 +223,50 @@ esp_err_t ble_camera_connect(const char* device_name) {
         return ESP_ERR_INVALID_STATE;
     }
 
-    // Check if already properly connected
-    if (camera_status == BLE_CAMERA_STATUS_CONNECTED) {
-        ESP_LOGW(TAG, "Already connected");
+    // Check current BLE controller state first
+    esp_bt_controller_status_t controller_status = esp_bt_controller_get_status();
+    if (controller_status != ESP_BT_CONTROLLER_STATUS_ENABLED) {
+        ESP_LOGE(TAG, "BT controller not enabled: %d", controller_status);
+        return ESP_ERR_INVALID_STATE;
+    }
+
+    // CRITICAL: Check if we have an active connection attempt in progress
+    if (camera_status == BLE_CAMERA_STATUS_CONNECTING) {
+        ESP_LOGW(TAG, "Connection already in progress, waiting...");
         return ESP_OK;
     }
 
-    
-    // Only disconnect if we think we're connected but have invalid conn_id
-    if (camera_status == BLE_CAMERA_STATUS_CONNECTED) {
-        ESP_LOGI(TAG, "Invalid connection state, resetting...");
+    // If status shows connected but conn_id is 0, force disconnect
+    if (camera_status == BLE_CAMERA_STATUS_CONNECTED && conn_id == 0) {
+        ESP_LOGW(TAG, "Invalid connection state (connected but conn_id=0), resetting...");
         camera_status = BLE_CAMERA_STATUS_DISCONNECTED;
     }
 
-    //camera_status = BLE_CAMERA_STATUS_DISCONNECTED;
-    //conn_id = 0;
+    // Only disconnect if we have a valid connection
+    if (camera_status != BLE_CAMERA_STATUS_DISCONNECTED && conn_id != 0) {
+        ESP_LOGI(TAG, "Forcing clean disconnect...");
+        ble_camera_disconnect();
+        vTaskDelay(pdMS_TO_TICKS(1000));
+    }
+
+    // Reset connection state completely
+    camera_status = BLE_CAMERA_STATUS_DISCONNECTED;
+    conn_id = 0;
+    service_start_handle = 0;
+    service_end_handle = 0;
+    char_control_handle = 0;
+    char_image_handle = 0;
+    char_status_handle = 0;
 
     ESP_LOGI(TAG, "Connecting directly to ESP32-CAM...");
     
-    // ESP32-CAM MAC address from your logs
+    // ESP32-CAM MAC address
     esp_bd_addr_t camera_mac = {0xe0, 0x5a, 0x1b, 0xad, 0x3a, 0x3e};
     
-    // Connect directly without scanning
+    // Set connecting status BEFORE connection attempt
+    camera_status = BLE_CAMERA_STATUS_CONNECTING;
+    
+    // Connect directly
     esp_err_t ret = esp_ble_gattc_open(gattc_if, camera_mac, BLE_ADDR_TYPE_PUBLIC, true);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Direct connection failed: %s", esp_err_to_name(ret));
@@ -283,28 +275,37 @@ esp_err_t ble_camera_connect(const char* device_name) {
     }
     
     ESP_LOGI(TAG, "Direct connection initiated to ESP32-CAM");
-    camera_status = BLE_CAMERA_STATUS_CONNECTING;
     return ESP_OK;
 }
 
 esp_err_t ble_camera_disconnect(void) {
-    if (camera_status == BLE_CAMERA_STATUS_DISCONNECTED) {
-        return ESP_OK;
-    }
-    
     ESP_LOGI(TAG, "Disconnecting from camera...");
     
     // Close GATT connection if we have a valid conn_id
     if (gattc_if != ESP_GATT_IF_NONE && conn_id != 0) {
-        esp_ble_gattc_close(gattc_if, conn_id);
-        // Don't reset conn_id here - let the close event handle it
+        esp_err_t ret = esp_ble_gattc_close(gattc_if, conn_id);
+        if (ret != ESP_OK) {
+            ESP_LOGW(TAG, "Failed to close GATT connection: %s", esp_err_to_name(ret));
+        }
+        ESP_LOGI(TAG, "Disconnect initiated");
+        
+        // Wait a bit for the close event, then force reset if needed
+        vTaskDelay(pdMS_TO_TICKS(500));
+        
+        // Force reset connection state
+        camera_status = BLE_CAMERA_STATUS_DISCONNECTED;
+        conn_id = 0;
+        service_start_handle = 0;
+        service_end_handle = 0;
+        char_control_handle = 0;
+        char_image_handle = 0;
+        char_status_handle = 0;
     } else {
-        // Force reset if no valid connection
+        // Already disconnected
         camera_status = BLE_CAMERA_STATUS_DISCONNECTED;
         conn_id = 0;
     }
     
-    ESP_LOGI(TAG, "Disconnect initiated");
     return ESP_OK;
 }
 
@@ -452,24 +453,46 @@ static void gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_
     
     switch (event) {
         case ESP_GATTC_REG_EVT:
-            ESP_LOGI(TAG, "GATT client registered, app_id: %d", param->reg.app_id);
-            gattc_if = gattc_if_param;
+            if (gattc_if == ESP_GATT_IF_NONE) {
+                ESP_LOGI(TAG, "GATT client registered, app_id: %d", param->reg.app_id);
+                gattc_if = gattc_if_param;
+            } else {
+                ESP_LOGW(TAG, "GATT client already registered, ignoring duplicate");
+            }
             break;
             
         case ESP_GATTC_OPEN_EVT:
+            ESP_LOGI(TAG, "GATT connection result: status=%d, conn_id=%d", 
+                     param->open.status, param->open.conn_id);
+            
             if (param->open.status == ESP_GATT_OK) {
-                ESP_LOGI(TAG, "Connected to ESP32-CAM successfully, conn_id: %d", param->open.conn_id);
+
+                /*
+                if (param->open.conn_id == 0) {
+                    ESP_LOGE(TAG, "CRITICAL: Invalid conn_id=0 from BLE stack");
+                    camera_status = BLE_CAMERA_STATUS_ERROR;
+                    
+                    // Close this invalid connection
+                    esp_ble_gattc_close(gattc_if, param->open.conn_id);
+                    break;
+                }
+                */
+                
                 conn_id = param->open.conn_id;
                 camera_status = BLE_CAMERA_STATUS_CONNECTED;
+                
+                ESP_LOGI(TAG, "✓ Connected with valid conn_id: %d", conn_id);
                 
                 // Request larger MTU for image data transfer
                 esp_ble_gattc_send_mtu_req(gattc_if, conn_id);
                 
                 // Start service discovery
                 esp_ble_gattc_search_service(gattc_if, conn_id, NULL);
+                
             } else {
                 ESP_LOGE(TAG, "Connection failed: status %d", param->open.status);
                 camera_status = BLE_CAMERA_STATUS_ERROR;
+                conn_id = 0;
             }
             break;
             
@@ -507,7 +530,7 @@ static void gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_
                 
                 uint16_t notify_en = 0x0001;
                 esp_ble_gattc_write_char_descr(gattc_if, conn_id, 
-                                            char_image_handle + 2,  // CCCD handle is usually +1
+                                            char_image_handle + 1,  // CCCD handle is usually +1
                                             sizeof(notify_en), 
                                             (uint8_t*)&notify_en,
                                             ESP_GATT_WRITE_TYPE_RSP,
@@ -554,10 +577,18 @@ static void gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_
         */
             
         case ESP_GATTC_NOTIFY_EVT:
-            ESP_LOGI(TAG, "Received data: %d bytes", param->notify.value_len);
-            process_image_data(param->notify.value, param->notify.value_len);
+            if (param->notify.handle == char_image_handle) {
+                ESP_LOGI(TAG, "Received image data: %d bytes", param->notify.value_len);
+                process_image_data(param->notify.value, param->notify.value_len);
+                
+                // Update stats to show frames are being received
+                camera_stats.frames_received++;
+                camera_stats.bytes_received += param->notify.value_len;
+            } else {
+                ESP_LOGW(TAG, "Notification from unknown handle: %d", param->notify.handle);
+            }
             break;
-            
+
         default:
             break;
     }
@@ -631,47 +662,48 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
 }
 
 static esp_err_t send_camera_command(uint8_t cmd, uint8_t *data, size_t len) {
-   if (camera_status != BLE_CAMERA_STATUS_CONNECTED && 
-       camera_status != BLE_CAMERA_STATUS_STREAMING) {
-       ESP_LOGW(TAG, "Camera not connected, cannot send command");
-       return ESP_ERR_INVALID_STATE;
-   }
-   
-    if (gattc_if == ESP_GATT_IF_NONE || camera_status != BLE_CAMERA_STATUS_CONNECTED) {        ESP_LOGE(TAG, "GATT interface not established");
-        ESP_LOGE(TAG, "GATT connection not established");
+    // CRITICAL: Check conn_id first (conn_id = 0 means no connection)
+    if (conn_id == 0) {
+        ESP_LOGE(TAG, "No active connection (conn_id = 0)");
+        camera_status = BLE_CAMERA_STATUS_DISCONNECTED; // Fix state mismatch
         return ESP_ERR_INVALID_STATE;
     }
 
-    if (camera_status != BLE_CAMERA_STATUS_CONNECTED) {
-        ESP_LOGE(TAG, "Camera not connected");
+    if (gattc_if == ESP_GATT_IF_NONE) {
+        ESP_LOGE(TAG, "GATT interface not established");
         return ESP_ERR_INVALID_STATE;
     }
-   
-   // Prepare command packet: [CMD][DATA_LEN][DATA...]
-   uint8_t command_packet[64];
-   command_packet[0] = cmd;
-   command_packet[1] = (uint8_t)len;
-   
-   size_t packet_len = 2;
-   if (data && len > 0) {
-       if (len > 62) len = 62; // Limit data size
-       memcpy(command_packet + 2, data, len);
-       packet_len += len;
-   }
-   
-   // Send command via GATT write to control characteristic
-   esp_err_t ret = esp_ble_gattc_write_char(gattc_if, conn_id, char_control_handle,
-                                           packet_len, command_packet,
-                                           ESP_GATT_WRITE_TYPE_NO_RSP,
-                                           ESP_GATT_AUTH_REQ_NONE);
-   
-   if (ret != ESP_OK) {
-       ESP_LOGE(TAG, "Failed to send command 0x%02x: %s", cmd, esp_err_to_name(ret));
-       return ret;
-   }
-   
-   ESP_LOGI(TAG, "Command 0x%02x sent successfully (%d bytes)", cmd, packet_len);
-   return ESP_OK;
+
+    if (char_control_handle == 0) {
+        ESP_LOGE(TAG, "Control characteristic not found");
+        return ESP_ERR_INVALID_STATE;
+    }
+    
+    // Prepare command packet: [CMD][DATA_LEN][DATA...]
+    uint8_t command_packet[64];
+    command_packet[0] = cmd;
+    command_packet[1] = (uint8_t)len;
+    
+    size_t packet_len = 2;
+    if (data && len > 0) {
+        if (len > 62) len = 62; // Limit data size
+        memcpy(command_packet + 2, data, len);
+        packet_len += len;
+    }
+    
+    // Send command via GATT write to control characteristic
+    esp_err_t ret = esp_ble_gattc_write_char(gattc_if, conn_id, char_control_handle,
+                                            packet_len, command_packet,
+                                            ESP_GATT_WRITE_TYPE_NO_RSP,
+                                            ESP_GATT_AUTH_REQ_NONE);
+    
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to send command 0x%02x: %s", cmd, esp_err_to_name(ret));
+        return ret;
+    }
+    
+    ESP_LOGI(TAG, "Command 0x%02x sent successfully (%d bytes)", cmd, packet_len);
+    return ESP_OK;
 }
 
 static void process_image_data(uint8_t *data, size_t len) {

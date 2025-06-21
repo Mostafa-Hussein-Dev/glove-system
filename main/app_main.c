@@ -47,7 +47,7 @@
 static const char *TAG = "APP_MAIN";
 
 // You can change this to true to enable debug mode
-#define DEBUG_MODE_ENABLED true
+#define DEBUG_MODE_ENABLED false
 
 // Global I2C master bus handle (defined here, declared in util/i2c_utils.h)
 i2c_master_bus_handle_t i2c_master_bus = NULL;

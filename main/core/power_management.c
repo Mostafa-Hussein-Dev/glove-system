@@ -143,6 +143,27 @@ esp_err_t power_management_init(void) {
         power_management_set_mode(POWER_MODE_BALANCED);
     }
     
+
+
+
+
+
+
+
+
+
+    power_management_set_mode(POWER_MODE_BALANCED);
+
+
+
+
+
+
+
+
+
+
+    
     // Set current time as last activity time
     power_state.last_activity_time_ms = esp_timer_get_time() / 1000;
     
