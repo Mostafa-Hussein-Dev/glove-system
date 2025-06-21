@@ -25,20 +25,6 @@
 #define I2C_MASTER_FREQ_HZ          100000
 #define IMU_INT_PIN                 16
 
-/* Camera Interface Pins */
-#define CAMERA_XCLK_PIN             15
-#define CAMERA_PCLK_PIN             14
-#define CAMERA_VSYNC_PIN            13
-#define CAMERA_HREF_PIN             12
-#define CAMERA_D0_PIN               35   
-#define CAMERA_D1_PIN               36   
-#define CAMERA_D2_PIN               37    
-#define CAMERA_D3_PIN               38    
-#define CAMERA_D4_PIN               39   
-#define CAMERA_D5_PIN               40   
-#define CAMERA_D6_PIN               41   
-#define CAMERA_D7_PIN               42   
-
 /* Touch Sensor Pins (Using ESP32-S3 Touch Sensors) */
 #define TOUCH_THUMB_PIN             TOUCH_PAD_NUM9   
 #define TOUCH_INDEX_PIN             TOUCH_PAD_NUM10     
@@ -67,11 +53,13 @@
 
 /* Power Control Pins */
 #define SENSOR_POWER_CTRL_PIN       17  // Controls power to sensors
-#define SYSTEM_POWER_CTRL_PIN       19  // Not used (placeholder)
 
 /* Debug and Development Pins */
 #define DEBUG_LED_PIN               33
 #define DEBUG_UART_TX_PIN           43
 #define DEBUG_UART_RX_PIN           44
+
+/* Optional USB Detection Pin */
+#define USB_DETECT_PIN              12  // NEW: Detect USB charging (was camera HREF)
 
 #endif /* PIN_DEFINITIONS_H */

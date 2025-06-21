@@ -8,7 +8,7 @@
 #include "freertos/event_groups.h"
 #include "drivers/flex_sensor.h"
 #include "drivers/imu.h"
-#include "drivers/camera.h"
+#include "drivers/ble_camera.h"
 #include "drivers/touch.h"
 #include "app_main.h"
 #include "config/system_config.h"
@@ -113,8 +113,7 @@ static void sensor_task(void *arg) {
         }
         
         // Check if it's time to sample camera (if enabled)
-        if (g_system_config.camera_enabled && 
-            current_time - last_camera_sample_time >= CAMERA_SAMPLE_INTERVAL) {
+        if (current_time - last_camera_sample_time >= CAMERA_SAMPLE_INTERVAL) {
             if (sample_camera() == ESP_OK) {
                 last_camera_sample_time = current_time;
                 data_updated = true;
@@ -195,14 +194,14 @@ static esp_err_t sample_camera(void) {
     // First release any previous frame
     if (current_sensor_data.camera_data_valid && 
         current_sensor_data.camera_data.buffer != NULL) {
-        camera_release_frame();
+        ble_camera_release_frame();
         current_sensor_data.camera_data.buffer = NULL;
         current_sensor_data.camera_data_valid = false;
     }
     
-    // Capture new frame using a temporary camera_frame_t structure
-    camera_frame_t frame;
-    ret = camera_capture_frame(&frame);
+    // Capture new frame using a temporary ble_camera_frame_t structure
+    ble_camera_frame_t frame;
+    ret = ble_camera_capture_frame(&frame);
     if (ret != ESP_OK) {
         ESP_LOGW(TAG, "Failed to capture camera frame: %s", esp_err_to_name(ret));
         return ret;

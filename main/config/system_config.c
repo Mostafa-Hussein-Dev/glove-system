@@ -7,7 +7,7 @@
 
 static const char *TAG = "SYSTEM_CONFIG";
 #define CONFIG_NVS_NAMESPACE "system_config"
-#define CONFIG_NVS_KEY "config"
+#define CONFIG_NVS_KEY "config"  
 
 esp_err_t system_config_init(void) {
     return ESP_OK;

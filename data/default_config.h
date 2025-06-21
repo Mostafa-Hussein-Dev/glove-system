@@ -19,7 +19,6 @@ static const system_config_t DEFAULT_SYSTEM_CONFIG = {
     .bluetooth_enabled = true,
     .power_save_enabled = true,
     .touch_enabled = true,
-    .camera_enabled = false,  // Camera disabled by default to save power
     .calibration_required = true
 };
 

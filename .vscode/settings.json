@@ -38,8 +38,17 @@
     "esp_lcd_panel_vendor.h": "c",
     "*.inc": "c",
     "imu.h": "c",
-    "semphr.h": "c"
+    "semphr.h": "c",
+    "text_generation.h": "c",
+    "i2c_master.h": "c",
+    "esp_gatt_common_api.h": "c"
   },
   "C_Cpp.errorSquiggles": "disabled",
-  "C_Cpp.dimInactiveRegions": false
+  "C_Cpp.dimInactiveRegions": false,
+  "clangd.path": "C:\\Espressif\\tools\\esp-clang\\esp-18.1.2_20240912\\esp-clang\\bin\\clangd.exe",
+  "clangd.arguments": [
+    "--background-index",
+    "--query-driver=C:\\Espressif\\tools\\xtensa-esp-elf\\esp-14.2.0_20241119\\xtensa-esp-elf\\bin\\xtensa-esp32s3-elf-gcc.exe",
+    "--compile-commands-dir=c:\\Users\\MostafaHussein\\Desktop\\Embedded Systems Project\\glove-system\\build"
+  ]
 }

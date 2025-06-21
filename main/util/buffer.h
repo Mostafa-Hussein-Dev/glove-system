@@ -7,7 +7,7 @@
 #include "esp_err.h"
 #include "config/system_config.h"
 #include "drivers/imu.h"       // For imu_data_t
-#include "drivers/camera.h"    // For camera_frame_t
+#include "drivers/ble_camera.h"    // For ble_camera_frame_t
 
 /**
  * @brief Structure to hold flex sensor data
@@ -32,7 +32,7 @@ typedef struct {
 typedef struct sensor_data_s {
     flex_sensor_data_t flex_data;
     imu_data_t imu_data;
-    camera_frame_t camera_data;
+    ble_camera_frame_t camera_data;
     touch_sensor_data_t touch_data;
     bool flex_data_valid;
     bool imu_data_valid;

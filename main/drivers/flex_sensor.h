@@ -75,5 +75,7 @@ esp_err_t flex_sensor_set_filtering(bool enable);
 esp_err_t flex_sensor_get_health_status(flex_sensor_health_t* health);
 esp_err_t flex_sensor_test_connectivity(void);
 esp_err_t flex_sensor_calibrate_noise_floor(void);
+void flex_sensor_test_calibration_math(finger_t finger);
+
 
 #endif /* DRIVERS_FLEX_SENSOR_H */

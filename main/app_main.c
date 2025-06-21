@@ -25,7 +25,7 @@
 #include "core/system_monitor.h"
 #include "drivers/flex_sensor.h"
 #include "drivers/imu.h"
-#include "drivers/camera.h"
+#include "drivers/ble_camera.h"
 #include "drivers/touch.h"
 #include "drivers/display.h"
 #include "drivers/audio.h"
@@ -83,7 +83,7 @@ static esp_err_t init_tasks(void);
 static void debug_mode_run(void);
 static void debug_test_flex_sensors(void);
 static void debug_test_imu(void);
-static void debug_test_camera(void);
+static void debug_test_ble_camera(void);
 static void debug_test_touch_sensors(void);
 static void debug_test_display(void);
 static void debug_test_audio(void);
@@ -192,8 +192,8 @@ esp_err_t app_init(void) {
     // Set system initialization complete
     xEventGroupSetBits(g_system_event_group, SYSTEM_EVENT_INIT_COMPLETE);
     
-    ESP_LOGI(TAG, "Application initialized successfully");
-    return ESP_OK;
+    ESP_LOGI(TAG, "=== Sign Language Glove Ready ===");
+   return ESP_OK;
 }
 
 static esp_err_t init_nvs(void) {
@@ -290,7 +290,6 @@ static esp_err_t init_system_config(void) {
     g_system_config.bluetooth_enabled = true;
     g_system_config.power_save_enabled = true;
     g_system_config.touch_enabled = true;
-    g_system_config.camera_enabled = false; // Camera initially disabled to save power
     g_system_config.calibration_required = true;
     
     // Load configuration from NVS if available
@@ -327,6 +326,11 @@ static esp_err_t init_drivers(void) {
         ESP_LOGE(TAG, "Failed to initialize flex sensors: %s", esp_err_to_name(ret));
         return ret;
     }
+
+    ESP_LOGI("MAIN", "Testing flex sensor calibration...");
+    for (int i = 0; i < FINGER_COUNT; i++) {
+        flex_sensor_test_calibration_math(i);
+    }
     
     
     // Initialize IMU (it will use the existing I2C bus)
@@ -358,13 +362,18 @@ static esp_err_t init_drivers(void) {
     }
     
     // Initialize camera (if enabled)
-    if (g_system_config.camera_enabled) {
-        ret = camera_init();
-        if (ret != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to initialize camera: %s", esp_err_to_name(ret));
-            // Camera is optional, so we continue even if it fails
-            g_system_config.camera_enabled = false;
-        }
+    ret = ble_camera_init();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize BLE camera: %s", esp_err_to_name(ret));
+        return ret;
+    }
+
+    //Connecting to camera
+    ESP_LOGI(TAG, "Attempting to connect to ESP32-CAM...");
+    ret = ble_camera_connect(DEVICE_NAME);
+    if (ret != ESP_OK) {
+        ESP_LOGW(TAG, "Initial camera connection failed, will retry automatically");
+        // Don't return error - camera connection can be established later
     }
     
     // Initialize power management
@@ -560,7 +569,7 @@ static void debug_mode_run(void) {
         
 
         // Test output devices every 10 seconds
-        /*
+        
         if (current_time - last_full_test_time > 10000) {
             ESP_LOGI(TAG, "Testing Display...");
             debug_test_display();
@@ -576,7 +585,7 @@ static void debug_mode_run(void) {
             static uint32_t last_camera_test = 0;
             if (current_time - last_camera_test > 20000) {
                 ESP_LOGI(TAG, "Testing Camera...");
-                debug_test_camera();
+                debug_test_ble_camera();
                 last_camera_test = current_time;
             }
             
@@ -584,13 +593,12 @@ static void debug_mode_run(void) {
             last_full_test_time = current_time;
             
         }
-        */
+        
            
         
         ESP_LOGI(TAG, "=== DEBUG LOOP %lu COMPLETE ===\n", loop_count - 1);
         
-        // Wait 2 seconds between test cycles
-        vTaskDelay(pdMS_TO_TICKS(20));
+        vTaskDelay(pdMS_TO_TICKS(10000));
     }
 }
 
@@ -608,6 +616,11 @@ static void debug_test_flex_sensors(void) {
             ESP_LOGI(TAG, "  Middle: Raw=%4d, Angle=%.1f°", raw_values[2], angles[2]);
             ESP_LOGI(TAG, "  Ring:   Raw=%4d, Angle=%.1f°", raw_values[3], angles[3]);
             ESP_LOGI(TAG, "  Pinky:  Raw=%4d, Angle=%.1f°", raw_values[4], angles[4]);
+
+            ESP_LOGI(TAG, "Testing calibration math:");
+            for (int i = 0; i < FINGER_COUNT; i++) {
+                flex_sensor_test_calibration_math(i);
+            }
         } else {
             ESP_LOGE(TAG, "✗ Flex Sensors: Failed to read angles: %s", esp_err_to_name(ret));
         }
@@ -634,19 +647,92 @@ static void debug_test_imu(void) {
     }
 }
 
-static void debug_test_camera(void) {
-    camera_frame_t frame;
+static void debug_test_ble_camera(void) {
+    ESP_LOGI(TAG, "--- BLE Camera Test ---");
     
-    esp_err_t ret = camera_capture_frame(&frame);
-    if (ret == ESP_OK) {
-        ESP_LOGI(TAG, "✓ Camera OK:");
-        ESP_LOGI(TAG, "  Frame: %dx%d, Size=%lu bytes", frame.width, frame.height, frame.buffer_size);
-        
-        // Release the frame buffer
-        camera_release_frame();
-    } else {
-        ESP_LOGE(TAG, "✗ Camera: Failed to capture frame: %s", esp_err_to_name(ret));
+    // Initialize BLE camera
+    esp_err_t ret = ble_camera_init();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "✗ BLE Camera: Failed to initialize: %s", esp_err_to_name(ret));
+        return;
     }
+    
+    ESP_LOGI(TAG, "✓ BLE Camera: Initialized successfully");
+    
+    // Attempt to connect
+    ESP_LOGI(TAG, "Attempting to connect to ESP32 CAMERA...");
+    ret = ble_camera_connect(DEVICE_NAME);
+    if (ret != ESP_OK) {
+        ESP_LOGW(TAG, "⚠ BLE Camera: Connection failed (camera may not be available)");
+        return;
+    }
+    
+    // Wait for connection
+    int timeout = 10; // 10 seconds timeout
+    ble_camera_status_t status;
+    while (timeout > 0) {
+        ret = ble_camera_get_status(&status);
+        if (ret == ESP_OK && status == BLE_CAMERA_STATUS_CONNECTED) {
+            ESP_LOGI(TAG, "✓ BLE Camera: Connected successfully");
+            break;
+        }
+        vTaskDelay(pdMS_TO_TICKS(1000));
+        timeout--;
+    }
+    
+    if (timeout == 0) {
+        ESP_LOGW(TAG, "⚠ BLE Camera: Connection timeout");
+        return;
+    }
+    
+    // Test frame capture
+    ble_camera_frame_t frame;
+    ret = ble_camera_capture_frame(&frame);
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG, "✓ BLE Camera: Frame captured successfully");
+        ESP_LOGI(TAG, "  Frame: %dx%d, Size=%lu bytes, Format=%d", 
+                 frame.width, frame.height, frame.buffer_size, frame.format);
+    } else {
+        ESP_LOGW(TAG, "⚠ BLE Camera: Frame capture failed: %s", esp_err_to_name(ret));
+    }
+    
+    // Test streaming
+    ESP_LOGI(TAG, "Testing streaming mode...");
+    ret = ble_camera_start_streaming();
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG, "✓ BLE Camera: Streaming started");
+        
+        // Capture a few frames
+        for (int i = 0; i < 3; i++) {
+            vTaskDelay(pdMS_TO_TICKS(500));
+            ret = ble_camera_capture_frame(&frame);
+            if (ret == ESP_OK) {
+                ESP_LOGI(TAG, "  Stream frame %d: %dx%d, %lu bytes", 
+                         i+1, frame.width, frame.height, frame.buffer_size);
+            }
+        }
+        
+        ble_camera_stop_streaming();
+        ESP_LOGI(TAG, "✓ BLE Camera: Streaming stopped");
+    } else {
+        ESP_LOGW(TAG, "⚠ BLE Camera: Streaming failed to start");
+    }
+    
+    // Get statistics
+    ble_camera_stats_t stats;
+    ret = ble_camera_get_stats(&stats);
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG, "✓ BLE Camera Statistics:");
+        ESP_LOGI(TAG, "  Frames received: %lu", stats.frames_received);
+        ESP_LOGI(TAG, "  Frames dropped: %lu", stats.frames_dropped);
+        ESP_LOGI(TAG, "  Bytes received: %lu", stats.bytes_received);
+        ESP_LOGI(TAG, "  Frame rate: %.1f fps", stats.frame_rate);
+        ESP_LOGI(TAG, "  Signal strength: %d dBm", stats.signal_strength);
+    }
+    
+    // Disconnect
+    ble_camera_disconnect();
+    ESP_LOGI(TAG, "BLE Camera test completed");
 }
 
 static void debug_test_touch_sensors(void) {
@@ -763,7 +849,7 @@ static void debug_display_system_info(void) {
 // Main application entry point
 void app_main(void) {
 
-    ESP_LOGI(TAG, "Sign Language Translation Glove starting...");
+    ESP_LOGI(TAG, "=== Sign Language Translation Glove starting ===");
     
     // Initialize the application
     esp_err_t ret = app_init();
@@ -785,12 +871,55 @@ void app_main(void) {
     } else {
         ESP_LOGI(TAG, "=== NORMAL MODE ===");
         ESP_LOGI(TAG, "System running with tasks");
+        ESP_LOGI(TAG, "Waiting for BLE camera connection...");
         
         // Normal operation - system runs via tasks
         // Main thread can be used for monitoring if needed
         while (1) {
-            // Periodic system checks could be done here
-            vTaskDelay(pdMS_TO_TICKS(5000));
+            // Periodic system health check
+            ESP_LOGI(TAG, "System running - Free heap: %lu bytes", esp_get_free_heap_size());
+            
+            // Check BLE camera status (NEW)
+            ble_camera_status_t camera_status;
+            if (ble_camera_get_status(&camera_status) == ESP_OK) {
+                static ble_camera_status_t prev_status = BLE_CAMERA_STATUS_DISCONNECTED;
+                if (camera_status != prev_status) {
+                    const char* status_str[] = {"DISCONNECTED", "CONNECTING", "CONNECTED", "STREAMING", "ERROR"};
+                    ESP_LOGI(TAG, "BLE Camera status: %s", status_str[camera_status]);
+                    prev_status = camera_status;
+                    
+                    // Optional: Log camera statistics when connected
+                    if (camera_status == BLE_CAMERA_STATUS_CONNECTED || camera_status == BLE_CAMERA_STATUS_STREAMING) {
+                        ble_camera_stats_t stats;
+                        if (ble_camera_get_stats(&stats) == ESP_OK) {
+                            ESP_LOGI(TAG, "Camera stats: %lu frames, %.1f fps, %d dBm", 
+                                     stats.frames_received, stats.frame_rate, stats.signal_strength);
+                        }
+                    }
+                }
+            }
+            
+            // Check battery status periodically (NEW - every 5 cycles = 25 seconds)
+            static int battery_check_counter = 0;
+            if (++battery_check_counter >= 5) {
+                battery_status_t battery;
+                if (power_management_get_battery_status(&battery) == ESP_OK) {
+                    ESP_LOGI(TAG, "Battery: %.2fV (%d%%) %s", 
+                             battery.voltage_mv / 1000.0f, 
+                             battery.percentage,
+                             battery.is_charging ? "[CHARGING]" : "");
+                    
+                    if (battery.is_low) {
+                        ESP_LOGW(TAG, "⚠️  LOW BATTERY WARNING");
+                    }
+                    if (battery.is_critical) {
+                        ESP_LOGE(TAG, "🔋 CRITICAL BATTERY - SAVE WORK!");
+                    }
+                }
+                battery_check_counter = 0;
+            }
+            
+            vTaskDelay(pdMS_TO_TICKS(5000));  // Check every 5 seconds
         }
     }
 }

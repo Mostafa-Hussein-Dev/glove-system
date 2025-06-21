@@ -72,6 +72,9 @@
 #define MAX_GESTURE_DURATION_MS     (2000)
 #define MIN_GESTURE_DURATION_MS     (200)
 
+//ESP32 CAM Device Name
+#define DEVICE_NAME "ESP32CAM-SLG"
+
 /* System states */
 typedef enum {
     SYSTEM_STATE_INIT,
@@ -118,7 +121,6 @@ typedef struct {
     bool bluetooth_enabled;
     bool power_save_enabled;
     bool touch_enabled;
-    bool camera_enabled;
     bool calibration_required;
     bool imu_enabled;
 } system_config_t;

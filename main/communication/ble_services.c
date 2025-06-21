@@ -29,7 +29,7 @@ static const char *TAG = "BLE_SERVICE";
 #define PROFILE_APP_IDX                    0
 
 // BLE service parameters
-#define DEVICE_NAME                        BLE_DEVICE_NAME
+#define DEVICE_NAME                        
 #define SERVICE_UUID                       GATTS_SERVICE_UUID_SIGN_LANGUAGE
 #define SERVICE_INSTANCE_ID                0
 

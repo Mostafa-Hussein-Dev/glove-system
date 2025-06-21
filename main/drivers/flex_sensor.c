@@ -108,6 +108,10 @@ static const char *TAG = "FLEX_SENSOR";
 #define SENSOR_TIMEOUT_MS 100
 #define STABILITY_THRESHOLD 20
 
+#define FLEX_SENSOR_DIRECTION  1
+#define FLAT_ADC_READING    2048
+#define BENT_ADC_READING    819
+
 // Global variables
 static flex_sensor_calibration_t sensor_calibration;
 static flex_sensor_health_t sensor_health;
@@ -139,6 +143,8 @@ static esp_err_t detect_sensor_direction(finger_t finger);
 static void calculate_calibration_factors(void);
 static bool validate_adc_value(finger_t finger, uint16_t value);
 static esp_err_t check_sensor_connectivity(finger_t finger);
+void flex_sensor_test_calibration_math(finger_t finger);
+
 
 esp_err_t flex_sensor_init(void) {
     if (driver_initialized) {
@@ -250,16 +256,35 @@ static esp_err_t init_adc_unit(void) {
 }
 
 static esp_err_t init_calibration_defaults(void) {
-    // Initialize with reasonable defaults
+    // Clear calibration structure
+    memset(&sensor_calibration, 0, sizeof(sensor_calibration));
+    memset(&sensor_health, 0, sizeof(sensor_health));
+    
+    // Set default values based on your actual sensor characteristics
+    // 0° (flat): ADC ~2048, 90° (bent): ADC ~819 (decreasing sensor)
     for (int i = 0; i < FINGER_COUNT; i++) {
-        sensor_calibration.flat_value[i] = 1100;
-        sensor_calibration.bent_value[i] = 2450;
-        sensor_calibration.direction[i] = SENSOR_DIRECTION_INCREASING;
-        sensor_calibration.scale_factor[i] = 90.0f / 4095.0f;
-        sensor_calibration.offset[i] = 0.0f;
-        sensor_calibration.min_value[i] = 800;
-        sensor_calibration.max_value[i] = 4095;
-        sensor_calibration.calibrated[i] = true;
+        #if FLEX_SENSOR_TYPE_DECREASING
+            // Decreasing: higher ADC = flat, lower ADC = bent
+            sensor_calibration.flat_value[i] = FLAT_ADC_READING;  // 2048 = 0°
+            sensor_calibration.bent_value[i] = BENT_ADC_READING;  // 819 = 90°
+            sensor_calibration.direction[i] = SENSOR_DIRECTION_DECREASING;
+        #else
+            // Increasing: lower ADC = flat, higher ADC = bent  
+            sensor_calibration.flat_value[i] = BENT_ADC_READING;  // 819 = 0°
+            sensor_calibration.bent_value[i] = FLAT_ADC_READING;  // 2048 = 90°
+            sensor_calibration.direction[i] = SENSOR_DIRECTION_INCREASING;
+        #endif
+        
+            sensor_calibration.calibrated[i] = true;
+        
+        // Calculate initial calibration factors
+        uint16_t range = sensor_calibration.flat_value[i] - sensor_calibration.bent_value[i];
+        sensor_calibration.scale_factor[i] = -90.0f / (float)range;
+        sensor_calibration.offset[i] = -sensor_calibration.scale_factor[i] * sensor_calibration.flat_value[i];
+        
+        // Set valid ADC range with margin
+        sensor_calibration.min_value[i] = sensor_calibration.bent_value[i] - 200;  // 619
+        sensor_calibration.max_value[i] = sensor_calibration.flat_value[i] + 200;  // 2248
         
         // Initialize health status
         sensor_health.sensor_connected[i] = false;
@@ -267,6 +292,9 @@ static esp_err_t init_calibration_defaults(void) {
         sensor_health.noise_level[i] = 0;
         sensor_health.read_errors[i] = 0;
     }
+    
+    ESP_LOGI(TAG, "Initialized with default calibration values for decreasing sensors");
+    ESP_LOGI(TAG, "Flat: ~2048 ADC = 0°, Bent: ~819 ADC = 90°");
     
     return ESP_OK;
 }
@@ -434,10 +462,12 @@ esp_err_t flex_sensor_read_angles(float* angles) {
     uint16_t raw_values[FINGER_COUNT];
     esp_err_t ret = flex_sensor_read_raw(raw_values);
     
-    // Convert to angles even if some sensors failed
+    // Convert to angles using proper calibration
     for (int i = 0; i < FINGER_COUNT; i++) {
         if (sensor_calibration.calibrated[i]) {
-            float raw_angle = (float)raw_values[i] * 90.0f / 4095.0f;
+            // Use proper calibrated calculation with scale_factor and offset
+            float raw_angle = sensor_calibration.scale_factor[i] * (float)raw_values[i] + 
+                             sensor_calibration.offset[i];
             
             // Constrain to valid range
             angles[i] = fmaxf(0.0f, fminf(90.0f, raw_angle));
@@ -518,24 +548,48 @@ static esp_err_t detect_sensor_direction(finger_t finger) {
 static void calculate_calibration_factors(void) {
     for (int i = 0; i < FINGER_COUNT; i++) {
         if (sensor_calibration.calibrated[i]) {
-            uint16_t range = abs((int)sensor_calibration.bent_value[i] - 
-                               (int)sensor_calibration.flat_value[i]);
+            uint16_t flat_val = sensor_calibration.flat_value[i];
+            uint16_t bent_val = sensor_calibration.bent_value[i];
             
-            if (range > MIN_CALIBRATION_RANGE) {
-                sensor_calibration.scale_factor[i] = 90.0f / range;
-                sensor_calibration.offset[i] = -sensor_calibration.scale_factor[i] * 
-                                              sensor_calibration.flat_value[i];
+            // Determine direction and calculate factors correctly
+            if (bent_val < flat_val) {
+                // DECREASING sensor: ADC decreases when bent (your case: 2048->819)
+                sensor_calibration.direction[i] = SENSOR_DIRECTION_DECREASING;
+                uint16_t range = flat_val - bent_val;  // 2048 - 819 = 1229
                 
-                // Set valid range with some margin
-                sensor_calibration.min_value[i] = fmin(sensor_calibration.flat_value[i], 
-                                                      sensor_calibration.bent_value[i]) - 200;
-                sensor_calibration.max_value[i] = fmax(sensor_calibration.flat_value[i], 
-                                                      sensor_calibration.bent_value[i]) + 200;
+                if (range > MIN_CALIBRATION_RANGE) {
+                    // Linear mapping: flat_val->0°, bent_val->90°
+                    // angle = 90 * (flat_val - raw_val) / range
+                    // angle = 90 * flat_val / range - 90 * raw_val / range
+                    sensor_calibration.scale_factor[i] = -90.0f / (float)range;  // negative slope
+                    sensor_calibration.offset[i] = 90.0f * flat_val / (float)range;
+                } else {
+                    ESP_LOGW(TAG, "Finger %d calibration range too small (%d)", i, range);
+                    sensor_calibration.calibrated[i] = false;
+                }
             } else {
-                ESP_LOGW(TAG, "Finger %d calibration range too small (%d), using defaults", 
-                         i, range);
-                sensor_calibration.calibrated[i] = false;
+                // INCREASING sensor: ADC increases when bent
+                sensor_calibration.direction[i] = SENSOR_DIRECTION_INCREASING;
+                uint16_t range = bent_val - flat_val;
+                
+                if (range > MIN_CALIBRATION_RANGE) {
+                    // Linear mapping: flat_val->0°, bent_val->90°
+                    sensor_calibration.scale_factor[i] = 90.0f / (float)range;
+                    sensor_calibration.offset[i] = -90.0f * flat_val / (float)range;
+                } else {
+                    ESP_LOGW(TAG, "Finger %d calibration range too small (%d)", i, range);
+                    sensor_calibration.calibrated[i] = false;
+                }
             }
+            
+            // Set valid range with margin
+            sensor_calibration.min_value[i] = fmin(flat_val, bent_val) - 200;
+            sensor_calibration.max_value[i] = fmax(flat_val, bent_val) + 200;
+            
+            ESP_LOGI(TAG, "Finger %d: flat=%d, bent=%d, range=%d, scale=%.6f, offset=%.2f, dir=%s", 
+                     i, flat_val, bent_val, abs(bent_val - flat_val),
+                     sensor_calibration.scale_factor[i], sensor_calibration.offset[i],
+                     sensor_calibration.direction[i] == SENSOR_DIRECTION_DECREASING ? "DEC" : "INC");
         }
     }
 }
@@ -594,13 +648,11 @@ esp_err_t flex_sensor_read_finger(finger_t finger, uint16_t* raw_value, float* a
     esp_err_t ret = flex_sensor_read_raw_single(finger, raw_value);
     
     if (ret == ESP_OK && sensor_calibration.calibrated[finger]) {
+        // Calculate angle using calibrated scale and offset
         float raw_angle = sensor_calibration.scale_factor[finger] * (*raw_value) + 
                          sensor_calibration.offset[finger];
         
-        // Apply direction correction
-        if (sensor_calibration.direction[finger] == SENSOR_DIRECTION_DECREASING) {
-            raw_angle = 90.0f - raw_angle;
-        }
+        // NO ADDITIONAL DIRECTION CORRECTION - it's already in scale_factor and offset!
         
         // Constrain to valid range
         *angle = fmaxf(0.0f, fminf(90.0f, raw_angle));
@@ -1076,4 +1128,27 @@ esp_err_t flex_sensor_deinit(void) {
     driver_initialized = false;
     ESP_LOGI(TAG, "Flex sensor driver deinitialized");
     return ESP_OK;
+}
+
+void flex_sensor_test_calibration_math(finger_t finger) {
+    if (finger >= FINGER_COUNT || !sensor_calibration.calibrated[finger]) {
+        ESP_LOGW(TAG, "Finger %d not calibrated", finger);
+        return;
+    }
+    
+    uint16_t flat_val = sensor_calibration.flat_value[finger];
+    uint16_t bent_val = sensor_calibration.bent_value[finger];
+    float scale = sensor_calibration.scale_factor[finger];
+    float offset = sensor_calibration.offset[finger];
+    
+    // Test flat position (should give 0°)
+    float flat_angle = scale * flat_val + offset;
+    
+    // Test bent position (should give 90°)
+    float bent_angle = scale * bent_val + offset;
+    
+    ESP_LOGI(TAG, "Calibration test for finger %d:", finger);
+    ESP_LOGI(TAG, "  Flat value %d -> %.2f° (should be 0°)", flat_val, flat_angle);
+    ESP_LOGI(TAG, "  Bent value %d -> %.2f° (should be 90°)", bent_val, bent_angle);
+    ESP_LOGI(TAG, "  Scale: %.6f, Offset: %.2f", scale, offset);
 }

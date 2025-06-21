@@ -12,6 +12,8 @@
 #include "util/debug.h"
 #include "drivers/display.h"
 #include "communication/ble_service.h"
+#include "drivers/ble_camera.h"
+#include "config/system_config.h"
 
 static const char *TAG = "POWER_MGMT";
 
@@ -19,7 +21,7 @@ static const char *TAG = "POWER_MGMT";
 #define PERIPHERAL_DISPLAY   1
 #define PERIPHERAL_AUDIO     2
 #define PERIPHERAL_BLE       3
-#define PERIPHERAL_CAMERA    4
+#define PERIPHERAL_BLE_CAMERA    4
 
 // ADC handles
 static adc_oneshot_unit_handle_t adc_handle;
@@ -67,9 +69,9 @@ static const struct {
 esp_err_t power_management_init(void) {
     esp_err_t ret;
     
-    // Initialize ADC for battery monitoring
+    // FIXED: Initialize ADC for battery monitoring
     adc_oneshot_unit_init_cfg_t adc_init_config = {
-        .unit_id = BATTERY_ADC_UNIT,
+        .unit_id = BATTERY_ADC_UNIT,  // Now correctly ADC_UNIT_1
     };
     ret = adc_oneshot_new_unit(&adc_init_config, &adc_handle);
     if (ret != ESP_OK) {
@@ -110,6 +112,18 @@ esp_err_t power_management_init(void) {
     };
     gpio_config(&io_conf);
     
+    // NEW: Configure USB detection pin if defined
+    #ifdef USB_DETECT_PIN
+    gpio_config_t usb_detect_conf = {
+        .intr_type = GPIO_INTR_DISABLE,
+        .mode = GPIO_MODE_INPUT,
+        .pin_bit_mask = (1ULL << USB_DETECT_PIN),
+        .pull_down_en = 1,
+        .pull_up_en = 0
+    };
+    gpio_config(&usb_detect_conf);
+    #endif
+    
     // Enable all peripherals initially
     gpio_set_level(SENSOR_POWER_CTRL_PIN, 1);
     
@@ -132,9 +146,12 @@ esp_err_t power_management_init(void) {
     // Set current time as last activity time
     power_state.last_activity_time_ms = esp_timer_get_time() / 1000;
     
-    ESP_LOGI(TAG, "Power management initialized. Battery: %dmV (%d%%)", 
-             power_state.battery.voltage_mv, power_state.battery.percentage);
-             
+    ESP_LOGI(TAG, "Power management initialized successfully");
+    ESP_LOGI(TAG, "Battery: %.2fV (%d%%), %s", 
+             power_state.battery.voltage_mv / 1000.0f,
+             power_state.battery.percentage,
+             power_state.battery.is_charging ? "Charging" : "Not charging");
+    
     return ESP_OK;
 }
 
@@ -179,7 +196,7 @@ esp_err_t power_management_set_mode(power_mode_t mode) {
             power_management_set_peripheral_power(PERIPHERAL_DISPLAY, true);
             power_management_set_peripheral_power(PERIPHERAL_AUDIO, true);
             power_management_set_peripheral_power(PERIPHERAL_BLE, true);
-            power_management_set_peripheral_power(PERIPHERAL_CAMERA, false);
+            power_management_set_peripheral_power(PERIPHERAL_BLE_CAMERA, false);
             
             {
                 // Configure automatic light sleep
@@ -207,7 +224,7 @@ esp_err_t power_management_set_mode(power_mode_t mode) {
             power_management_set_peripheral_power(PERIPHERAL_DISPLAY, true);
             power_management_set_peripheral_power(PERIPHERAL_AUDIO, false);
             power_management_set_peripheral_power(PERIPHERAL_BLE, true);
-            power_management_set_peripheral_power(PERIPHERAL_CAMERA, false);
+            power_management_set_peripheral_power(PERIPHERAL_BLE_CAMERA, false);
             
             {
                 // Configure aggressive automatic light sleep
@@ -235,7 +252,7 @@ esp_err_t power_management_set_mode(power_mode_t mode) {
             power_management_set_peripheral_power(PERIPHERAL_DISPLAY, false);
             power_management_set_peripheral_power(PERIPHERAL_AUDIO, false);
             power_management_set_peripheral_power(PERIPHERAL_BLE, false);
-            power_management_set_peripheral_power(PERIPHERAL_CAMERA, false);
+            power_management_set_peripheral_power(PERIPHERAL_BLE_CAMERA, false);
             
             {
                 // Configure very aggressive automatic light sleep
@@ -272,8 +289,8 @@ esp_err_t power_management_get_battery_status(battery_status_t* status) {
     esp_err_t ret = adc_oneshot_read(adc_handle, BATTERY_ADC_CHANNEL, &adc_reading);
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to read ADC: %s", esp_err_to_name(ret));
+        return ret;
     }
-    return ret;
     
     // Convert ADC reading to voltage
     int voltage_mv = 0;
@@ -281,44 +298,52 @@ esp_err_t power_management_get_battery_status(battery_status_t* status) {
         ret = adc_cali_raw_to_voltage(adc_cali_handle, adc_reading, &voltage_mv);
         if (ret != ESP_OK) {
             ESP_LOGW(TAG, "Failed to convert ADC reading to voltage: %s", esp_err_to_name(ret));
-            // Continue with uncalibrated reading
-            voltage_mv = adc_reading * 3300 / 4095; // Simple approximation
+            // Fall back to simple calculation
+            voltage_mv = adc_reading * 3300 / 4095;
         }
     } else {
         // No calibration available, use approximation
         voltage_mv = adc_reading * 3300 / 4095;
     }
     
-    // Apply voltage divider conversion if necessary
-    // Note: This assumes a voltage divider is used to measure battery voltage
-    // Adjust the formula according to your hardware
-    voltage_mv = voltage_mv * 2; // Example: if using a 1:1 voltage divider
+    // FIXED: Apply voltage divider conversion (10kΩ + 10kΩ divider = 2x)
+    voltage_mv *= 2;
     
-    // Determine battery percentage
+    // Convert voltage to percentage
     uint8_t percentage = 0;
-    for (int i = 0; i < BATTERY_LEVELS_COUNT; i++) {
-        if (voltage_mv >= battery_levels[i].voltage_mv) {
-            percentage = battery_levels[i].percentage;
+    for (int i = 0; i < BATTERY_LEVELS_COUNT - 1; i++) {
+        if (voltage_mv >= battery_levels[i+1].voltage_mv) {
+            // Linear interpolation between two points
+            uint16_t v_diff = battery_levels[i].voltage_mv - battery_levels[i+1].voltage_mv;
+            uint8_t p_diff = battery_levels[i].percentage - battery_levels[i+1].percentage;
+            uint16_t v_offset = voltage_mv - battery_levels[i+1].voltage_mv;
+            percentage = battery_levels[i+1].percentage + (p_diff * v_offset) / v_diff;
             break;
         }
     }
     
-    // Check if battery is low or critical
-    bool is_low = voltage_mv <= BATTERY_LOW_THRESHOLD_MV;
-    bool is_critical = voltage_mv <= BATTERY_CRITICAL_MV;
-    
-    // Check if charging (if hardware supports it)
-    // For this example, we'll assume it's not charging
+    // Detect charging status
     bool is_charging = false;
+    #ifdef USB_DETECT_PIN
+    // Check USB power presence
+    is_charging = gpio_get_level(USB_DETECT_PIN);
+    #else
+    // Alternative: detect charging by voltage trend (simplified)
+    static uint16_t prev_voltage = 0;
+    if (prev_voltage > 0 && voltage_mv > prev_voltage + 50) {
+        is_charging = true; // Voltage rising significantly
+    }
+    prev_voltage = voltage_mv;
+    #endif
     
-    // Update the status
+    // Fill status structure
     status->voltage_mv = voltage_mv;
     status->percentage = percentage;
     status->is_charging = is_charging;
-    status->is_low = is_low;
-    status->is_critical = is_critical;
+    status->is_low = (voltage_mv < 3400);      // Below 20%
+    status->is_critical = (voltage_mv < 3300); // Below 10%
     
-    // Also update internal state
+    // Update internal state
     memcpy(&power_state.battery, status, sizeof(battery_status_t));
     
     return ESP_OK;
@@ -404,23 +429,15 @@ esp_err_t power_management_set_cpu_frequency(uint32_t frequency_mhz) {
 }
 
 esp_err_t power_management_set_peripheral_power(uint8_t peripheral, bool enable) {
-    // Validate peripheral
-    if (peripheral >= 5) {
-        ESP_LOGE(TAG, "Invalid peripheral ID: %d", peripheral);
+    if (peripheral >= 5) {  // Updated to 5 peripherals
         return ESP_ERR_INVALID_ARG;
     }
     
-    // Check if state is already correct
-    if (power_state.peripherals_enabled[peripheral] == enable) {
-        return ESP_OK;
-    }
-    
-    // Update state
     power_state.peripherals_enabled[peripheral] = enable;
     
-    // Apply power control
     switch (peripheral) {
         case PERIPHERAL_SENSORS:
+            // Control sensor power via GPIO
             gpio_set_level(SENSOR_POWER_CTRL_PIN, enable ? 1 : 0);
             ESP_LOGI(TAG, "Sensors power %s", enable ? "ON" : "OFF");
             break;
@@ -428,9 +445,9 @@ esp_err_t power_management_set_peripheral_power(uint8_t peripheral, bool enable)
         case PERIPHERAL_DISPLAY:
             // Display power control
             if (enable) {
-                display_power_on();
+                display_init();
             } else {
-                display_power_off();
+                display_clear();
             }
             ESP_LOGI(TAG, "Display power %s", enable ? "ON" : "OFF");
             break;
@@ -451,10 +468,13 @@ esp_err_t power_management_set_peripheral_power(uint8_t peripheral, bool enable)
             ESP_LOGI(TAG, "BLE power %s", enable ? "ON" : "OFF");
             break;
             
-        case PERIPHERAL_CAMERA:
-            // Camera power control would depend on the hardware
-            // For this example, we'll just log the state change
-            ESP_LOGI(TAG, "Camera power %s", enable ? "ON" : "OFF");
+        case PERIPHERAL_BLE_CAMERA:  // NEW: BLE Camera control
+            if (enable) {
+                ble_camera_connect(DEVICE_NAME);
+            } else {
+                ble_camera_disconnect();
+            }
+            ESP_LOGI(TAG, "BLE Camera power %s", enable ? "ON" : "OFF");
             break;
     }
     
@@ -491,5 +511,28 @@ esp_err_t power_management_process_inactivity(uint32_t current_time_ms) {
 
 esp_err_t power_management_reset_inactivity_timer(void) {
     power_state.last_activity_time_ms = esp_timer_get_time() / 1000;
+    return ESP_OK;
+}
+
+esp_err_t power_management_optimize_for_camera(bool camera_active) {
+    if (camera_active) {
+        // Increase CPU frequency for BLE data processing
+        esp_pm_config_t config = {
+            .max_freq_mhz = 160,
+            .min_freq_mhz = 80,   // Higher minimum for BLE stability
+            .light_sleep_enable = false  // Disable sleep during camera use
+        };
+        esp_pm_configure(&config);
+        
+        // Disable other power-hungry peripherals temporarily
+        power_management_set_peripheral_power(PERIPHERAL_AUDIO, false);
+        
+        ESP_LOGI(TAG, "Power optimized for camera mode");
+    } else {
+        // Return to normal power management
+        power_management_set_mode(power_state.current_mode);
+        ESP_LOGI(TAG, "Power returned to normal mode");
+    }
+    
     return ESP_OK;
 }

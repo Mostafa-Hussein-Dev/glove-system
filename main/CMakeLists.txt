@@ -7,7 +7,7 @@ idf_component_register(
         "core/system_monitor.c"
         "drivers/flex_sensor.c"
         "drivers/imu.c"
-        "drivers/camera.c"
+        "drivers/ble_camera.c"
         "drivers/touch.c"
         "drivers/display.c"
         "drivers/audio.c"
