@@ -41,7 +41,9 @@
     "semphr.h": "c",
     "text_generation.h": "c",
     "i2c_master.h": "c",
-    "esp_gatt_common_api.h": "c"
+    "esp_gatt_common_api.h": "c",
+    "ble_camera.h": "c",
+    "buffer.h": "c"
   },
   "C_Cpp.errorSquiggles": "disabled",
   "C_Cpp.dimInactiveRegions": false,

@@ -8,6 +8,12 @@
 #include "driver/uart.h"
 #include "drivers/display.h"
 #include "communication/ble_service.h"
+#include "ml/model_manager.h"
+#include "ml/ml_test.h"
+#include "util/buffer.h"
+#include "drivers/flex_sensor.h"
+#include "ml/data_preprocessor.h"
+#include "ml/ml_inference.h"
 
 static const char *TAG = "DEBUG";
 
@@ -156,4 +162,62 @@ esp_err_t debug_assert(bool condition, const char* tag, const char* message, int
     }
     
     return ESP_OK;
+}
+
+static void debug_ml_status(void) {
+    ESP_LOGI(TAG, "=== ML System Status ===");
+    
+    // Check model status
+    bool static_ready = model_manager_is_ready(MODEL_TYPE_STATIC_CNN);
+    bool dynamic_ready = model_manager_is_ready(MODEL_TYPE_DYNAMIC_LSTM);
+    
+    ESP_LOGI(TAG, "Models loaded:");
+    ESP_LOGI(TAG, "  Static CNN: %s", static_ready ? "YES" : "NO");
+    ESP_LOGI(TAG, "  Dynamic LSTM: %s", dynamic_ready ? "YES" : "NO");
+    
+    // Memory usage
+    ESP_LOGI(TAG, "Memory usage:");
+    ESP_LOGI(TAG, "  Free heap: %u bytes", esp_get_free_heap_size());
+    ESP_LOGI(TAG, "  Free SPIRAM: %zu bytes", heap_caps_get_free_size(MALLOC_CAP_SPIRAM));
+    
+    // Run performance test if models are loaded
+    if (static_ready) {
+        ml_test_performance();
+    }
+}
+
+static void debug_ml_inference_test(void) {
+    ESP_LOGI(TAG, "Running ML inference test...");
+    
+    // Create dummy sensor data
+    sensor_data_t sensor_data = {0};
+    sensor_data.flex_data_valid = true;
+    sensor_data.imu_data_valid = true;
+    sensor_data.timestamp = esp_timer_get_time() / 1000;
+    
+    // Simulate fist gesture
+    for (int i = 0; i < FINGER_COUNT; i++) {
+        sensor_data.flex_data.angles[i] = 80.0f + (rand() % 20) - 10;  // 70-90 degrees
+    }
+    
+    // Simulate IMU data
+    sensor_data.imu_data.accel[0] = 0.0f;
+    sensor_data.imu_data.accel[1] = 0.0f;
+    sensor_data.imu_data.accel[2] = 9.8f;
+    
+    // Preprocess and run inference
+    ml_input_t ml_input;
+    esp_err_t ret = data_preprocessor_static(&sensor_data, &ml_input);
+    if (ret == ESP_OK) {
+        ml_result_t result;
+        ret = ml_inference_run(&ml_input, MODEL_TYPE_STATIC_CNN, &result);
+        if (ret == ESP_OK) {
+            ESP_LOGI(TAG, "Inference result: %s (%.2f confidence, %u μs)", 
+                    result.gesture_name, result.confidence, result.inference_time_us);
+        } else {
+            ESP_LOGE(TAG, "Inference failed");
+        }
+    } else {
+        ESP_LOGE(TAG, "Preprocessing failed");
+    }
 }

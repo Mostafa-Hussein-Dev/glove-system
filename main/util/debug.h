@@ -92,6 +92,10 @@ void debug_get_time_str(char* buffer, size_t size);
  */
 esp_err_t debug_assert(bool condition, const char* tag, const char* message, int line, const char* file);
 
+static void debug_ml_inference_test(void);
+
+static void debug_ml_status(void);
+
 /**
  * @brief Macro for assertions in debug mode
  */

@@ -3,3 +3,4 @@ source "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/co
 source "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/components/esp_rom/Kconfig.projbuild"
 source "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/components/esptool_py/Kconfig.projbuild"
 source "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/components/partition_table/Kconfig.projbuild"
+source "C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/managed_components/espressif__esp-nn/Kconfig.projbuild"

@@ -559,6 +559,16 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
+  include("C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/espressif__esp-nn/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp-tflite-micro/cmake_install.cmake")
+endif()
+
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
   include("C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/main/cmake_install.cmake")
 endif()
 

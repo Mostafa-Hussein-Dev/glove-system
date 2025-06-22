@@ -86,6 +86,8 @@ C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-
 C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/usb/libusb.a
 C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/wifi_provisioning/libwifi_provisioning.a
 C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp32-camera/libesp32-camera.a
+C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/espressif__esp-nn/libespressif__esp-nn.a
+C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp-tflite-micro/libesp-tflite-micro.a
 C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/main/libmain.a
 C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp32-camera-master/libesp32-camera-master.a
 C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/i2cdev/libi2cdev.a

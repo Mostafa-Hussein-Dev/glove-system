@@ -1,5 +1,5 @@
 idf_component_register(
-    COMPILE_OPTIONS "-Wno-error=deprecated-declarations" "-Wno-deprecated-declarations"
+    COMPILE_OPTIONS "-Wno-error=deprecated-declarations" "-Wno-deprecated-declarations" "-std=c++17" "-DESP_NN"
     SRCS 
         "app_main.c"
         "config/system_config.c"
@@ -15,6 +15,10 @@ idf_component_register(
         "processing/sensor_fusion.c"
         "processing/feature_extraction.c"
         "processing/gesture_detection.c"
+        "ml/ml_inference.cpp"                    
+        "ml/model_manager.cpp"                   
+        "ml/data_preprocessor.cpp"
+        "ml/ml_test.cpp"
         "communication/ble_service.c"
         "output/text_generation.c"
         "output/output_manager.c"
@@ -26,7 +30,7 @@ idf_component_register(
         "util/buffer.c"
         "util/debug.c"
         "util/i2c_utils.c"
-    INCLUDE_DIRS "." "config" "core" "drivers" "processing" "communication" "output" "tasks" "util" 
+    INCLUDE_DIRS "." "config" "core" "drivers" "processing" "communication" "output" "tasks" "util" "ml" 
     REQUIRES
     driver
     esp_timer
@@ -48,8 +52,11 @@ idf_component_register(
     esp_https_server
     esp_lcd
     freertos
+    esp-tflite-micro
+    json
 )
 
 # Suppress unused-but-set-variable warning for this file
 set_source_files_properties(core/system_monitor.c PROPERTIES COMPILE_FLAGS "-Wno-unused-but-set-variable")
+
 

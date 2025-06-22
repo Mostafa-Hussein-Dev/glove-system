@@ -14,6 +14,9 @@
 #include "esp_chip_info.h"   
 #include "esp_flash.h"
 #include "freertos/semphr.h"
+#include "ml/model_manager.h"
+#include "ml/ml_inference.h"
+#include "ml/data_preprocessor.h"
 
 // Include app_main header first
 #include "app_main.h"
@@ -399,6 +402,35 @@ static esp_err_t init_drivers(void) {
 
 static esp_err_t init_processing(void) {
     esp_err_t ret;
+
+    // Initialize ML components
+    ret = model_manager_init();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize model manager: %s", esp_err_to_name(ret));
+        return ret;
+    }
+    
+    ret = ml_inference_init();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize ML inference: %s", esp_err_to_name(ret));
+        return ret;
+    }
+
+    ret = data_preprocessor_init();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize data preprocessor: %s", esp_err_to_name(ret));
+        return ret;
+    }
+
+    ESP_LOGI(TAG, "Loading ML models...");
+    esp_err_t model_ret1 = model_manager_load_model("static_cnn.tflite", MODEL_TYPE_STATIC_CNN);
+    esp_err_t model_ret2 = model_manager_load_model("dynamic_lstm.tflite", MODEL_TYPE_DYNAMIC_LSTM);
+    
+    if (model_ret1 != ESP_OK && model_ret2 != ESP_OK) {
+        ESP_LOGW(TAG, "No ML models loaded - using template-based detection only");
+    } else {
+        ESP_LOGI(TAG, "ML models loaded successfully");
+    }
     
     // Initialize sensor fusion
     ret = sensor_fusion_init();
@@ -579,6 +611,13 @@ static void debug_mode_run(void) {
             
             ESP_LOGI(TAG, "Testing Haptic...");
             debug_test_haptic();
+
+            ESP_LOGI(TAG, "Testing ML Status...");
+            debug_ml_status();
+
+            ESP_LOGI(TAG, "Testing ML Inference Status...");
+            debug_ml_inference_test();
+
             
             
             // Test camera less frequently (every 20 seconds) due to performance
