@@ -239,4 +239,36 @@ esp_err_t buffer_clear(sensor_data_buffer_t* buffer);
  */
 esp_err_t buffer_get(const sensor_data_buffer_t* buffer, size_t index, sensor_data_t* data);
 
+/**
+ * @brief Buffer statistics structure for monitoring
+ */
+typedef struct {
+    size_t total_allocations;
+    size_t total_deallocations;
+    size_t current_camera_buffers;
+    size_t max_camera_buffers;
+    size_t overflow_count;
+    size_t bytes_allocated;
+    size_t bytes_freed;
+    size_t peak_memory_usage;
+    size_t memory_leaked;
+} buffer_stats_t;
+
+/**
+ * @brief Get buffer statistics for monitoring
+ * 
+ * @param stats Pointer to structure to fill with statistics
+ */
+void buffer_get_stats(buffer_stats_t* stats);
+
+/**
+ * @brief Print buffer statistics for debugging
+ */
+void buffer_print_stats(void);
+
+/**
+ * @brief Emergency cleanup - force free all camera buffers
+ */
+void buffer_emergency_cleanup(void);
+
 #endif /* UTIL_BUFFER_H */

@@ -14,6 +14,7 @@
 #include "app_main.h"
 #include "config/system_config.h"
 #include "util/debug.h"
+#include "freertos/queue.h"
 
 static const char *TAG = "OUTPUT_TASK";
 
@@ -75,6 +76,22 @@ static void output_task(void *arg) {
             output_manager_handle_command(&command);
         }
         
+        // Add this code wherever processing results are received from queue
+        UBaseType_t result_queue_items = uxQueueMessagesWaiting(g_processing_result_queue);
+        if (result_queue_items > (PROCESSING_QUEUE_SIZE * 0.9)) {
+            ESP_LOGW(TAG, "Processing result queue nearly full: %u/%d items", 
+                    (unsigned int)result_queue_items, PROCESSING_QUEUE_SIZE);
+            
+            // Process multiple items quickly to clear backlog
+            processing_result_t results[3];
+            for (int i = 0; i < 3 && uxQueueMessagesWaiting(g_processing_result_queue) > 0; i++) {
+                if (xQueueReceive(g_processing_result_queue, &results[i], 0) == pdTRUE) {
+                    // Process result immediately
+                    ESP_LOGI(TAG, "Batch processing result %d: %s", i, results[i].gesture_name);
+                }
+            }
+        }
+
         // Check for processing results
         if (xQueueReceive(g_processing_result_queue, &result, 0) == pdTRUE) {
             // Generate text from the recognition result

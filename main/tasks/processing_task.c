@@ -17,6 +17,7 @@
 #include "ml/ml_inference.h"
 #include "ml/model_manager.h"
 #include "ml/data_preprocessor.h"
+#include "util/buffer.h" 
 
 static const char *TAG = "PROCESSING_TASK";
 
@@ -85,6 +86,24 @@ esp_err_t processing_task_init(void) {
         return ret;
     }
     
+    ret = sensor_fusion_init();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize sensor fusion");
+        return ret;
+    }
+
+    ret = feature_extraction_init();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize advanced feature extraction");
+        return ret;
+    }
+
+    ret = gesture_detection_init();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize advanced gesture detection");
+        return ret;
+    }
+
     // Create the processing task
     BaseType_t xReturned = xTaskCreatePinnedToCore(
         processing_task,
@@ -126,16 +145,90 @@ static void processing_task(void *arg) {
     
     while (1) {
         // Wait for sensor data from queue
-        if (xQueueReceive(g_sensor_data_queue, &sensor_data, pdMS_TO_TICKS(100)) == pdTRUE) {
-            // Store sensor data in buffer for temporal analysis
+        // Wait for sensor data from queue with adaptive timeout
+        TickType_t timeout = pdMS_TO_TICKS(100);
+        UBaseType_t queue_items = uxQueueMessagesWaiting(g_sensor_data_queue);
+        
+        // Use shorter timeout if queue is getting full
+        if (queue_items > (SENSOR_QUEUE_SIZE * 0.8)) {
+            timeout = pdMS_TO_TICKS(10);  // Process faster when queue filling up
+        }
+        
+        if (xQueueReceive(g_sensor_data_queue, &sensor_data, timeout) == pdTRUE) {            // Store sensor data in buffer for temporal analysis
             buffer_push(&sensor_data_buffer, &sensor_data);
             
             // Perform sensor fusion
             sensor_fusion_process(&sensor_data, &sensor_data_buffer);
             
+            fusion_stats_t stats;
+            if (sensor_fusion_get_stats(&stats) == ESP_OK) {
+                ESP_LOGI(TAG, "Fusion Stats:");
+                ESP_LOGI(TAG, "Fusions performed: %u", stats.fusion_count);
+                ESP_LOGI(TAG, "Kalman filters: %u active", stats.flex_filter_count);
+                ESP_LOGI(TAG, "IMU filter: %s", stats.imu_filter_active ? "Active" : "Inactive");
+                ESP_LOGI(TAG, "Average filter error: %.3f", stats.avg_filter_error);
+            }
+
             // Extract features from sensor data
             // In the main processing loop, replace the existing gesture detection with:
             if (feature_extraction_process(&sensor_data, &sensor_data_buffer, &feature_vector) == ESP_OK) {
+                
+                // Add this to your debug code for treasure status:
+                feature_extraction_stats_t features_stats;
+                if (feature_extraction_get_stats(&features_stats) == ESP_OK) {
+                    ESP_LOGI(TAG, "Feature Extraction Treasure Status:");
+                    ESP_LOGI(TAG, "Extractions performed: %u", features_stats.extraction_count);
+                    ESP_LOGI(TAG, "Total features: %u", features_stats.total_features);
+                    ESP_LOGI(TAG, "Window size: %u samples", features_stats.window_size);
+                    ESP_LOGI(TAG, "Current samples: %u", features_stats.current_samples);
+                }
+
+                // Feature vector inspection:
+                ESP_LOGI(TAG, "Sample Features:");
+                ESP_LOGI(TAG, "Flex current: %.1f°, %.1f°, %.1f°, %.1f°, %.1f°", 
+                        feature_vector.features[0], feature_vector.features[1], 
+                        feature_vector.features[2], feature_vector.features[3], feature_vector.features[4]);
+                ESP_LOGI(TAG, "Fist closure: %.2f", feature_vector.features[136]); // Gesture-specific
+                ESP_LOGI(TAG, "Pointing detected: %.1f", feature_vector.features[139]);
+                ESP_LOGI(TAG, "Hand stability: %.2f", feature_vector.features[142]);
+                    
+                if (gesture_detection_process(&feature_vector, &result) == ESP_OK) {
+                    // Now using advanced DTW, boundary detection, confidence scoring!
+                    
+                    if (result.confidence > 0.0f) {
+                        ESP_LOGI(TAG, "GESTURE: %s (%.1f%%, %ums, %s)", 
+                                result.gesture_name, 
+                                result.confidence * 100.0f,
+                                result.duration_ms,
+                                result.is_dynamic ? "dynamic" : "static");
+                        
+                        // Send to output task
+                        xQueueSend(g_processing_result_queue, &result, 0);
+                    }
+
+                    gesture_detection_stats_t stats;
+                    if (gesture_detection_get_stats(&stats) == ESP_OK) {
+                        ESP_LOGI(TAG, "Gesture Detection Treasure Status:");
+                        ESP_LOGI(TAG, "Total detections: %u", stats.total_detections);
+                        ESP_LOGI(TAG, "Templates loaded: %u", stats.template_count);
+                        ESP_LOGI(TAG, "Current state: %u", stats.current_state);
+                        ESP_LOGI(TAG, "Sequence length: %u", stats.sequence_length);
+                        ESP_LOGI(TAG, "False positives: %u", stats.false_positive_count);
+                        ESP_LOGI(TAG, "Sequence timeouts: %u", stats.sequence_timeouts);
+                    }
+
+                    // Real-time gesture monitoring:
+                    ESP_LOGI(TAG, "Gesture State: %s", 
+                            (stats.current_state == 0) ? "IDLE" :
+                            (stats.current_state == 1) ? "STARTING" :
+                            (stats.current_state == 2) ? "ACTIVE" :
+                            (stats.current_state == 3) ? "HOLDING" :
+                            (stats.current_state == 4) ? "ENDING" : "UNKNOWN");
+                }
+
+
+
+                
                 // Try ML-based gesture detection first
                 if (process_ml_inference(&sensor_data, &sensor_data_buffer, &result) == ESP_OK) {
                     // ML inference successful
@@ -159,17 +252,40 @@ static void processing_task(void *arg) {
                             ESP_LOGI(TAG, "Template Gesture detected: %s (confidence: %.2f)", 
                                     result.gesture_name, result.confidence);
                             
-                            // Send result to output task
+                            // Send result to output task with overflow protection
                             if (xQueueSend(g_processing_result_queue, &result, 0) != pdTRUE) {
-                                ESP_LOGW(TAG, "Failed to send template processing result to queue (queue full)");
+                                UBaseType_t spaces = uxQueueSpacesAvailable(g_processing_result_queue);
+                                ESP_LOGW(TAG, "Processing result queue full (%u spaces), dropping result", 
+                                        (unsigned int)spaces);
                             }
+
                         }
                     }
                 }
             }
         }
         
-        // Check system events or commands if any (could add here)
+        // Periodic queue health check (every 100 iterations ≈ 10 seconds)
+        static uint32_t health_check_counter = 0;
+        if (++health_check_counter >= 100) {
+            health_check_counter = 0;
+            
+            UBaseType_t sensor_waiting = uxQueueMessagesWaiting(g_sensor_data_queue);
+            UBaseType_t processing_waiting = uxQueueMessagesWaiting(g_processing_result_queue);
+            
+            if (sensor_waiting > (SENSOR_QUEUE_SIZE * 0.8)) {
+                ESP_LOGW(TAG, "Sensor queue high usage: %u/%d items", 
+                         (unsigned int)sensor_waiting, SENSOR_QUEUE_SIZE);
+            }
+            
+            if (processing_waiting > (PROCESSING_QUEUE_SIZE * 0.8)) {
+                ESP_LOGW(TAG, "Processing queue high usage: %u/%d items", 
+                         (unsigned int)processing_waiting, PROCESSING_QUEUE_SIZE);
+            }
+            
+            // Print buffer statistics periodically
+            buffer_print_stats();
+        }
     }
 }
 

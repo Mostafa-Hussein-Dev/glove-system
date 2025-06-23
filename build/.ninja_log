@@ -4,7 +4,7 @@
 30106	30632	7722546605703135	esp-idf/newlib/CMakeFiles/__idf_newlib.dir/reent_init.c.obj	34ed5e6d66ceecfb
 32341	33261	7722546628047422	esp-idf/esp_hw_support/CMakeFiles/__idf_esp_hw_support.dir/rtc_module.c.obj	7aa0c9d00ce42175
 19413	21140	7722546498776248	esp-idf/lwip/CMakeFiles/__idf_lwip.dir/apps/dhcpserver/dhcpserver.c.obj	d1d9610d0840870f
-200	771	7722521319134806	partition_table/partition-table.bin	140af1019019257e
+218	515	7722566834625521	partition_table/partition-table.bin	140af1019019257e
 31796	32613	7722546622590237	esp-idf/freertos/CMakeFiles/__idf_freertos.dir/esp_additions/idf_additions.c.obj	c1dd732ab332c344
 110550	123548	7722547410153028	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/micro_interpreter_context.cc.obj	e00cd993eb70828a
 57819	61735	7722546882835756	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/bta/gatt/bta_gattc_api.c.obj	b15a4a5f861f9c03
@@ -37,7 +37,7 @@
 108691	110193	7722547391550173	esp-idf/esp32-camera/CMakeFiles/__idf_esp32-camera.dir/sensors/ov2640.c.obj	ba7478a0e9a10aee
 23149	24161	7722546536122202	esp-idf/esp_driver_i2s/CMakeFiles/__idf_esp_driver_i2s.dir/i2s_std.c.obj	c2aa37f6357aee28
 14520	15467	7722546449838400	esp-idf/lwip/CMakeFiles/__idf_lwip.dir/lwip/src/core/stats.c.obj	8b770a44c0d45f18
-200	771	7722521319134806	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/partition_table/partition-table.bin	140af1019019257e
+218	515	7722566834625521	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/partition_table/partition-table.bin	140af1019019257e
 96567	100073	7722547270320395	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/rfcomm/rfc_port_fsm.c.obj	5232c6e31f41e0f1
 217	652	7722546306807007	esp-idf/esp_psram/CMakeFiles/__idf_esp_psram.dir/mmu_psram_flash.c.obj	13d94aaf29956f01
 32317	33180	7722546627801609	esp-idf/esp_hw_support/CMakeFiles/__idf_esp_hw_support.dir/periph_ctrl.c.obj	9385ecf6f386ab76
@@ -51,7 +51,7 @@
 252	880	7722557268439068	esp-idf/esp32-camera-master/CMakeFiles/__idf_esp32-camera-master.dir/driver/sccb-ng.c.obj	f54d8c36e516f9c7
 32091	32671	7722546625575080	esp-idf/nvs_flash/libnvs_flash.a	cdbaeed9fda42122
 2579	3777	7722546330428652	esp-idf/esp_adc/CMakeFiles/__idf_esp_adc.dir/gdma/adc_dma.c.obj	c60baf5677660b63
-251	9787	7722565803159031	esp-idf/main/CMakeFiles/__idf_main.dir/ml/model_manager.cpp.obj	da06f220a1cc323c
+313	11343	7722864674635433	esp-idf/main/CMakeFiles/__idf_main.dir/ml/model_manager.cpp.obj	da06f220a1cc323c
 328	1502	7722546307917248	esp-idf/esp_http_client/CMakeFiles/__idf_esp_http_client.dir/lib/http_header.c.obj	d9060f4d36d7928b
 104369	105623	7722547348327737	esp-idf/espressif__esp-nn/CMakeFiles/__idf_espressif__esp-nn.dir/src/convolution/esp_nn_depthwise_conv_opt.c.obj	869c6b2de9ba3f1d
 44652	45574	7722546751165543	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/ecp_curves.c.obj	176abade7ee0b414
@@ -60,10 +60,10 @@
 217732	218670	7722548481993387	esp-idf/fatfs/CMakeFiles/__idf_fatfs.dir/diskio/diskio_rawflash.c.obj	3d37f3522162389f
 24264	24684	7722546547285648	esp-idf/esp_driver_usb_serial_jtag/libesp_driver_usb_serial_jtag.a	8e821dc25c8ba465
 1182	1455	7722546316460556	esp-idf/esp_psram/libesp_psram.a	67fcc34a653e5f97
-232	2205	7722546306952592	esp-idf/esp_https_ota/CMakeFiles/__idf_esp_https_ota.dir/src/esp_https_ota.c.obj	b4ea1a6c7c06e612
+3338	4011	7722546338015079	esp-idf/esp_wifi/CMakeFiles/__idf_esp_wifi.dir/src/lib_printf.c.obj	63614c777bf0051f
 126321	126618	7722547568000294	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/decompress.cc.obj	7a452ec605f21391
 31872	32388	7722546623357896	esp-idf/esp_hw_support/CMakeFiles/__idf_esp_hw_support.dir/port/esp32s3/cpu_region_protect.c.obj	ac82b5a6a2e8be4b
-3338	4011	7722546338015079	esp-idf/esp_wifi/CMakeFiles/__idf_esp_wifi.dir/src/lib_printf.c.obj	63614c777bf0051f
+232	2205	7722546306952592	esp-idf/esp_https_ota/CMakeFiles/__idf_esp_https_ota.dir/src/esp_https_ota.c.obj	b4ea1a6c7c06e612
 294	2263	7722546307575568	esp-idf/esp_http_server/CMakeFiles/__idf_esp_http_server.dir/src/util/ctrl_sock.c.obj	e1e265f3e3caf00c
 14413	15210	7722546448771468	esp-idf/lwip/CMakeFiles/__idf_lwip.dir/lwip/src/core/memp.c.obj	333594d487db25dd
 43794	44750	7722546742577471	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/aria.c.obj	d23124dbf6bd3995
@@ -154,7 +154,7 @@
 2672	3375	7722546331359792	esp-idf/esp_adc/CMakeFiles/__idf_esp_adc.dir/esp32s3/curve_fitting_coefficients.c.obj	b5158e0d77516d7
 83543	87256	7722547140076496	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/avrc/avrc_bld_ct.c.obj	b14071343961219c
 34131	34999	7722546645945208	esp-idf/esp_hw_support/CMakeFiles/__idf_esp_hw_support.dir/lowpower/port/esp32s3/sleep_cpu.c.obj	4a255c5201347a7b
-9788	10020	7722565898522930	esp-idf/main/libmain.a	9217ca18ffc1bb77
+575	772	7723277920761826	esp-idf/main/libmain.a	9217ca18ffc1bb77
 3605	4490	7722546340692104	esp-idf/esp_wifi/CMakeFiles/__idf_esp_wifi.dir/src/wifi_default_ap.c.obj	7a71ae2d1bafc498
 2433	3604	7722546328969779	esp-idf/esp_adc/CMakeFiles/__idf_esp_adc.dir/adc_oneshot.c.obj	ca1b271879ea520f
 3530	4995	7722546339942280	esp-idf/esp_wifi/CMakeFiles/__idf_esp_wifi.dir/src/wifi_default.c.obj	575c602bed99cbac
@@ -186,7 +186,7 @@
 52446	56310	7722546829099542	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/api/esp_gap_bt_api.c.obj	d598e2d99b8b4cc1
 3622	3925	7722546340858245	esp-idf/tcp_transport/libtcp_transport.a	219dbfc9810ad729
 2866	4296	7722546333308527	esp-idf/esp-tls/CMakeFiles/__idf_esp-tls.dir/esp_tls_error_capture.c.obj	319f6ab9d464b033
-223106	223903	7722548535695508	esp-idf/main/CMakeFiles/__idf_main.dir/output/output_manager.c.obj	cec70cdce41dd67b
+527	2361	7722874785852209	esp-idf/main/CMakeFiles/__idf_main.dir/output/output_manager.c.obj	cec70cdce41dd67b
 3356	4524	7722546338206397	esp-idf/esp_wifi/CMakeFiles/__idf_esp_wifi.dir/src/mesh_event.c.obj	8221c75aef9aa3f
 41092	41728	7722546715570876	esp-idf/bootloader_support/CMakeFiles/__idf_bootloader_support.dir/bootloader_flash/src/flash_qio_mode.c.obj	f495071073485924
 34374	34646	7722546648382234	esp-idf/soc/CMakeFiles/__idf_soc.dir/dport_access_common.c.obj	a25cc8491b26627f
@@ -206,7 +206,7 @@
 53343	57043	7722546838070272	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/api/esp_hf_client_api.c.obj	bafdc0c08eb003fa
 18063	19459	7722546485279396	esp-idf/lwip/CMakeFiles/__idf_lwip.dir/lwip/src/netif/ppp/utils.c.obj	958f93c5a398f8b9
 40163	41576	7722546706279882	esp-idf/spi_flash/CMakeFiles/__idf_spi_flash.dir/esp_flash_api.c.obj	e1e2ac8c41df1cf7
-313	651	7722565803823975	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+204	7384	7723282288196036	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
 39171	40068	7722546696353025	esp-idf/esp_system/CMakeFiles/__idf_esp_system.dir/port/soc/esp32s3/apb_backup_dma.c.obj	a7d12445f1aa284c
 3643	5968	7722546341069926	esp-idf/esp_wifi/CMakeFiles/__idf_esp_wifi.dir/esp32s3/esp_adapter.c.obj	3d280134c58d41ff
 32965	33779	7722546634293308	esp-idf/esp_hw_support/CMakeFiles/__idf_esp_hw_support.dir/spi_share_hw_ctrl.c.obj	b339a07791df268b
@@ -393,7 +393,7 @@
 49394	49469	7722521810459632	bootloader-prefix/src/bootloader-stamp/bootloader-patch	f681c16c6b71c893
 10166	12468	7722546406307088	esp-idf/wpa_supplicant/CMakeFiles/__idf_wpa_supplicant.dir/esp_supplicant/src/esp_wps.c.obj	9fb2467d3196a037
 70589	74562	7722547010533950	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/btc/profile/std/a2dp/btc_a2dp_control.c.obj	7a7206812fae9084
-221720	223396	7722548521861756	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/display.c.obj	b31146126bdc562e
+401	2429	7722874784594474	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/display.c.obj	b31146126bdc562e
 36783	37497	7722546672469480	esp-idf/hal/CMakeFiles/__idf_hal.dir/spi_slave_hd_hal.c.obj	60c40b0d6b9a2aed
 23847	24820	7722546543104632	esp-idf/esp_driver_mcpwm/CMakeFiles/__idf_esp_driver_mcpwm.dir/src/mcpwm_timer.c.obj	912749a993f78aea
 44690	45042	7722546751553213	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/ecp_curves_new.c.obj	bd345e5cbc8fdd50
@@ -566,7 +566,7 @@
 16887	18201	7722546473520595	esp-idf/lwip/CMakeFiles/__idf_lwip.dir/lwip/src/netif/ppp/fsm.c.obj	e61258fc5f244532
 29115	29837	7722546595786081	esp-idf/pthread/CMakeFiles/__idf_pthread.dir/pthread_semaphore.c.obj	3956211de20613
 24415	31563	7722546548805943	esp-idf/nvs_flash/CMakeFiles/__idf_nvs_flash.dir/src/nvs_page.cpp.obj	58b77be72a04b487
-313	651	7722565803823975	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+204	7384	7723282288196036	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
 17041	18230	7722546475055762	esp-idf/lwip/CMakeFiles/__idf_lwip.dir/lwip/src/netif/ppp/ipv6cp.c.obj	e195f62f64686783
 42533	43090	7722546729968128	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedtls.dir/ssl_tls13_server.c.obj	7f179bacf23e20
 17941	19241	7722546484039026	esp-idf/lwip/CMakeFiles/__idf_lwip.dir/lwip/src/netif/ppp/multilink.c.obj	7e51f44a9a0a3e7c
@@ -641,7 +641,7 @@
 21445	22209	7722546519095756	esp-idf/esp_driver_usb_serial_jtag/CMakeFiles/__idf_esp_driver_usb_serial_jtag.dir/src/usb_serial_jtag_connection_monitor.c.obj	db5e21e4d560e784
 81059	84696	7722547115231197	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/avct/avct_l2c.c.obj	30805c822bb1181f
 21125	22337	7722546515893051	esp-idf/driver/CMakeFiles/__idf_driver.dir/deprecated/rtc_temperature_legacy.c.obj	decee4d1a5ac503c
-262	1504	7722565803274177	esp-idf/main/CMakeFiles/__idf_main.dir/ml/data_preprocessor.cpp.obj	4c26e7900f40ca13
+328	2601	7722864674792297	esp-idf/main/CMakeFiles/__idf_main.dir/ml/data_preprocessor.cpp.obj	4c26e7900f40ca13
 21181	22452	7722546516446310	esp-idf/driver/CMakeFiles/__idf_driver.dir/touch_sensor/touch_sensor_common.c.obj	6194fd8765712852
 21589	22668	7722546520527885	esp-idf/esp_driver_usb_serial_jtag/CMakeFiles/__idf_esp_driver_usb_serial_jtag.dir/src/usb_serial_jtag_vfs.c.obj	72a9138d4dc8d8d3
 68750	72309	7722546992142885	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/btc/core/btc_sm.c.obj	ab7c9a0c0691ecfb
@@ -728,7 +728,7 @@
 39274	39815	7722546697374442	esp-idf/spi_flash/CMakeFiles/__idf_spi_flash.dir/spi_flash_chip_drivers.c.obj	10b47857587ee9ae
 26432	27883	7722546568953211	esp-idf/esp_driver_uart/CMakeFiles/__idf_esp_driver_uart.dir/src/uart_vfs.c.obj	5bb59f636b288ee7
 43994	44848	7722546744582951	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/ccm.c.obj	630490967def3a8b
-722	877	7722565809297031	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+7428	7530	7723282361388660	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
 24249	31191	7722546547139417	esp-idf/nvs_flash/CMakeFiles/__idf_nvs_flash.dir/src/nvs_cxx_api.cpp.obj	75da253a465b97d4
 27195	28239	7722546576614189	esp-idf/esp_driver_gptimer/CMakeFiles/__idf_esp_driver_gptimer.dir/src/gptimer_common.c.obj	2b8f942807a9384f
 26412	26673	7722546568767185	esp-idf/esp_driver_sdmmc/libesp_driver_sdmmc.a	6a0aed13529798fe
@@ -758,7 +758,7 @@
 29673	30106	7722546601368250	esp-idf/newlib/CMakeFiles/__idf_newlib.dir/heap.c.obj	5c258a1f860e7c7
 24388	31000	7722546548513361	esp-idf/nvs_flash/CMakeFiles/__idf_nvs_flash.dir/src/nvs_item_hash_list.cpp.obj	5bbbbe9f55a4b070
 24915	31576	7722546553858873	esp-idf/nvs_flash/CMakeFiles/__idf_nvs_flash.dir/src/nvs_types.cpp.obj	393e9347c8758a37
-313	651	7722565803823975	bootloader/bootloader.elf	74242a8008610cd9
+204	7384	7723282288196036	bootloader/bootloader.elf	74242a8008610cd9
 36421	36738	7722546668835955	esp-idf/hal/CMakeFiles/__idf_hal.dir/sdm_hal.c.obj	36efedb91c360be5
 29806	30580	7722546602695989	esp-idf/newlib/CMakeFiles/__idf_newlib.dir/locks.c.obj	a078803aec6ef7a1
 181345	195122	7722548119136882	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/transpose_conv.cc.obj	30830eed4ef6e0f2
@@ -773,7 +773,7 @@
 36824	37235	7722546672871894	esp-idf/hal/CMakeFiles/__idf_hal.dir/hmac_hal.c.obj	711b3a92f7313adb
 30040	30546	7722546605042580	esp-idf/newlib/CMakeFiles/__idf_newlib.dir/pthread.c.obj	d23f1d4392e96304
 38251	39054	7722546687154737	esp-idf/esp_system/CMakeFiles/__idf_esp_system.dir/port/image_process.c.obj	17adbb250a59078d
-273	907	7722565803379557	esp-idf/main/CMakeFiles/__idf_main.dir/ml/ml_test.cpp.obj	d4e0330fe52fe484
+344	1934	7722864674937678	esp-idf/main/CMakeFiles/__idf_main.dir/ml/ml_test.cpp.obj	d4e0330fe52fe484
 30523	31145	7722546609962856	esp-idf/newlib/CMakeFiles/__idf_newlib.dir/termios.c.obj	11de50686c561856
 71186	75142	7722547016502976	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/btc/profile/std/avrc/btc_avrc.c.obj	c8c5a4d385faf20c
 77560	79728	7722547080242359	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/external/sbc/decoder/srce/framing-sbc.c.obj	bd68017f788116a7
@@ -794,7 +794,7 @@
 218090	218873	7722548485569341	esp-idf/fatfs/CMakeFiles/__idf_fatfs.dir/port/freertos/ffsystem.c.obj	597f6625b5692047
 111807	126000	7722547422712538	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/assign_variable.cc.obj	c6f2295617a161b4
 31164	31831	7722546616285479	esp-idf/freertos/CMakeFiles/__idf_freertos.dir/port_common.c.obj	2f88d54ed3fac3b
-44389	44702	7722546748522022	esp-idf/esp_app_format/libesp_app_format.a	337164afc2afe126
+510	643	7722860770219649	esp-idf/esp_app_format/libesp_app_format.a	337164afc2afe126
 31682	31955	7722546621470148	esp-idf/freertos/CMakeFiles/__idf_freertos.dir/FreeRTOS-Kernel/portable/xtensa/portasm.S.obj	e0a6e2478bf2e950
 49895	51512	7722546803594175	esp-idf/bt/CMakeFiles/__idf_bt.dir/common/osi/config.c.obj	3910ae3c75ed52d0
 24208	31807	7722546546721764	esp-idf/nvs_flash/CMakeFiles/__idf_nvs_flash.dir/src/nvs_api.cpp.obj	ecf38ecbe4ae31c7
@@ -816,7 +816,7 @@
 32413	33068	7722546628778237	esp-idf/esp_hw_support/CMakeFiles/__idf_esp_hw_support.dir/sleep_console.c.obj	160597db3aa80335
 39066	39467	7722546695300173	esp-idf/esp_system/CMakeFiles/__idf_esp_system.dir/port/soc/esp32s3/highint_hdl.S.obj	75deb12c3cb41905
 44702	45333	7722546751663953	esp-idf/mbedtls/mbedtls/library/libmbedtls.a	bfdadc80a7ca7137
-221985	223595	7722548524487781	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/audio.c.obj	faf3b7d5cfe098fd
+416	2380	7722874784745175	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/audio.c.obj	faf3b7d5cfe098fd
 31325	32964	7722546617938889	esp-idf/freertos/CMakeFiles/__idf_freertos.dir/FreeRTOS-Kernel/tasks.c.obj	de2d25f5ed5f881d
 32442	33552	7722546629110797	esp-idf/esp_hw_support/CMakeFiles/__idf_esp_hw_support.dir/sleep_gpio.c.obj	7896a51799c65ecb
 37498	38238	7722546679622654	esp-idf/esp_system/CMakeFiles/__idf_esp_system.dir/crosscore_int.c.obj	29cf5d13e128cccc
@@ -898,7 +898,7 @@
 35758	36295	7722546662244518	esp-idf/hal/CMakeFiles/__idf_hal.dir/cache_hal.c.obj	235a2d81931d7927
 44750	45541	7722546752132925	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/entropy.c.obj	9b3de87d26703ede
 35853	36455	7722546663161271	esp-idf/hal/CMakeFiles/__idf_hal.dir/esp32s3/clk_tree_hal.c.obj	9c759f5da59bb1c6
-221522	222620	7722548519864230	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/touch.c.obj	291a63251b9b9c96
+385	2118	7722874784437663	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/touch.c.obj	291a63251b9b9c96
 95279	98651	7722547257428640	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/l2cap/l2c_link.c.obj	ff6f2589ddf64bc2
 77931	80232	7722547083951662	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/external/sbc/decoder/srce/synthesis-8-generated.c.obj	262e985949be5ea3
 35951	36385	7722546664145839	esp-idf/hal/CMakeFiles/__idf_hal.dir/timer_hal.c.obj	f451b40f214035a9
@@ -918,6 +918,7 @@
 42437	42908	7722546729005960	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedtls.dir/ssl_debug_helpers_generated.c.obj	dde11e40f702045c
 36362	36750	7722546668265325	esp-idf/hal/CMakeFiles/__idf_hal.dir/twai_hal_iram.c.obj	b503c4016d08af96
 51513	52655	7722546819764848	esp-idf/bt/CMakeFiles/__idf_bt.dir/porting/mem/bt_osi_mem.c.obj	ece40c203ac855d1
+17793	17893	7723282464093052	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
 36385	36782	7722546668492417	esp-idf/hal/CMakeFiles/__idf_hal.dir/gdma_hal_top.c.obj	f38ece30cd365c3b
 36164	36617	7722546666271600	esp-idf/hal/CMakeFiles/__idf_hal.dir/i2c_hal.c.obj	2e6e9c2e39b86cf9
 44789	45462	7722546752536108	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/entropy_poll.c.obj	2739438df700a475
@@ -982,7 +983,7 @@
 104266	104811	7722547347292461	esp-idf/espressif__esp-nn/CMakeFiles/__idf_espressif__esp-nn.dir/src/activation_functions/esp_nn_relu_ansi.c.obj	b48b1dd79b852280
 38607	38915	7722546690702640	esp-idf/esp_system/CMakeFiles/__idf_esp_system.dir/port/arch/xtensa/esp_ipc_isr_routines.S.obj	f6e492a37a422a98
 46629	47204	7722546770954674	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/rsa_alt_helpers.c.obj	27528e561acabfde
-222147	223467	7722548526100500	esp-idf/main/CMakeFiles/__idf_main.dir/processing/feature_extraction.c.obj	8bdf22556a702406
+351	1042	7723019410969917	esp-idf/main/CMakeFiles/__idf_main.dir/processing/feature_extraction.c.obj	8bdf22556a702406
 105371	105724	7722547358355625	esp-idf/unity/CMakeFiles/__idf_unity.dir/unity_compat.c.obj	d882ff2c8d4a6c66
 46963	47480	7722546774261139	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/__/__/port/aes/dma/esp_aes_gdma_impl.c.obj	8b7789946c86c9d7
 38699	39210	7722546691654140	esp-idf/esp_system/CMakeFiles/__idf_esp_system.dir/port/arch/xtensa/panic_handler_asm.S.obj	c4d6001d68c1ab65
@@ -1046,7 +1047,7 @@
 40791	41482	7722546712556104	esp-idf/bootloader_support/CMakeFiles/__idf_bootloader_support.dir/src/secure_boot.c.obj	575f691037695a38
 67440	71185	7722546979056929	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/bta/sys/bta_sys_conn.c.obj	4bc8b1f79ea16a79
 41216	41638	7722546716798895	esp-idf/bootloader_support/CMakeFiles/__idf_bootloader_support.dir/src/flash_partitions.c.obj	d4c8d0596abd3503
-306	2085	7722549619775214	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/sensor_task.c.obj	804735d96f8f99b6
+545	2404	7722874786037756	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/sensor_task.c.obj	804735d96f8f99b6
 47533	48335	7722546779977330	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/__/__/port/aes/esp_aes_gcm.c.obj	9ee7490fa32234dd
 108388	109440	7722547388511217	esp-idf/esp32-camera/CMakeFiles/__idf_esp32-camera.dir/conversions/to_jpg.cpp.obj	db27851747906bd3
 41397	42066	7722546718605044	esp-idf/bootloader_support/CMakeFiles/__idf_bootloader_support.dir/src/esp32s3/secure_boot_secure_features.c.obj	503b823d2ce94c5a
@@ -1055,7 +1056,7 @@
 105445	106046	7722547359091670	esp-idf/unity/CMakeFiles/__idf_unity.dir/port/esp/unity_utils_memory_esp.c.obj	6b962280a704a877
 41437	41984	7722546719012892	esp-idf/efuse/CMakeFiles/__idf_efuse.dir/esp32s3/esp_efuse_rtc_calib.c.obj	d2b247db97ba4f68
 47377	48139	7722546778408619	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/__/__/port/bignum/bignum_alt.c.obj	349855bf1405120d
-104	14410	7722566830353738	build.ninja	31a0992e358641cd
+92	13047	7723282483915408	build.ninja	31a0992e358641cd
 41450	42130	7722546719133295	esp-idf/efuse/CMakeFiles/__idf_efuse.dir/esp32s3/esp_efuse_utility.c.obj	aae94ef185681c01
 84995	88909	7722547154594568	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/hid/hidh_conn.c.obj	bf5cc77feb87a885
 41535	42344	7722546719993621	esp-idf/efuse/CMakeFiles/__idf_efuse.dir/src/esp_efuse_fields.c.obj	c24789e12f5cc516
@@ -1075,7 +1076,7 @@
 41640	42623	7722546721038997	esp-idf/esp_partition/CMakeFiles/__idf_esp_partition.dir/partition.c.obj	1774790c33cdc7e5
 104298	104865	7722547347609581	esp-idf/espressif__esp-nn/CMakeFiles/__idf_espressif__esp-nn.dir/src/basic_math/esp_nn_mul_ansi.c.obj	a2f329ca77f3bc6a
 45042	45866	7722546755070055	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/md.c.obj	86a54782fc8da290
-41985	42606	7722546724494313	esp-idf/esp_app_format/CMakeFiles/__idf_esp_app_format.dir/esp_app_desc.c.obj	b10a131a2424ec18
+233	509	7722860767452886	esp-idf/esp_app_format/CMakeFiles/__idf_esp_app_format.dir/esp_app_desc.c.obj	875da8190a878068
 47243	47850	7722546777063274	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/__/__/port/aes/esp_aes_common.c.obj	7eb68da77ff4b29
 42130	42546	7722546725949509	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedtls.dir/mps_trace.c.obj	d21dc13c2d3c8e45
 45660	46590	7722546761246195	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/pkwrite.c.obj	7320602cf3cbfac9
@@ -1119,7 +1120,7 @@
 87594	91394	7722547180582689	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/btm/btm_dev.c.obj	4a66170be83fca01
 49202	51165	7722546796658601	esp-idf/bt/CMakeFiles/__idf_bt.dir/common/btc/core/btc_alarm.c.obj	db78e426bf11ae31
 44620	45003	7722546750842474	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/ecjpake.c.obj	fa173d01a271e9f7
-313	651	7722565803823975	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+204	7384	7723282288196036	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
 44141	44388	7722546746043226	esp-idf/esp_bootloader_format/libesp_bootloader_format.a	7eb6fdf46ea71c6b
 44482	45301	7722546749462988	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/ctr_drbg.c.obj	e07c3cbe35166a9e
 89356	92940	7722547198205258	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/btu/btu_hcif.c.obj	69ce3dc25ce64a4e
@@ -1257,7 +1258,7 @@
 61253	63160	7722546917175715	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/bta/hd/bta_hd_api.c.obj	5be1bd17f93093f9
 61684	63749	7722546921482093	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/bta/hh/bta_hh_cfg.c.obj	f9fde145e9690ae5
 174026	186656	7722548044961929	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/split_v.cc.obj	86934540c2493381
-221365	223063	7722548518302732	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/flex_sensor.c.obj	51f8bd41348ee699
+359	2439	7722874784176622	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/flex_sensor.c.obj	51f8bd41348ee699
 60379	63996	7722546908419835	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/bta/gatt/bta_gatts_act.c.obj	144c5865fc8d70b4
 61230	64726	7722546916953442	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/bta/gatt/bta_gatts_utils.c.obj	27c5fff8d3ed4324
 61736	65343	7722546922002047	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/bta/hh/bta_hh_le.c.obj	83c4c4afede297da
@@ -1304,7 +1305,7 @@
 79118	79550	7722547095817797	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/hci/hci_audio.c.obj	386dfc91d4cadd4e
 77291	79484	7722547077561898	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/external/sbc/decoder/srce/dequant.c.obj	7e86f01c5b4d7b1
 77793	80102	7722547082568027	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/external/sbc/decoder/srce/oi_codec_version.c.obj	170c9a50d7907735
-298	1013	7722565803633461	esp-idf/main/CMakeFiles/__idf_main.dir/util/debug.c.obj	ca426de3e98261a1
+1730	2576	7722874797888228	esp-idf/main/CMakeFiles/__idf_main.dir/util/debug.c.obj	ca426de3e98261a1
 77777	79987	7722547082412014	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/external/sbc/decoder/srce/framing.c.obj	e0d6a97a89c4ee6a
 77995	80162	7722547084585948	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/external/sbc/decoder/srce/synthesis-dct8.c.obj	73a6770db591f029
 78097	80213	7722547085610462	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/external/sbc/decoder/srce/synthesis-sbc.c.obj	adfd0c49d99ce9
@@ -1347,7 +1348,7 @@
 87151	90974	7722547176152269	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/btm/btm_ble_cont_energy.c.obj	da6b410ca03faa6f
 87133	91215	7722547175971091	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/btm/btm_ble_bgconn.c.obj	995715bdc094d0e8
 87257	91519	7722547177216839	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/btm/btm_ble_5_gap.c.obj	30907d4981da8235
-722	877	7722565809297031	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+7428	7530	7723282361388660	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
 87577	91434	7722547180415913	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/btm/btm_ble_privacy.c.obj	1e697ebcd38c885b
 87612	91478	7722547180758432	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/btm/btm_devctl.c.obj	df61b53c6f6bcba9
 88457	91677	7722547189212031	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/btm/btm_main.c.obj	e33e6a1d383d86d1
@@ -1366,7 +1367,7 @@
 92122	95879	7722547225864893	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/gatt/gatt_sr_hash.c.obj	da6a5f7a25b489a3
 214443	215363	7722548449068031	esp-idf/esp_driver_cam/CMakeFiles/__idf_esp_driver_cam.dir/dvp_share_ctrl.c.obj	2ef9862fac896665
 91521	95794	7722547219852323	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/gatt/gatt_cl.c.obj	fc679d997c56bfa
-222085	223521	7722548525495635	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/haptic.c.obj	ce85cd0c22c9b74b
+435	2283	7722874784927065	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/haptic.c.obj	ce85cd0c22c9b74b
 91899	95811	7722547223630139	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/gatt/gatt_main.c.obj	29fd42deed99362e
 91678	95851	7722547221424722	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/gatt/gatt_db.c.obj	cfe13c4293ebd9db
 92163	96400	7722547226277246	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/gatt/gatt_utils.c.obj	4db3782bf351de4c
@@ -1378,7 +1379,7 @@
 94943	98161	7722547254073882	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/l2cap/l2c_fcr.c.obj	355fb4dc87f592c8
 95357	98804	7722547258213433	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/l2cap/l2c_main.c.obj	433920541e4d08ae
 95812	99417	7722547262765098	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/rfcomm/port_api.c.obj	7eaf7ebf38cb4870
-230	1136	7722565802943336	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	14333362315c597e
+244	876	7723028239730202	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	14333362315c597e
 95879	99541	7722547263433398	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/rfcomm/port_utils.c.obj	56786b98619f7b7e
 95854	99476	7722547263177217	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/rfcomm/port_rfc.c.obj	446321bfaecfdde9
 96165	99638	7722547266295605	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/rfcomm/rfc_l2cap_if.c.obj	33f3d18bff9d563f
@@ -1500,7 +1501,7 @@
 123549	134986	7722547540127610	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/batch_to_space_nd.cc.obj	e4adaaf6e570a143
 124499	138203	7722547549625455	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/call_once.cc.obj	58358d9037f16025
 124223	137642	7722547547013258	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/broadcast_to.cc.obj	741c90676bd1bc9d
-652	722	7722565807167693	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+7385	7427	7723282360012354	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
 124853	136109	7722547553181319	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/circular_buffer_common.cc.obj	709ed8dd3a0d5246
 123320	140012	7722547537870394	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/batch_matmul.cc.obj	55fc3c0f438b6ed5
 137580	138090	7722547680706662	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/ethosu.cc.obj	eca0c31d0c6adde4
@@ -1546,7 +1547,7 @@
 179648	194453	7722548101454749	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/transpose.cc.obj	9b21e9bcccf83bf9
 166739	179994	7722547972018398	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/shape.cc.obj	31b157fd0d4a9d2c
 173681	186200	7722548041643932	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/space_to_depth.cc.obj	883e0fc835514396
-367	2191	7722549620381740	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/power_task.c.obj	b50b103e1d0a1359
+279	714	7722898973553918	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/power_task.c.obj	b50b103e1d0a1359
 173713	186528	7722548041769843	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/split.cc.obj	7fa6dd39f4a3456a
 213442	214481	7722548439132504	esp-idf/app_trace/CMakeFiles/__idf_app_trace.dir/host_file_io.c.obj	d58cea6a95419877
 174498	186411	7722548049620524	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/squeeze.cc.obj	628c89f28af822e6
@@ -1582,7 +1583,7 @@
 198552	211203	7722548290169631	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/signal/micro/kernels/filter_bank_square_root.cc.obj	8053577ea89bc3f3
 211213	212309	7722548416877837	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/core/c/common.cc.obj	4f38caac495221ce
 211397	212242	7722548418604361	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/core/api/tensor_utils.cc.obj	e026769d13eb77f3
-384	1838	7722549620557989	esp-idf/main/CMakeFiles/__idf_main.dir/util/buffer.c.obj	1167acbd56c357e9
+491	2311	7722864676448599	esp-idf/main/CMakeFiles/__idf_main.dir/util/buffer.c.obj	1167acbd56c357e9
 211480	213124	7722548419435168	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/kernels/internal/common.cc.obj	aacbc37a85925874
 198815	211356	7722548292791265	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/signal/micro/kernels/framer.cc.obj	d9141067eaf1547d
 466	2124	7722549621382699	esp-idf/esp32-camera-master/CMakeFiles/__idf_esp32-camera-master.dir/conversions/to_bmp.c.obj	440f2f0b1d8e0d03
@@ -1607,8 +1608,8 @@
 217479	217776	7722548479435202	esp-idf/espcoredump/CMakeFiles/__idf_espcoredump.dir/src/core_dump_sha.c.obj	1bf6ca0ae0ffcdc7
 203529	217684	7722548339934062	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/signal/micro/kernels/overlap_add.cc.obj	82307d9bce4cd9c0
 217543	217812	7722548480065585	esp-idf/espcoredump/CMakeFiles/__idf_espcoredump.dir/src/core_dump_crc.c.obj	c45717d426a4355b
-22756	29251	7722566028210949	glove-system.elf	ae676e3b56759347
-349	2103	7722549620210870	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/communication_task.c.obj	1d088b6e32394d9
+11546	17447	7723282401616203	glove-system.elf	ae676e3b56759347
+604	2416	7722874786634726	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/communication_task.c.obj	1d088b6e32394d9
 217596	218085	7722548480600946	esp-idf/wear_levelling/libwear_levelling.a	adaacb299667743d
 217188	218220	7722548476516983	esp-idf/espcoredump/CMakeFiles/__idf_espcoredump.dir/src/core_dump_flash.c.obj	f5a32ac08c5d951
 204956	217596	7722548354392744	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/signal/micro/kernels/window.cc.obj	61804c3aeee5c775
@@ -1640,21 +1641,21 @@
 221011	221521	7722548514743128	esp-idf/wifi_provisioning/CMakeFiles/__idf_wifi_provisioning.dir/proto-c/wifi_constants.pb-c.c.obj	5866a5cb16529b96
 221029	221957	7722548514924753	esp-idf/wifi_provisioning/CMakeFiles/__idf_wifi_provisioning.dir/src/scheme_softap.c.obj	4c361c234fd0b15b
 221165	222146	7722548516321074	esp-idf/esp32-camera/libesp32-camera.a	47781835a37b0859
-221277	222124	7722548517410344	esp-idf/main/CMakeFiles/__idf_main.dir/config/system_config.c.obj	4c1192ee95983b22
+242	850	7722864673921693	esp-idf/main/CMakeFiles/__idf_main.dir/config/system_config.c.obj	4c1192ee95983b22
 221140	222234	7722548516029352	esp-idf/wifi_provisioning/CMakeFiles/__idf_wifi_provisioning.dir/src/scheme_ble.c.obj	4aab2a1e35b41924
 220467	222075	7722548509312640	esp-idf/wifi_provisioning/CMakeFiles/__idf_wifi_provisioning.dir/src/manager.c.obj	c9e0ecb9c5ef7ff7
-221345	222534	7722548518090374	esp-idf/main/CMakeFiles/__idf_main.dir/core/system_monitor.c.obj	7b3f88faceabb14f
-221296	222370	7722548517596492	esp-idf/main/CMakeFiles/__idf_main.dir/core/power_management.c.obj	1434e54b4291b622
+345	1730	7722874784033803	esp-idf/main/CMakeFiles/__idf_main.dir/core/system_monitor.c.obj	7b3f88faceabb14f
+333	1450	7722874783913290	esp-idf/main/CMakeFiles/__idf_main.dir/core/power_management.c.obj	1434e54b4291b622
 210337	222167	7722548407998389	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/arena_allocator/non_persistent_arena_buffer_allocator.cc.obj	f0e61d65300feb20
 221470	223202	7722548519334326	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/ble_camera.c.obj	82d7761f63821804
-221429	223418	7722548518930525	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/imu.c.obj	65f524744b520952
-222126	223458	7722548525899320	esp-idf/main/CMakeFiles/__idf_main.dir/processing/sensor_fusion.c.obj	59c3eeb0bb0760a1
-222168	223253	7722548526318170	esp-idf/main/CMakeFiles/__idf_main.dir/processing/gesture_detection.c.obj	6c8e67290a2fc36f
+373	2401	7722874784312206	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/imu.c.obj	65f524744b520952
+334	854	7722916002588800	esp-idf/main/CMakeFiles/__idf_main.dir/processing/sensor_fusion.c.obj	59c3eeb0bb0760a1
+195	574	7723277916963020	esp-idf/main/CMakeFiles/__idf_main.dir/processing/gesture_detection.c.obj	6c8e67290a2fc36f
 222621	223373	7722548530856861	esp-idf/main/CMakeFiles/__idf_main.dir/communication/ble_service.c.obj	f39e8ba0784671f4
 273	2567	7722549619448791	esp-idf/esp-tflite-micro/libesp-tflite-micro.a	b5ad4487cd41dcea
-222731	223766	7722548531987318	esp-idf/main/CMakeFiles/__idf_main.dir/output/text_generation.c.obj	77a2f52e9fb1e608
-333	2050	7722549620041189	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/output_task.c.obj	7014e0aded2b2606
-286	1030	7722565803504931	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/processing_task.c.obj	5ae791e2bea22f88
+508	2307	7722874785666349	esp-idf/main/CMakeFiles/__idf_main.dir/output/text_generation.c.obj	77a2f52e9fb1e608
+583	2375	7722874786417856	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/output_task.c.obj	7014e0aded2b2606
+270	758	7723028240001291	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/processing_task.c.obj	5ae791e2bea22f88
 491	1566	7722549621654383	esp-idf/esp32-camera-master/CMakeFiles/__idf_esp32-camera-master.dir/conversions/esp_jpg_decode.c.obj	dded6ad384069bf3
 786	1669	7722549624583309	esp-idf/esp32-camera-master/CMakeFiles/__idf_esp32-camera-master.dir/driver/sensor.c.obj	a0784598b8440663
 505	2252	7722549621775465	esp-idf/esp32-camera-master/CMakeFiles/__idf_esp32-camera-master.dir/driver/esp_camera.c.obj	a07bd3f25ecb9527
@@ -1675,36 +1676,18 @@
 531	829	7722557271229836	esp-idf/usb/libusb.a	4a03d04ac8109ebd
 548	873	7722557271395191	esp-idf/wifi_provisioning/libwifi_provisioning.a	203b69b00a3669c3
 861	1037	7722557274529196	esp-idf/i2cdev/libi2cdev.a	2b969f091606efd4
-313	651	7722565803823975	bootloader/bootloader.bin	74242a8008610cd9
-313	651	7722565803823975	bootloader/bootloader.map	74242a8008610cd9
-722	877	7722565809297031	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-313	651	7722565803823975	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-313	651	7722565803823975	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-652	722	7722565807167693	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+204	7384	7723282288196036	bootloader/bootloader.bin	74242a8008610cd9
+204	7384	7723282288196036	bootloader/bootloader.map	74242a8008610cd9
+7428	7530	7723282361388660	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+204	7384	7723282288196036	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+204	7384	7723282288196036	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+7385	7427	7723282360012354	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
 222595	223629	7722548530634242	esp-idf/main/CMakeFiles/__idf_main.dir/ml/ml_test.c.obj	1082acd6d4ab4c50
-722	877	7722565809297031	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-241	9551	7722565803053558	esp-idf/main/CMakeFiles/__idf_main.dir/ml/ml_inference.cpp.obj	e81a614810f2804f
-10020	22754	7722566027601356	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-10020	22754	7722566027601356	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+7428	7530	7723282361388660	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+298	11120	7722864674484655	esp-idf/main/CMakeFiles/__idf_main.dir/ml/ml_inference.cpp.obj	e81a614810f2804f
+196	11545	7723282401036448	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+196	11545	7723282401036448	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
 22063	22177	7722563841774849	CMakeFiles/glove-system.elf.dir/project_elf_src_esp32s3.c.obj	c6b63552c7ecd31c
-29252	29693	7722566097486031	.bin_timestamp	af2f321773c08f52
-29252	29693	7722566097486031	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	af2f321773c08f52
-126	15517	7722566830353738	build.ninja	31a0992e358641cd
-218	515	7722566834625521	partition_table/partition-table.bin	140af1019019257e
-218	515	7722566834625521	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/partition_table/partition-table.bin	140af1019019257e
-524	636	7722566836548924	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-524	636	7722566836548924	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-516	704	7722566836463137	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-516	704	7722566836463137	bootloader/bootloader.elf	74242a8008610cd9
-516	704	7722566836463137	bootloader/bootloader.bin	74242a8008610cd9
-516	704	7722566836463137	bootloader/bootloader.map	74242a8008610cd9
-516	704	7722566836463137	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-516	704	7722566836463137	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-516	704	7722566836463137	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-516	704	7722566836463137	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-704	749	7722566838347613	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-704	749	7722566838347613	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-749	847	7722566839685724	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-749	847	7722566839685724	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-749	847	7722566839685724	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-749	847	7722566839685724	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+17448	17793	7723282464008032	.bin_timestamp	af2f321773c08f52
+17448	17793	7723282464008032	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	af2f321773c08f52
+17793	17893	7723282464093052	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0

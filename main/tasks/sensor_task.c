@@ -16,6 +16,7 @@
 #include "util/debug.h"
 #include "util/buffer.h"
 #include "cJSON.h"
+#include "esp_heap_caps.h"
 
 static const char *TAG = "SENSOR_TASK";
 
@@ -137,9 +138,30 @@ static void sensor_task(void *arg) {
             current_sensor_data.timestamp = current_time;
             current_sensor_data.sequence_number = sequence_number++;
             
-            // Send data to processing task
-            if (xQueueSend(g_sensor_data_queue, &current_sensor_data, 0) != pdTRUE) {
-                ESP_LOGW(TAG, "Failed to send sensor data to queue (queue full)");
+            // Send data to processing task with overflow protection
+            BaseType_t queue_result = xQueueSend(g_sensor_data_queue, &current_sensor_data, 0);
+            if (queue_result != pdTRUE) {
+                // Queue overflow detected - implement prioritization
+                UBaseType_t queue_spaces = uxQueueSpacesAvailable(g_sensor_data_queue);
+                
+                if (queue_spaces == 0) {
+                    // Critical: Queue completely full
+                    ESP_LOGW(TAG, "Sensor queue completely full! Dropping data. Heap: %zu bytes", 
+                             heap_caps_get_free_size(MALLOC_CAP_DEFAULT));
+                    
+                    // Try to force send critical data (IMU/Touch) by dropping oldest
+                    if (current_sensor_data.imu_data_valid || current_sensor_data.touch_data_valid) {
+                        sensor_data_t dummy;
+                        if (xQueueReceive(g_sensor_data_queue, &dummy, 0) == pdTRUE) {
+                            // Successfully removed oldest, try again
+                            if (xQueueSend(g_sensor_data_queue, &current_sensor_data, 0) != pdTRUE) {
+                                ESP_LOGE(TAG, "Failed to send even after making space!");
+                            }
+                        }
+                    }
+                } else {
+                    ESP_LOGW(TAG, "Sensor queue near full (%u spaces remaining)", (unsigned int)queue_spaces);
+                }
             }
 
             static bool data_collection_mode = false;  // Set to true when collecting data
@@ -304,8 +326,13 @@ static void touch_callback(bool *status) {
     current_sensor_data.timestamp = current_sensor_data.touch_data.timestamp;
     current_sensor_data.sequence_number = sequence_number++;
     
-    // Send data to processing task
-    if (xQueueSend(g_sensor_data_queue, &current_sensor_data, 0) != pdTRUE) {
-        ESP_LOGW(TAG, "Failed to send touch event data to queue (queue full)");
+    // Send touch event data with high priority (touch is critical)
+    if (xQueueSend(g_sensor_data_queue, &current_sensor_data, pdMS_TO_TICKS(5)) != pdTRUE) {
+        ESP_LOGW(TAG, "Failed to send touch event data - queue critically full");
+        // Touch events are critical, try to force by removing oldest non-touch data
+        sensor_data_t dummy;
+        if (xQueueReceive(g_sensor_data_queue, &dummy, 0) == pdTRUE) {
+            xQueueSend(g_sensor_data_queue, &current_sensor_data, 0);
+        }
     }
 }

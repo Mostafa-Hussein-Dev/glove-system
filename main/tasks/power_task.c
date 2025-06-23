@@ -14,6 +14,8 @@
 #include "config/system_config.h"
 #include "util/debug.h"
 #include "output/output_manager.h"
+#include "esp_heap_caps.h"
+#include "util/buffer.h"
 
 static const char *TAG = "POWER_TASK";
 
@@ -117,15 +119,31 @@ static void power_task(void *arg) {
             power_management_process_inactivity(current_time_ms);
         }
         
-        // Check system health
+        // Check system health with direct heap check
         system_metrics_t metrics;
+        size_t direct_free_heap = esp_get_free_heap_size();  // Direct read
+        
         if (system_monitor_get_metrics(&metrics) == ESP_OK) {
-            // Perform automated actions based on metrics
-            if (metrics.free_heap < 10000) {  // Getting low on memory
-                ESP_LOGW(TAG, "Low memory detected: %u bytes", metrics.free_heap);
+            // Validate metrics - if system monitor hasn't run yet, use direct values
+            if (metrics.free_heap == 0 || metrics.uptime_ms == 0) {
+                ESP_LOGD(TAG, "System monitor not ready, using direct heap reading");
+                metrics.free_heap = direct_free_heap;
+            }
+            
+            // Perform automated actions based on validated metrics
+            if (metrics.free_heap < 50000) {  // Increased threshold to 50KB (was 10KB)
+                ESP_LOGW(TAG, "Low memory detected: %u bytes (direct: %zu bytes)", 
+                         metrics.free_heap, direct_free_heap);
                 
-                // Take some actions to free memory (e.g., reduce buffers, clear caches)
-                // This would be specific to the application
+                // Only take action if both readings are low
+                if (direct_free_heap < 50000) {
+                    ESP_LOGW(TAG, "Confirmed low memory condition");
+                    // Take some actions to free memory
+                    buffer_emergency_cleanup();  // Emergency buffer cleanup
+                }
+            } else {
+                ESP_LOGD(TAG, "Memory OK: %u bytes (direct: %zu bytes)", 
+                         metrics.free_heap, direct_free_heap);
             }
             
             if (metrics.cpu_usage_percent > 80) {  // High CPU usage

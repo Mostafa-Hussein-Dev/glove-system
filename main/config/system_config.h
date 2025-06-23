@@ -36,11 +36,16 @@
 #define CAMERA_FRAME_RATE_HZ        (5)
 #define TOUCH_SAMPLE_RATE_HZ        (10)
 
-/* Queue sizes */
-#define SENSOR_QUEUE_SIZE           (10)
-#define PROCESSING_QUEUE_SIZE       (5)
-#define OUTPUT_QUEUE_SIZE           (5)
-#define COMMAND_QUEUE_SIZE          (5)
+/* Queue sizes - INCREASED for better throughput */
+#define SENSOR_QUEUE_SIZE           (25)  // Increased from 10
+#define PROCESSING_QUEUE_SIZE       (15)  // Increased from 5  
+#define OUTPUT_QUEUE_SIZE           (10)  // Increased from 5
+#define COMMAND_QUEUE_SIZE          (10)  // Increased from 5
+
+/* Queue monitoring configuration */
+#define QUEUE_MONITOR_ENABLED       (1)
+#define QUEUE_WARNING_THRESHOLD     (80)  // Warn when 80% full
+#define QUEUE_CRITICAL_THRESHOLD    (95)  // Critical when 95% full
 
 /* Buffer sizes */
 #define FLEX_SENSOR_BUFFER_SIZE     (10)
@@ -67,7 +72,7 @@
 #define BLE_MAX_CONNECTIONS         (1)
 
 /* Gesture recognition */
-#define MAX_GESTURES                (50)
+#define MAX_GESTURES                (40)
 #define CONFIDENCE_THRESHOLD        (0.7f)
 #define MAX_GESTURE_DURATION_MS     (2000)
 #define MIN_GESTURE_DURATION_MS     (200)

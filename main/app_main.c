@@ -495,35 +495,50 @@ static esp_err_t init_output(void) {
 }
 
 static esp_err_t init_queues(void) {
-    // Create sensor data queue
+    ESP_LOGI(TAG, "Initializing queues with enhanced sizes...");
+    
+    // Create sensor data queue with increased size
     g_sensor_data_queue = xQueueCreate(SENSOR_QUEUE_SIZE, sizeof(sensor_data_t));
     if (g_sensor_data_queue == NULL) {
-        ESP_LOGE(TAG, "Failed to create sensor data queue");
+        ESP_LOGE(TAG, "Failed to create sensor data queue (size: %d)", SENSOR_QUEUE_SIZE);
         return ESP_FAIL;
     }
+    ESP_LOGI(TAG, "Sensor queue created: %d items", SENSOR_QUEUE_SIZE);
     
-    // Create processing result queue
+    // Create processing result queue with increased size
     g_processing_result_queue = xQueueCreate(PROCESSING_QUEUE_SIZE, sizeof(processing_result_t));
     if (g_processing_result_queue == NULL) {
-        ESP_LOGE(TAG, "Failed to create processing result queue");
+        ESP_LOGE(TAG, "Failed to create processing result queue (size: %d)", PROCESSING_QUEUE_SIZE);
         return ESP_FAIL;
     }
+    ESP_LOGI(TAG, "Processing queue created: %d items", PROCESSING_QUEUE_SIZE);
     
-    // Create output command queue
+    // Create output command queue with increased size
     g_output_command_queue = xQueueCreate(OUTPUT_QUEUE_SIZE, sizeof(output_command_t));
     if (g_output_command_queue == NULL) {
-        ESP_LOGE(TAG, "Failed to create output command queue");
+        ESP_LOGE(TAG, "Failed to create output command queue (size: %d)", OUTPUT_QUEUE_SIZE);
         return ESP_FAIL;
     }
+    ESP_LOGI(TAG, "Output queue created: %d items", OUTPUT_QUEUE_SIZE);
     
-    // Create system command queue
+    // Create system command queue with increased size
     g_system_command_queue = xQueueCreate(COMMAND_QUEUE_SIZE, sizeof(system_command_t));
     if (g_system_command_queue == NULL) {
-        ESP_LOGE(TAG, "Failed to create system command queue");
+        ESP_LOGE(TAG, "Failed to create system command queue (size: %d)", COMMAND_QUEUE_SIZE);
         return ESP_FAIL;
     }
+    ESP_LOGI(TAG, "System queue created: %d items", COMMAND_QUEUE_SIZE);
     
-    ESP_LOGI(TAG, "All queues created successfully");
+    // Calculate total queue memory usage
+    size_t total_queue_memory = 
+        (SENSOR_QUEUE_SIZE * sizeof(sensor_data_t)) +
+        (PROCESSING_QUEUE_SIZE * sizeof(processing_result_t)) +
+        (OUTPUT_QUEUE_SIZE * sizeof(output_command_t)) +
+        (COMMAND_QUEUE_SIZE * sizeof(system_command_t));
+    
+    ESP_LOGI(TAG, "All queues created successfully. Total memory: %zu bytes (%.1f KB)", 
+             total_queue_memory, total_queue_memory / 1024.0f);
+    
     return ESP_OK;
 }
 
@@ -583,7 +598,6 @@ static void debug_mode_run(void) {
     uint32_t last_full_test_time = 0;
     
     while (1) {
-        uint32_t current_time = esp_timer_get_time() / 1000; // Convert to milliseconds
         
         ESP_LOGI("INIT", "\033[2J\033[H"); 
         ESP_LOGI(TAG, "=== DEBUG LOOP %lu ===\n", loop_count++);
@@ -597,11 +611,9 @@ static void debug_mode_run(void) {
         
         ESP_LOGI(TAG, "Testing Touch Sensors...");
         debug_test_touch_sensors();
-        
-        
 
         // Test output devices every 10 seconds
-        
+        /*
         if (current_time - last_full_test_time > 10000) {
             ESP_LOGI(TAG, "Testing Display...");
             debug_test_display();
@@ -633,11 +645,11 @@ static void debug_mode_run(void) {
             
         }
         
-           
+        */   
         
         ESP_LOGI(TAG, "=== DEBUG LOOP %lu COMPLETE ===\n", loop_count - 1);
         
-        vTaskDelay(pdMS_TO_TICKS(10000));
+        vTaskDelay(pdMS_TO_TICKS(20));
     }
 }
 
@@ -656,10 +668,12 @@ static void debug_test_flex_sensors(void) {
             ESP_LOGI(TAG, "  Ring:   Raw=%4d, Angle=%.1f°", raw_values[3], angles[3]);
             ESP_LOGI(TAG, "  Pinky:  Raw=%4d, Angle=%.1f°", raw_values[4], angles[4]);
 
+            /*
             ESP_LOGI(TAG, "Testing calibration math:");
             for (int i = 0; i < FINGER_COUNT; i++) {
                 flex_sensor_test_calibration_math(i);
             }
+            */
         } else {
             ESP_LOGE(TAG, "✗ Flex Sensors: Failed to read angles: %s", esp_err_to_name(ret));
         }

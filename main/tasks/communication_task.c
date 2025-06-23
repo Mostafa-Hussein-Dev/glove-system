@@ -12,6 +12,7 @@
 #include "config/system_config.h"
 #include "util/debug.h"
 #include "util/buffer.h"
+#include "esp_heap_caps.h"
 
 static const char *TAG = "COMM_TASK";
 
@@ -25,6 +26,40 @@ static uint32_t last_status_update_ms = 0;
 // Forward declarations
 static void communication_task(void *arg);
 static void ble_command_handler(const uint8_t *data, size_t length);
+
+static void check_system_health(void) {
+    // Check queue health
+    UBaseType_t sensor_items = uxQueueMessagesWaiting(g_sensor_data_queue);
+    UBaseType_t processing_items = uxQueueMessagesWaiting(g_processing_result_queue);
+    UBaseType_t output_items = uxQueueMessagesWaiting(g_output_command_queue);
+    UBaseType_t system_items = uxQueueMessagesWaiting(g_system_command_queue);
+    
+    // Check memory health
+    size_t free_heap = heap_caps_get_free_size(MALLOC_CAP_DEFAULT);
+    
+    // Log warnings if queues are getting full
+    if (sensor_items > (SENSOR_QUEUE_SIZE * 0.8)) {
+        ESP_LOGW(TAG, "Sensor queue high: %u/%d", (unsigned int)sensor_items, SENSOR_QUEUE_SIZE);
+    }
+    if (processing_items > (PROCESSING_QUEUE_SIZE * 0.8)) {
+        ESP_LOGW(TAG, "Processing queue high: %u/%d", (unsigned int)processing_items, PROCESSING_QUEUE_SIZE);
+    }
+    if (output_items > (OUTPUT_QUEUE_SIZE * 0.8)) {
+        ESP_LOGW(TAG, "Output queue high: %u/%d", (unsigned int)output_items, OUTPUT_QUEUE_SIZE);
+    }
+    if (system_items > (COMMAND_QUEUE_SIZE * 0.8)) {
+        ESP_LOGW(TAG, "System queue high: %u/%d", (unsigned int)system_items, COMMAND_QUEUE_SIZE);
+    }
+    
+    // Log memory warnings
+    if (free_heap < 50000) {  // Less than 50KB
+        ESP_LOGW(TAG, "Low memory warning: %zu bytes free", free_heap);
+        if (free_heap < 20000) {  // Less than 20KB - critical
+            ESP_LOGE(TAG, "CRITICAL: Very low memory: %zu bytes", free_heap);
+            buffer_emergency_cleanup();  // Emergency cleanup
+        }
+    }
+}
 
 esp_err_t communication_task_init(void) {
     // Create the communication task
@@ -113,9 +148,13 @@ static void communication_task(void *arg) {
                 }
             }
             
-            last_status_update_ms = current_time_ms;
+            // Periodic system health check (every 10 seconds)
+            uint32_t current_time_ms = esp_timer_get_time() / 1000;
+            if (current_time_ms - last_status_update_ms >= 10000) {
+                check_system_health();
+                last_status_update_ms = current_time_ms;
+            }
         }
-        
         // Short delay to prevent CPU hogging
         vTaskDelay(pdMS_TO_TICKS(50));
     }

@@ -164,7 +164,7 @@ esp_err_t debug_assert(bool condition, const char* tag, const char* message, int
     return ESP_OK;
 }
 
-static void debug_ml_status(void) {
+void debug_ml_status(void) {
     ESP_LOGI(TAG, "=== ML System Status ===");
     
     // Check model status
@@ -186,7 +186,7 @@ static void debug_ml_status(void) {
     }
 }
 
-static void debug_ml_inference_test(void) {
+void debug_ml_inference_test(void) {
     ESP_LOGI(TAG, "Running ML inference test...");
     
     // Create dummy sensor data
