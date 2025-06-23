@@ -10,25 +10,28 @@
  */
 
 /* Task priorities */
-#define SENSOR_TASK_PRIORITY        (10)
-#define PROCESSING_TASK_PRIORITY    (9)
-#define OUTPUT_TASK_PRIORITY        (8)
-#define COMMUNICATION_TASK_PRIORITY (7)
-#define POWER_TASK_PRIORITY         (6)
+#define SENSOR_TASK_PRIORITY          (11)
+#define PROCESSING_TASK_PRIORITY      (10)
+#define SYSTEM_MONITOR_TASK_PRIORITY  (8)
+#define OUTPUT_TASK_PRIORITY          (6)
+#define COMMUNICATION_TASK_PRIORITY   (7)
+#define POWER_TASK_PRIORITY           (5)
 
 /* Task stack sizes */
-#define SENSOR_TASK_STACK_SIZE        (8192)
-#define PROCESSING_TASK_STACK_SIZE    (12288)
+#define SENSOR_TASK_STACK_SIZE        (6144)
+#define PROCESSING_TASK_STACK_SIZE    (16384)
+#define SYSTEM_MONITOR_TASK_STACK     (4096)
 #define OUTPUT_TASK_STACK_SIZE        (6144)
-#define COMMUNICATION_TASK_STACK_SIZE (6144)
-#define POWER_TASK_STACK_SIZE         (4096)
+#define COMMUNICATION_TASK_STACK_SIZE (8192)
+#define POWER_TASK_STACK_SIZE         (3072)
 
 /* Core assignments */
-#define SENSOR_TASK_CORE           (0)
-#define PROCESSING_TASK_CORE       (1)
-#define OUTPUT_TASK_CORE           (1)
-#define COMMUNICATION_TASK_CORE    (0)
-#define POWER_TASK_CORE            (0)
+#define SENSOR_TASK_CORE              (0)
+#define PROCESSING_TASK_CORE          (1)
+#define SYSTEM_MONITOR_TASK_CORE      (0)     // NEW - Core 0 with sensors
+#define COMMUNICATION_TASK_CORE       (1)
+#define OUTPUT_TASK_CORE              (0)
+#define POWER_TASK_CORE               (0)
 
 /* Sampling rates */
 #define FLEX_SENSOR_SAMPLE_RATE_HZ  (25)

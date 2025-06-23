@@ -169,3 +169,7 @@ void output_task_deinit(void) {
     
     ESP_LOGI(TAG, "Output task deinitialized");
 }
+
+void* output_task_get_handle(void) {
+    return (void*)output_task_handle;
+}

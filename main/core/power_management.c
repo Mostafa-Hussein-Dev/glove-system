@@ -134,6 +134,7 @@ esp_err_t power_management_init(void) {
         return ret;
     }
     
+    /*
     // Set initial power mode based on battery status
     if (power_state.battery.is_critical) {
         power_management_set_mode(POWER_MODE_MAX_POWER_SAVE);
@@ -142,27 +143,10 @@ esp_err_t power_management_init(void) {
     } else {
         power_management_set_mode(POWER_MODE_BALANCED);
     }
-    
+    */
 
-
-
-
-
-
-
-
-
+    //TODOS: This is temporary
     power_management_set_mode(POWER_MODE_BALANCED);
-
-
-
-
-
-
-
-
-
-
     
     // Set current time as last activity time
     power_state.last_activity_time_ms = esp_timer_get_time() / 1000;

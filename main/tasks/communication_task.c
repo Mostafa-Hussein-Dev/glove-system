@@ -379,3 +379,7 @@ static void ble_command_handler(const uint8_t *data, size_t length) {
             break;
     }
 }
+
+void* communication_task_get_handle(void) {
+    return (void*)communication_task_handle;
+}

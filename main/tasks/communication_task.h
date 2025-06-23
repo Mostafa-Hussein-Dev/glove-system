@@ -19,4 +19,6 @@ esp_err_t communication_task_init(void);
  */
 void communication_task_deinit(void);
 
+void* communication_task_get_handle(void);
+
 #endif /* TASKS_COMMUNICATION_TASK_H */

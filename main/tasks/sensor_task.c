@@ -17,6 +17,7 @@
 #include "util/buffer.h"
 #include "cJSON.h"
 #include "esp_heap_caps.h"
+#include "core/system_monitor.h"
 
 static const char *TAG = "SENSOR_TASK";
 
@@ -170,9 +171,21 @@ static void sensor_task(void *arg) {
                 output_sensor_data_for_collection(&current_sensor_data);
             }
         }
+
+        if (g_sensor_data_queue != NULL) {
+            UBaseType_t waiting = uxQueueMessagesWaiting(g_sensor_data_queue);
+            UBaseType_t spaces = uxQueueSpacesAvailable(g_sensor_data_queue);
+            
+            if (waiting + spaces > 0) {  // Avoid division by zero
+                uint32_t usage_percent = (waiting * 100) / (waiting + spaces);
+                bool overflow = (spaces == 0 && waiting > 0);  // Queue full condition
+                
+                system_monitor_update_queue_health(usage_percent, overflow);
+            }
+        }
         
         // Short delay to prevent CPU hogging
-        vTaskDelay(pdMS_TO_TICKS(50));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
@@ -313,7 +326,6 @@ static void output_sensor_data_for_collection(const sensor_data_t* data) {
     cJSON_Delete(json);
 }
 
-// Callback for touch events
 static void touch_callback(bool *status) {
     // Copy touch status to sensor data
     memcpy(current_sensor_data.touch_data.touch_status, status, sizeof(bool) * TOUCH_SENSOR_COUNT);
@@ -335,4 +347,8 @@ static void touch_callback(bool *status) {
             xQueueSend(g_sensor_data_queue, &current_sensor_data, 0);
         }
     }
+}
+
+void* sensor_task_get_handle(void) {
+    return (void*)sensor_task_handle;
 }

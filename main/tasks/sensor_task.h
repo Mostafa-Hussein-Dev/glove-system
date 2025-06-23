@@ -20,4 +20,6 @@ esp_err_t sensor_task_init(void);
  */
 void sensor_task_deinit(void);
 
+void* sensor_task_get_handle(void);
+
 #endif /* TASKS_SENSOR_TASK_H */

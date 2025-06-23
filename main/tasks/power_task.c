@@ -120,41 +120,75 @@ static void power_task(void *arg) {
         }
         
         // Check system health with direct heap check
+        // === ENHANCED SYSTEM HEALTH MONITORING ===
         system_metrics_t metrics;
-        size_t direct_free_heap = esp_get_free_heap_size();  // Direct read
-        
+
         if (system_monitor_get_metrics(&metrics) == ESP_OK) {
-            // Validate metrics - if system monitor hasn't run yet, use direct values
-            if (metrics.free_heap == 0 || metrics.uptime_ms == 0) {
-                ESP_LOGD(TAG, "System monitor not ready, using direct heap reading");
-                metrics.free_heap = direct_free_heap;
-            }
-            
-            // Perform automated actions based on validated metrics
-            if (metrics.free_heap < 50000) {  // Increased threshold to 50KB (was 10KB)
-                ESP_LOGW(TAG, "Low memory detected: %u bytes (direct: %zu bytes)", 
-                         metrics.free_heap, direct_free_heap);
+
+            // Memory management
+            if (metrics.free_heap < 15000 && metrics.free_heap >= 5000) {  // Warning threshold
+                ESP_LOGW(TAG, "Low memory warning: %u bytes (%.1f%% free)", 
+                    metrics.free_heap,
+                    (float)metrics.free_heap / metrics.total_heap * 100);
                 
-                // Only take action if both readings are low
-                if (direct_free_heap < 50000) {
-                    ESP_LOGW(TAG, "Confirmed low memory condition");
-                    // Take some actions to free memory
-                    buffer_emergency_cleanup();  // Emergency buffer cleanup
+                if (metrics.free_heap < 5000) {  // Critical threshold
+                    ESP_LOGE(TAG, "CRITICAL memory situation: %u bytes", metrics.free_heap);
+                    // Trigger automatic memory cleanup
+                    system_monitor_recovery_action(RECOVERY_MEMORY_CLEANUP, NULL);
                 }
             } else {
-                ESP_LOGD(TAG, "Memory OK: %u bytes (direct: %zu bytes)", 
-                         metrics.free_heap, direct_free_heap);
+                ESP_LOGD(TAG, "Memory OK: %u bytes", 
+                         metrics.free_heap);
             }
             
-            if (metrics.cpu_usage_percent > 80) {  // High CPU usage
-                ESP_LOGW(TAG, "High CPU usage detected: %u%%", metrics.cpu_usage_percent);
+            // CPU usage management
+            if (metrics.cpu_usage_percent > 80) {
+                ESP_LOGW(TAG, "High CPU usage: %u%%", metrics.cpu_usage_percent);
                 
-                // Consider throttling some non-essential tasks
+                // Boost performance mode temporarily if not already in performance mode
                 if (power_management_get_mode() != POWER_MODE_PERFORMANCE) {
-                    // Temporarily boost performance
+                    ESP_LOGI(TAG, "Boosting to balanced mode due to high CPU usage");
                     power_management_set_mode(POWER_MODE_BALANCED);
                 }
+            } 
+            
+            // Temperature management
+            if (metrics.cpu_temperature > 60.0f) {
+                ESP_LOGW(TAG, "High temperature: %.1f°C", metrics.cpu_temperature);
+                
+                if (metrics.cpu_temperature > 70.0f) {
+                    ESP_LOGE(TAG, "CRITICAL temperature: %.1f°C - enabling power save", 
+                        metrics.cpu_temperature);
+                    // Force power save mode to cool down
+                    power_management_set_mode(POWER_MODE_MAX_POWER_SAVE);
+                }
+            } 
+
+            // System health level management
+            system_health_level_t health = system_monitor_get_health_level();
+            switch (health) {
+                case SYSTEM_HEALTH_CRITICAL:
+                    ESP_LOGE(TAG, "🔴 SYSTEM HEALTH CRITICAL - Taking emergency actions");
+                    // Force lowest power mode
+                    power_management_set_mode(POWER_MODE_MAX_POWER_SAVE);
+                    break;
+                    
+                case SYSTEM_HEALTH_WARNING:
+                    ESP_LOGW(TAG, "🟡 System health warning - Optimizing power");
+                    // Use balanced mode
+                    if (power_management_get_mode() == POWER_MODE_PERFORMANCE) {
+                        power_management_set_mode(POWER_MODE_BALANCED);
+                    }
+                    break;
+                    
+                case SYSTEM_HEALTH_OK:
+                default:
+                    // System is healthy, normal power management
+                    break;
             }
+            
+        } else {
+            ESP_LOGE(TAG, "Failed to get system metrics");
         }
         
         // Short delay to prevent CPU hogging
@@ -491,4 +525,8 @@ static void check_battery_status(void) {
         // Return to balanced power mode
         power_management_set_mode(POWER_MODE_BALANCED);
     }
+}
+
+void* power_task_get_handle(void) {
+    return (void*)power_task_handle;
 }

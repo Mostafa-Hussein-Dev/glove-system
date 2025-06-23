@@ -20,4 +20,6 @@ esp_err_t power_task_init(void);
  */
 void power_task_deinit(void);
 
+void* power_task_get_handle(void);
+
 #endif /* TASKS_POWER_TASK_H */

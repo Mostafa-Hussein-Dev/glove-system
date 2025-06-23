@@ -20,4 +20,6 @@ esp_err_t output_task_init(void);
  */
 void output_task_deinit(void);
 
+void* output_task_get_handle(void);
+
 #endif /* TASKS_OUTPUT_TASK_H */

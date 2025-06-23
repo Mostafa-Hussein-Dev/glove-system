@@ -20,4 +20,6 @@ esp_err_t processing_task_init(void);
  */
 void processing_task_deinit(void);
 
+void* processing_task_get_handle(void);
+
 #endif /* TASKS_PROCESSING_TASK_H */

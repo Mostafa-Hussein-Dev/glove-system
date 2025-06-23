@@ -81,6 +81,7 @@ static esp_err_t init_communication(void);
 static esp_err_t init_output(void);
 static esp_err_t init_queues(void);
 static esp_err_t init_tasks(void);
+static esp_err_t register_critical_tasks(void);
 
 // Debug mode functions
 static void debug_mode_run(void);
@@ -92,6 +93,7 @@ static void debug_test_display(void);
 static void debug_test_audio(void);
 static void debug_test_haptic(void);
 static void debug_test_power_system(void);
+static void debug_test_enhanced_monitor(void);
 static void debug_display_system_info(void);
 
 /**
@@ -543,6 +545,8 @@ static esp_err_t init_queues(void) {
 }
 
 static esp_err_t init_tasks(void) {
+    ESP_LOGI(TAG, "Starting tasks initialization");
+
     esp_err_t ret;
     
     // Initialize sensor task
@@ -580,12 +584,60 @@ static esp_err_t init_tasks(void) {
         return ret;
     }
 
-    
+    ret = register_critical_tasks();
+    if (ret != ESP_OK) {
+        ESP_LOGW(TAG, "Failed to register critical tasks: %s", esp_err_to_name(ret));
+        // Non-fatal, continue anyway
+    }
+
     ESP_LOGI(TAG, "All tasks initialized successfully");
     return ESP_OK;
 }
 
-
+static esp_err_t register_critical_tasks(void) {
+    ESP_LOGI(TAG, "Registering critical tasks with system monitor");
+    
+    // Register all critical tasks for monitoring
+    // Note: Task handles should be made available from respective task modules
+    
+    // System monitor itself is automatically monitored
+    
+    // Register sensor task if available
+    void* sensor_task_handle = sensor_task_get_handle();  // You'll need to add this function
+    if (sensor_task_handle != NULL) {
+        system_monitor_register_task((TaskHandle_t)sensor_task_handle, "sensor_task");
+    }
+    
+    // Register processing task if available  
+    void* processing_task_handle = processing_task_get_handle();  // You'll need to add this function
+    if (processing_task_handle != NULL) {
+        system_monitor_register_task((TaskHandle_t)processing_task_handle, "proc_task");
+    }
+    
+    // Register output task if available
+    void* output_task_handle = output_task_get_handle();  // You'll need to add this function
+    if (output_task_handle != NULL) {
+        system_monitor_register_task((TaskHandle_t)output_task_handle, "output_task");
+    }
+    
+    // Register communication task if available
+    void* comm_task_handle = communication_task_get_handle();  // You'll need to add this function
+    if (comm_task_handle != NULL) {
+        system_monitor_register_task((TaskHandle_t)comm_task_handle, "comm_task");
+    }
+    
+    // Register power task if available
+    void* power_task_handle = power_task_get_handle();  // You'll need to add this function
+    if (power_task_handle != NULL) {
+        system_monitor_register_task((TaskHandle_t)power_task_handle, "power_task");
+    }
+    
+    // Enable adaptive monitoring intervals for better responsiveness
+    system_monitor_set_adaptive_intervals(true);
+    
+    ESP_LOGI(TAG, "Critical task registration completed");
+    return ESP_OK;
+}
 
 
 static void debug_mode_run(void) {
@@ -611,6 +663,9 @@ static void debug_mode_run(void) {
         
         ESP_LOGI(TAG, "Testing Touch Sensors...");
         debug_test_touch_sensors();
+
+        ESP_LOGI(TAG, "Testing System Monitor...");
+        debug_test_enhanced_monitor();
 
         // Test output devices every 10 seconds
         /*
@@ -897,8 +952,43 @@ static void debug_display_system_info(void) {
     ESP_LOGI(TAG, "=========================");
 }
 
-
-
+static void debug_test_enhanced_monitor(void) {
+    ESP_LOGI(TAG, "=== ENHANCED SYSTEM MONITOR TEST ===");
+    
+    system_metrics_t metrics;
+    if (system_monitor_get_metrics(&metrics) == ESP_OK) {
+        ESP_LOGI(TAG, "📊 Current System Status:");
+        ESP_LOGI(TAG, "  Health Level: %s", 
+            (metrics.health_level == SYSTEM_HEALTH_OK) ? "🟢 OK" :
+            (metrics.health_level == SYSTEM_HEALTH_WARNING) ? "🟡 WARNING" : "🔴 CRITICAL");
+        
+        ESP_LOGI(TAG, "  Memory: %u/%u bytes (%.1f%% free)", 
+            metrics.free_heap, metrics.total_heap,
+            (float)metrics.free_heap / metrics.total_heap * 100);
+            
+        ESP_LOGI(TAG, "  CPU: %u%% usage, %.1f°C", 
+            metrics.cpu_usage_percent, metrics.cpu_temperature);
+            
+        ESP_LOGI(TAG, "  Tasks: %u total, %u critical monitored", 
+            metrics.task_count, metrics.critical_task_count);
+            
+        ESP_LOGI(TAG, "  Uptime: %.1f seconds", metrics.uptime_ms / 1000.0f);
+        ESP_LOGI(TAG, "  Errors: %u, Recoveries: %u", 
+            metrics.error_count, metrics.recovery_count);
+    }
+    
+    // Test recovery system
+    ESP_LOGI(TAG, "🔧 Testing recovery system...");
+    system_monitor_recovery_action(RECOVERY_MEMORY_CLEANUP, NULL);
+    
+    // Test queue health reporting
+    ESP_LOGI(TAG, "📊 Testing queue health reporting...");
+    system_monitor_update_queue_health(75, false);  // 75% usage
+    system_monitor_update_queue_health(100, true);  // Overflow event
+    
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    ESP_LOGI(TAG, "Enhanced system monitor test completed");
+}
 
 // Main application entry point
 void app_main(void) {

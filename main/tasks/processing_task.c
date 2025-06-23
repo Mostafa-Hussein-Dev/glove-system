@@ -300,3 +300,7 @@ void processing_task_deinit(void) {
     
     ESP_LOGI(TAG, "Processing task deinitialized");
 }
+
+void* processing_task_get_handle(void) {
+    return (void*)processing_task_handle;
+}
