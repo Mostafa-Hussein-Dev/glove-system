@@ -139,7 +139,7 @@ esp_err_t sensor_fusion_init(void) {
     g_fusion_state.fusion_count = 0;
     g_fusion_state.initialized = true;
     
-    ESP_LOGI(TAG, "⚓ Sensor fusion Ready! All systems initialized.");
+    ESP_LOGI(TAG, "Sensor fusion Ready! All systems initialized.");
     return ESP_OK;
 }
 

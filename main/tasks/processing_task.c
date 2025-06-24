@@ -29,6 +29,7 @@ static sensor_data_buffer_t sensor_data_buffer;
 
 // Processing task function
 static void processing_task(void *arg);
+static void print_real_task_stats(void);
 
 static esp_err_t process_ml_inference(sensor_data_t* sensor_data, sensor_data_buffer_t* data_buffer, processing_result_t* result) {
     ml_input_t static_input, dynamic_input;
@@ -79,6 +80,12 @@ static esp_err_t process_ml_inference(sensor_data_t* sensor_data, sensor_data_bu
 }
 
 esp_err_t processing_task_init(void) {
+    ESP_LOGI(TAG, "Initializing processing task with enhanced architecture...");
+    ESP_LOGI(TAG, "  Core: %d, Priority: %d, Stack: %d bytes", 
+        PROCESSING_TASK_CORE, PROCESSING_TASK_PRIORITY, PROCESSING_TASK_STACK_SIZE);
+    
+    // === KEEP ALL YOUR EXISTING INITIALIZATION ===
+    
     // Initialize sensor data buffer
     esp_err_t ret = buffer_init(&sensor_data_buffer, 20);  // Buffer for 20 samples
     if (ret != ESP_OK) {
@@ -104,15 +111,16 @@ esp_err_t processing_task_init(void) {
         return ret;
     }
 
-    // Create the processing task
+    // === ONLY UPDATE THE TASK CREATION PART ===
+    // Create the processing task with NEW ENHANCED CONFIGURATION
     BaseType_t xReturned = xTaskCreatePinnedToCore(
         processing_task,
         "processing_task",
-        PROCESSING_TASK_STACK_SIZE,
+        PROCESSING_TASK_STACK_SIZE,  // UPDATED: Now 16384 instead of 12288
         NULL,
-        PROCESSING_TASK_PRIORITY,
+        PROCESSING_TASK_PRIORITY,    // UPDATED: Now 10 instead of 9
         &processing_task_handle,
-        PROCESSING_TASK_CORE
+        PROCESSING_TASK_CORE         // SAME: Still Core 1
     );
     
     if (xReturned != pdPASS) {
@@ -121,12 +129,13 @@ esp_err_t processing_task_init(void) {
         return ESP_FAIL;
     }
     
-    ESP_LOGI(TAG, "Processing task initialized on core %d", PROCESSING_TASK_CORE);
+    ESP_LOGI(TAG, "Processing task initialized on core %d with priority %d (enhanced)", 
+        PROCESSING_TASK_CORE, PROCESSING_TASK_PRIORITY);
     return ESP_OK;
 }
 
 static void processing_task(void *arg) {
-    ESP_LOGI(TAG, "Processing task started");
+    ESP_LOGI(TAG, "Processing task started on core %d", xPortGetCoreID());
     
     // Set processing task as ready
     xEventGroupSetBits(g_system_event_group, SYSTEM_EVENT_PROCESSING_READY);
@@ -286,6 +295,9 @@ static void processing_task(void *arg) {
             // Print buffer statistics periodically
             buffer_print_stats();
         }
+
+
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 
@@ -301,6 +313,8 @@ void processing_task_deinit(void) {
     ESP_LOGI(TAG, "Processing task deinitialized");
 }
 
+
 void* processing_task_get_handle(void) {
+    extern TaskHandle_t processing_task_handle;  // Declare external reference
     return (void*)processing_task_handle;
 }

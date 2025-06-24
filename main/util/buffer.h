@@ -117,39 +117,6 @@ typedef struct output_command_s {
     } data;
 } output_command_t;
 
-/**
- * @brief System command types
- */
-typedef enum {
-    SYS_CMD_CHANGE_STATE,
-    SYS_CMD_CALIBRATE,
-    SYS_CMD_SET_POWER_MODE,
-    SYS_CMD_ENABLE_BLE,
-    SYS_CMD_DISABLE_BLE,
-    SYS_CMD_RESTART,
-    SYS_CMD_SLEEP,
-    SYS_CMD_FACTORY_RESET
-} system_command_type_t;
-
-/**
- * @brief Structure for system commands
- */
-typedef struct system_command_s {
-    system_command_type_t type;
-    union {
-        struct {
-            system_state_t new_state;
-        } change_state;
-        
-        struct {
-            bool enable_power_save;
-        } power_mode;
-        
-        struct {
-            uint16_t sleep_duration_sec;
-        } sleep;
-    } data;
-} system_command_t;
 
 /**
  * @brief Circular buffer for sensor data storage

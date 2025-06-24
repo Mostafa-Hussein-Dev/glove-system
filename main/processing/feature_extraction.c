@@ -111,7 +111,7 @@ static void calculate_fft_magnitude(const float* input, int size, float* magnitu
  * 🏴‍☠️ INITIALIZE THE PIRATE'S TREASURE SORTING FACILITY
  */
 esp_err_t feature_extraction_init(void) {
-    ESP_LOGI(TAG, "🏴‍☠️ Ahoy! Initializing the Feature Extraction treasure sorting facility...");
+    ESP_LOGI(TAG, "Ahoy! Initializing the Feature Extraction treasure sorting facility...");
     
     // Initialize sliding window
     memset(&g_feature_state.window, 0, sizeof(sliding_window_t));
@@ -130,7 +130,7 @@ esp_err_t feature_extraction_init(void) {
     g_feature_state.extraction_count = 0;
     g_feature_state.initialized = true;
     
-    ESP_LOGI(TAG, "⚓ Feature extraction treasure facility ready! %d feature types available.", TOTAL_FEATURES);
+    ESP_LOGI(TAG, "Feature extraction treasure facility ready! %d feature types available.", TOTAL_FEATURES);
     return ESP_OK;
 }
 

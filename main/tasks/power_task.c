@@ -39,17 +39,22 @@ static void handle_system_command(system_command_t *cmd);
 static void enter_power_save_mode(void);
 static void exit_power_save_mode(void);
 static void check_battery_status(void);
+static void print_real_task_stats(void);
 
 esp_err_t power_task_init(void) {
-    // Create the power task
+    ESP_LOGI(TAG, "Initializing power task with enhanced architecture...");
+    ESP_LOGI(TAG, "  Core: %d, Priority: %d, Stack: %d bytes", 
+        POWER_TASK_CORE, POWER_TASK_PRIORITY, POWER_TASK_STACK_SIZE);
+    
+    // Create the power task with new configuration
     BaseType_t ret = xTaskCreatePinnedToCore(
         power_task,
         "power_task",
-        POWER_TASK_STACK_SIZE,
+        POWER_TASK_STACK_SIZE,      // UPDATED: Reduced from 4096 to 3072
         NULL,
-        POWER_TASK_PRIORITY,
+        POWER_TASK_PRIORITY,        // UPDATED: Decreased from 6 to 5
         &power_task_handle,
-        POWER_TASK_CORE
+        POWER_TASK_CORE             // SAME: Core 0 for background monitoring
     );
     
     if (ret != pdPASS) {
@@ -57,7 +62,8 @@ esp_err_t power_task_init(void) {
         return ESP_FAIL;
     }
     
-    ESP_LOGI(TAG, "Power task initialized on core %d", POWER_TASK_CORE);
+    ESP_LOGI(TAG, "Power task initialized on core %d with lowest priority %d", 
+        POWER_TASK_CORE, POWER_TASK_PRIORITY);
     return ESP_OK;
 }
 
@@ -126,19 +132,16 @@ static void power_task(void *arg) {
         if (system_monitor_get_metrics(&metrics) == ESP_OK) {
 
             // Memory management
-            if (metrics.free_heap < 15000 && metrics.free_heap >= 5000) {  // Warning threshold
+            if (metrics.free_heap < 5000) {  // Critical threshold - CHECK FIRST
+                ESP_LOGE(TAG, "CRITICAL memory situation: %u bytes", metrics.free_heap);
+                // Trigger automatic memory cleanup
+                system_monitor_recovery_action(RECOVERY_MEMORY_CLEANUP, NULL);
+            } else if (metrics.free_heap < 15000) {  // Warning threshold
                 ESP_LOGW(TAG, "Low memory warning: %u bytes (%.1f%% free)", 
                     metrics.free_heap,
                     (float)metrics.free_heap / metrics.total_heap * 100);
-                
-                if (metrics.free_heap < 5000) {  // Critical threshold
-                    ESP_LOGE(TAG, "CRITICAL memory situation: %u bytes", metrics.free_heap);
-                    // Trigger automatic memory cleanup
-                    system_monitor_recovery_action(RECOVERY_MEMORY_CLEANUP, NULL);
-                }
             } else {
-                ESP_LOGD(TAG, "Memory OK: %u bytes", 
-                         metrics.free_heap);
+                ESP_LOGD(TAG, "Memory OK: %u bytes", metrics.free_heap);
             }
             
             // CPU usage management
@@ -170,15 +173,15 @@ static void power_task(void *arg) {
                 case SYSTEM_HEALTH_CRITICAL:
                     ESP_LOGE(TAG, "🔴 SYSTEM HEALTH CRITICAL - Taking emergency actions");
                     // Force lowest power mode
-                    power_management_set_mode(POWER_MODE_MAX_POWER_SAVE);
+                    //power_management_set_mode(POWER_MODE_MAX_POWER_SAVE);
                     break;
                     
                 case SYSTEM_HEALTH_WARNING:
                     ESP_LOGW(TAG, "🟡 System health warning - Optimizing power");
                     // Use balanced mode
-                    if (power_management_get_mode() == POWER_MODE_PERFORMANCE) {
-                        power_management_set_mode(POWER_MODE_BALANCED);
-                    }
+                    //if (power_management_get_mode() == POWER_MODE_PERFORMANCE) {
+                    //    power_management_set_mode(POWER_MODE_BALANCED);
+                    //}
                     break;
                     
                 case SYSTEM_HEALTH_OK:
@@ -186,13 +189,21 @@ static void power_task(void *arg) {
                     // System is healthy, normal power management
                     break;
             }
+
+        
             
         } else {
             ESP_LOGE(TAG, "Failed to get system metrics");
         }
+
+        static uint32_t last_stats_time = 0;
+        if (current_time_ms - last_stats_time > 10000) {
+            print_real_task_stats();
+            last_stats_time = current_time_ms;
+        }
         
         // Short delay to prevent CPU hogging
-        vTaskDelay(pdMS_TO_TICKS(100));
+        vTaskDelay(pdMS_TO_TICKS(300));
     }
 }
 
@@ -213,10 +224,9 @@ static void handle_system_command(system_command_t *cmd) {
         case SYS_CMD_CHANGE_STATE:
             // Update system state
             ESP_LOGI(TAG, "Changing system state from %d to %d", 
-                    g_system_config.system_state, cmd->data.change_state.new_state);
-            
-            g_system_config.system_state = cmd->data.change_state.new_state;
-            
+                g_system_config.system_state, cmd->parameter);
+            g_system_config.system_state = (system_state_t)cmd->parameter;
+
             // Handle state-specific actions
             switch (g_system_config.system_state) {
                 case SYSTEM_STATE_SLEEP:
@@ -267,7 +277,7 @@ static void handle_system_command(system_command_t *cmd) {
             break;
             
         case SYS_CMD_SET_POWER_MODE:
-            if (cmd->data.power_mode.enable_power_save) {
+            if ((bool)cmd->parameter) {
                 enter_power_save_mode();
             } else {
                 exit_power_save_mode();
@@ -297,7 +307,7 @@ static void handle_system_command(system_command_t *cmd) {
             
         case SYS_CMD_SLEEP:
             ESP_LOGI(TAG, "Sleep command received: %d seconds", 
-                    cmd->data.sleep.sleep_duration_sec);
+                (uint16_t)cmd->parameter);
             
             // Display sleep message
             output_command_t sleep_cmd = {
@@ -308,7 +318,7 @@ static void handle_system_command(system_command_t *cmd) {
             };
             
             sprintf(sleep_cmd.data.display.text, "Sleeping for %d sec...", 
-                    cmd->data.sleep.sleep_duration_sec);
+                    (uint16_t)cmd->parameter);
             xQueueSend(g_output_command_queue, &sleep_cmd, 0);
             
             // Give some time for the message to be displayed
@@ -318,7 +328,7 @@ static void handle_system_command(system_command_t *cmd) {
             g_system_config.system_state = SYSTEM_STATE_SLEEP;
             
             // Enter deep sleep
-            power_management_deep_sleep(cmd->data.sleep.sleep_duration_sec * 1000);
+            power_management_deep_sleep(cmd->parameter * 1000);
             break;
             
         case SYS_CMD_FACTORY_RESET:
@@ -430,7 +440,7 @@ static void check_battery_status(void) {
         
         // Set error state
         g_system_config.system_state = SYSTEM_STATE_LOW_BATTERY;
-        g_system_config.last_error = SYSTEM_ERROR_BATTERY;
+        g_system_config.error_count = SYSTEM_ERROR_BATTERY;
         
         // Set max power save mode
         power_management_set_mode(POWER_MODE_MAX_POWER_SAVE);
@@ -508,7 +518,7 @@ static void check_battery_status(void) {
         
         // Return to idle state
         g_system_config.system_state = SYSTEM_STATE_IDLE;
-        g_system_config.last_error = SYSTEM_ERROR_NONE;
+        g_system_config.error_count = SYSTEM_ERROR_NONE;
         
         // Clear low battery event bit
         xEventGroupClearBits(g_system_event_group, SYSTEM_EVENT_LOW_BATTERY);
@@ -528,5 +538,6 @@ static void check_battery_status(void) {
 }
 
 void* power_task_get_handle(void) {
+    extern TaskHandle_t power_task_handle;  // Declare external reference
     return (void*)power_task_handle;
 }

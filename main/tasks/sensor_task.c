@@ -47,11 +47,16 @@ static esp_err_t sample_camera(void);
 static esp_err_t sample_touch_sensors(void);
 static void touch_callback(bool *status);
 static void output_sensor_data_for_collection(const sensor_data_t* data);
+static void print_real_task_stats(void);
 
-// Sensor task function
+// Sensor task declaration
 static void sensor_task(void *arg);
 
 esp_err_t sensor_task_init(void) {
+    ESP_LOGI(TAG, "Initializing sensor task with enhanced architecture...");
+    ESP_LOGI(TAG, "  Core: %d, Priority: %d, Stack: %d bytes",
+        SENSOR_TASK_CORE, SENSOR_TASK_PRIORITY, SENSOR_TASK_STACK_SIZE); 
+
     // Create the sensor task
     BaseType_t ret = xTaskCreatePinnedToCore(
         sensor_task,
@@ -79,113 +84,95 @@ esp_err_t sensor_task_init(void) {
 }
 
 static void sensor_task(void *arg) {
-    ESP_LOGI(TAG, "Sensor task started");
+    ESP_LOGI(TAG, "Sensor task started on core %d", xPortGetCoreID());
     
-    // Set sensor task as ready
+    // Wait for system initialization
+    xEventGroupWaitBits(g_system_event_group, 
+                       SYSTEM_EVENT_INIT_COMPLETE, 
+                       pdFALSE, pdTRUE, portMAX_DELAY);
+    
+    // Set sensor ready event
     xEventGroupSetBits(g_system_event_group, SYSTEM_EVENT_SENSOR_READY);
     
-    // Wait for system initialization to complete
-    xEventGroupWaitBits(g_system_event_group, 
-                        SYSTEM_EVENT_INIT_COMPLETE, 
-                        pdFALSE, pdTRUE, portMAX_DELAY);
-    
-    // Initialize timestamps to current time
-    uint32_t current_time = esp_timer_get_time() / 1000;  // Convert to milliseconds
-    last_flex_sample_time = current_time;
-    last_imu_sample_time = current_time;
-    last_camera_sample_time = current_time;
-    last_touch_sample_time = current_time;
-    
     while (1) {
-        current_time = esp_timer_get_time() / 1000;  // Get current time in milliseconds
-        bool data_updated = false;
+        uint32_t current_time_ms = esp_timer_get_time() / 1000;
+        bool data_collected = false;
         
-        // Check if it's time to sample flex sensors
-        if (current_time - last_flex_sample_time >= FLEX_SENSOR_SAMPLE_INTERVAL) {
+        // Sample sensors based on their individual rates
+        if (current_time_ms - last_flex_sample_time >= FLEX_SENSOR_SAMPLE_INTERVAL) {
             if (sample_flex_sensors() == ESP_OK) {
-                last_flex_sample_time = current_time;
-                data_updated = true;
+                data_collected = true;
             }
+            last_flex_sample_time = current_time_ms;
         }
         
-        // Check if it's time to sample IMU
-        if (current_time - last_imu_sample_time >= IMU_SAMPLE_INTERVAL) {
+        if (current_time_ms - last_imu_sample_time >= IMU_SAMPLE_INTERVAL) {
             if (sample_imu() == ESP_OK) {
-                last_imu_sample_time = current_time;
-                data_updated = true;
+                data_collected = true;
             }
+            last_imu_sample_time = current_time_ms;
         }
         
-        // Check if it's time to sample camera (if enabled)
-        if (current_time - last_camera_sample_time >= CAMERA_SAMPLE_INTERVAL) {
+        if (current_time_ms - last_camera_sample_time >= CAMERA_SAMPLE_INTERVAL) {
             if (sample_camera() == ESP_OK) {
-                last_camera_sample_time = current_time;
-                data_updated = true;
+                data_collected = true;
             }
+            last_camera_sample_time = current_time_ms;
         }
         
-        // Check if it's time to sample touch sensors
-        if (g_system_config.touch_enabled && 
-            current_time - last_touch_sample_time >= TOUCH_SAMPLE_INTERVAL) {
+        if (current_time_ms - last_touch_sample_time >= TOUCH_SAMPLE_INTERVAL) {
             if (sample_touch_sensors() == ESP_OK) {
-                last_touch_sample_time = current_time;
-                data_updated = true;
+                data_collected = true;
             }
+            last_touch_sample_time = current_time_ms;
         }
         
-        // If any data was updated, send it to the processing task
-        if (data_updated) {
-            // Update timestamp and sequence number
-            current_sensor_data.timestamp = current_time;
+        // Send data to processing queue if any data was collected
+        if (data_collected) {
+            current_sensor_data.timestamp = current_time_ms;
             current_sensor_data.sequence_number = sequence_number++;
             
-            // Send data to processing task with overflow protection
-            BaseType_t queue_result = xQueueSend(g_sensor_data_queue, &current_sensor_data, 0);
-            if (queue_result != pdTRUE) {
-                // Queue overflow detected - implement prioritization
-                UBaseType_t queue_spaces = uxQueueSpacesAvailable(g_sensor_data_queue);
+            // ENHANCED QUEUE HANDLING WITH OVERFLOW PROTECTION
+            if (QUEUE_OVERFLOW_PROTECTION) {
+                // Check queue usage before sending
+                UBaseType_t waiting = uxQueueMessagesWaiting(g_sensor_data_queue);
+                UBaseType_t spaces = uxQueueSpacesAvailable(g_sensor_data_queue);
                 
-                if (queue_spaces == 0) {
-                    // Critical: Queue completely full
-                    ESP_LOGW(TAG, "Sensor queue completely full! Dropping data. Heap: %zu bytes", 
-                             heap_caps_get_free_size(MALLOC_CAP_DEFAULT));
+                if (waiting + spaces > 0) {
+                    uint32_t usage_percent = (waiting * 100) / (waiting + spaces);
                     
-                    // Try to force send critical data (IMU/Touch) by dropping oldest
-                    if (current_sensor_data.imu_data_valid || current_sensor_data.touch_data_valid) {
-                        sensor_data_t dummy;
-                        if (xQueueReceive(g_sensor_data_queue, &dummy, 0) == pdTRUE) {
-                            // Successfully removed oldest, try again
-                            if (xQueueSend(g_sensor_data_queue, &current_sensor_data, 0) != pdTRUE) {
-                                ESP_LOGE(TAG, "Failed to send even after making space!");
-                            }
-                        }
+                    if (usage_percent > QUEUE_HIGH_WATERMARK_PERCENT) {
+                        ESP_LOGW(TAG, "Sensor queue high usage: %u%%", usage_percent);
                     }
-                } else {
-                    ESP_LOGW(TAG, "Sensor queue near full (%u spaces remaining)", (unsigned int)queue_spaces);
+                    
+                    // Report queue health to system monitor
+                    system_monitor_update_queue_health(usage_percent, false);
+                }
+                
+                // Try to send with retry mechanism
+                for (int retry = 0; retry < QUEUE_FULL_RETRY_COUNT; retry++) {
+                    if (xQueueSend(g_sensor_data_queue, &current_sensor_data, 0) == pdTRUE) {
+                        break;  // Successfully sent
+                    } else if (retry < QUEUE_FULL_RETRY_COUNT - 1) {
+                        // Queue full, wait and retry
+                        vTaskDelay(pdMS_TO_TICKS(QUEUE_FULL_RETRY_DELAY_MS));
+                    } else {
+                        // Final retry failed - report overflow
+                        ESP_LOGW(TAG, "Sensor queue overflow - data dropped");
+                        system_monitor_update_queue_health(100, true);
+                    }
+                }
+            } else {
+                // Standard queue send without protection
+                if (xQueueSend(g_sensor_data_queue, &current_sensor_data, 0) != pdTRUE) {
+                    ESP_LOGW(TAG, "Failed to send sensor data - queue full");
                 }
             }
-
-            static bool data_collection_mode = false;  // Set to true when collecting data
-
-            if (data_collection_mode) {
-                output_sensor_data_for_collection(&current_sensor_data);
-            }
         }
 
-        if (g_sensor_data_queue != NULL) {
-            UBaseType_t waiting = uxQueueMessagesWaiting(g_sensor_data_queue);
-            UBaseType_t spaces = uxQueueSpacesAvailable(g_sensor_data_queue);
-            
-            if (waiting + spaces > 0) {  // Avoid division by zero
-                uint32_t usage_percent = (waiting * 100) / (waiting + spaces);
-                bool overflow = (spaces == 0 && waiting > 0);  // Queue full condition
                 
-                system_monitor_update_queue_health(usage_percent, overflow);
-            }
-        }
-        
-        // Short delay to prevent CPU hogging
-        vTaskDelay(pdMS_TO_TICKS(100));
+        // High-frequency task - minimal delay for real-time response
+        vTaskDelay(pdMS_TO_TICKS(50));  // 10ms = 100Hz loop rate
     }
 }
 
@@ -349,6 +336,9 @@ static void touch_callback(bool *status) {
     }
 }
 
+
+
 void* sensor_task_get_handle(void) {
+    extern TaskHandle_t sensor_task_handle;  // Declare external reference
     return (void*)sensor_task_handle;
 }

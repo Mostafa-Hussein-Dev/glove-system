@@ -1,5 +1,3 @@
-// Add this to main/config/system_config.c (create this file):
-
 #include "config/system_config.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
@@ -43,13 +41,4 @@ esp_err_t system_config_load(void) {
     ret = nvs_get_blob(nvs_handle, CONFIG_NVS_KEY, &g_system_config, &required_size);
     nvs_close(nvs_handle);
     return ret;
-}
-
-esp_err_t system_config_reset_to_default(void) {
-    // Reset to defaults (implement based on your default values)
-    g_system_config.system_state = SYSTEM_STATE_INIT;
-    g_system_config.last_error = SYSTEM_ERROR_NONE;
-    g_system_config.output_mode = OUTPUT_MODE_TEXT_AND_AUDIO;
-    // ... set other defaults
-    return system_config_save();
 }

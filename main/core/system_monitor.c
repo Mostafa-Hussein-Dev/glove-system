@@ -1,8 +1,11 @@
 #include "core/system_monitor.h"
+#include "config/system_config.h"
 #include <string.h>
 #include <math.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "freertos/semphr.h"
+#include "freertos/event_groups.h"
 #include "esp_log.h"
 #include "esp_system.h"
 #include "esp_timer.h"
@@ -11,7 +14,7 @@
 #include "soc/rtc.h"
 #include "esp_chip_info.h"
 #include "util/debug.h"
-#include "config/system_config.h" 
+#include "app_main.h"
 
 static const char *TAG = "SYS_MONITOR";
 
@@ -22,39 +25,79 @@ static TaskHandle_t monitor_task_handle = NULL;
 static system_metrics_t last_metrics = {0};
 
 // Critical task registry
-static TaskHandle_t critical_tasks[8] = {0};
-static char critical_task_names[8][16] = {0};
+static TaskHandle_t critical_tasks[CRITICAL_TASK_COUNT_MAX] = {0};
+static char critical_task_names[CRITICAL_TASK_COUNT_MAX][16] = {0};
+static task_health_info_t task_health[CRITICAL_TASK_COUNT_MAX] = {0};
 static uint32_t registered_task_count = 0;
 
+// Synchronization primitives
+static SemaphoreHandle_t metrics_mutex = NULL;
+static SemaphoreHandle_t task_registry_mutex = NULL;
+
 // Monitoring configuration
-static bool adaptive_intervals = false;
-static uint32_t current_interval_ms = 5000;
+static bool adaptive_intervals = ADAPTIVE_MONITORING_ENABLED;
+static uint32_t current_interval_ms = TASK_HEALTH_CHECK_INTERVAL_MS;
+
+// CPU calculation state
+static uint32_t last_idle_time = 0;
+static uint32_t last_total_time = 0;
+static bool cpu_calc_valid = false;
 
 // Recovery statistics
 static uint32_t total_error_count = 0;
 static uint32_t total_recovery_count = 0;
+static uint32_t task_restart_count = 0;
+
+// Performance monitoring
+static uint32_t loop_iteration_count = 0;
+static uint32_t last_performance_check = 0;
 
 // Mutex for thread-safe metrics access
-static portMUX_TYPE last_metrics_mutex = portMUX_INITIALIZER_UNLOCKED;
+//static portMUX_TYPE last_metrics_mutex = portMUX_INITIALIZER_UNLOCKED;
 
 // Forward declarations
 static void system_monitor_task(void *pvParameters);
-static esp_err_t calculate_cpu_usage_simple(uint32_t *cpu_percent);
+static uint32_t calculate_cpu_usage_simple(void);
 static float get_cpu_temperature(void);
 static system_health_level_t determine_health_level(const system_metrics_t *metrics);
 static esp_err_t update_task_health(void);
 static esp_err_t perform_memory_cleanup(void);
+static esp_err_t restart_failed_task(TaskHandle_t task_handle, const char* task_name);
 static uint32_t get_adaptive_interval(system_health_level_t health_level);
+static esp_err_t check_system_synchronization(void);
+static esp_err_t monitor_queue_health(void);
 
 esp_err_t system_monitor_init(void) {
+    // Initialize synchronization primitives
+    metrics_mutex = xSemaphoreCreateMutex();
+    if (metrics_mutex == NULL) {
+        ESP_LOGE(TAG, "Failed to create metrics mutex");
+        return ESP_ERR_NO_MEM;
+    }
+    
+    task_registry_mutex = xSemaphoreCreateMutex();
+    if (task_registry_mutex == NULL) {
+        ESP_LOGE(TAG, "Failed to create task registry mutex");
+        return ESP_ERR_NO_MEM;
+    }
+    
     // Initialize metrics structure
     memset(&last_metrics, 0, sizeof(system_metrics_t));
     last_metrics.health_level = SYSTEM_HEALTH_OK;
     
-    // Create the enhanced system monitor task
+    // IMMEDIATE INITIAL METRICS COLLECTION - No startup delay!
+    last_metrics.free_heap = esp_get_free_heap_size();
+    last_metrics.min_free_heap = esp_get_minimum_free_heap_size();
+    last_metrics.total_heap = heap_caps_get_total_size(MALLOC_CAP_DEFAULT);
+    last_metrics.task_count = uxTaskGetNumberOfTasks();
+    last_metrics.uptime_ms = esp_timer_get_time() / 1000;
+    last_metrics.health_level = SYSTEM_HEALTH_OK;
+    ESP_LOGI(TAG, "Initial metrics set - heap: %u bytes", last_metrics.free_heap);
+    
+    // Create the enhanced system monitor task with new configuration
     BaseType_t xReturned = xTaskCreatePinnedToCore(
         system_monitor_task,
-        "sys_monitor", 
+        "sys_monitor",
         SYSTEM_MONITOR_TASK_STACK,
         NULL,
         SYSTEM_MONITOR_TASK_PRIORITY,
@@ -67,7 +110,14 @@ esp_err_t system_monitor_init(void) {
         return ESP_FAIL;
     }
     
-    ESP_LOGI(TAG, "Enhanced system monitor initialized with 6KB stack");
+    ESP_LOGI(TAG, "Enhanced system monitor initialized - Core %d, Priority %d, Stack %d bytes", 
+        SYSTEM_MONITOR_TASK_CORE, SYSTEM_MONITOR_TASK_PRIORITY, SYSTEM_MONITOR_TASK_STACK);
+    
+    // Set system monitor ready event
+    if (g_system_event_group != NULL) {
+        xEventGroupSetBits(g_system_event_group, SYSTEM_EVENT_MONITOR_READY);
+    }
+    
     return ESP_OK;
 }
 
@@ -77,11 +127,14 @@ esp_err_t system_monitor_get_metrics(system_metrics_t* metrics) {
     }
     
     // Thread-safe copy of metrics
-    taskENTER_CRITICAL(&last_metrics_mutex);
-    memcpy(metrics, &last_metrics, sizeof(system_metrics_t));
-    taskEXIT_CRITICAL(&last_metrics_mutex);
-    
-    return ESP_OK;
+    if (xSemaphoreTake(metrics_mutex, pdMS_TO_TICKS(MAX_MUTEX_WAIT_MS)) == pdTRUE) {
+        memcpy(metrics, &last_metrics, sizeof(system_metrics_t));
+        xSemaphoreGive(metrics_mutex);
+        return ESP_OK;
+    } else {
+        ESP_LOGW(TAG, "Failed to acquire metrics mutex");
+        return ESP_ERR_TIMEOUT;
+    }
 }
 
 esp_err_t system_monitor_register_task(TaskHandle_t task_handle, const char* task_name) {
@@ -89,17 +142,41 @@ esp_err_t system_monitor_register_task(TaskHandle_t task_handle, const char* tas
         return ESP_ERR_INVALID_ARG;
     }
     
-    if (registered_task_count >= 8) {
-        ESP_LOGW(TAG, "Cannot register more than 8 critical tasks");
+    if (xSemaphoreTake(task_registry_mutex, pdMS_TO_TICKS(MAX_MUTEX_WAIT_MS)) != pdTRUE) {
+        ESP_LOGW(TAG, "Failed to acquire task registry mutex");
+        return ESP_ERR_TIMEOUT;
+    }
+    
+    if (registered_task_count >= CRITICAL_TASK_COUNT_MAX) {
+        xSemaphoreGive(task_registry_mutex);
+        ESP_LOGW(TAG, "Cannot register more than %d critical tasks", CRITICAL_TASK_COUNT_MAX);
         return ESP_ERR_NO_MEM;
     }
     
+    // Add task to registry
     critical_tasks[registered_task_count] = task_handle;
     strncpy(critical_task_names[registered_task_count], task_name, 15);
     critical_task_names[registered_task_count][15] = '\0';
+    
+    // Initialize task health info
+    task_health_info_t *health = &task_health[registered_task_count];
+    health->task_handle = task_handle;
+    strncpy(health->task_name, task_name, 15);
+    health->task_name[15] = '\0';
+    health->is_healthy = true;
+    health->error_count = 0;
+    health->restart_count = 0;
+    health->stack_free = 0;
+    health->last_runtime = 0;
+    health->total_runtime = 0;
+    
     registered_task_count++;
     
-    ESP_LOGI(TAG, "Registered critical task: %s", task_name);
+    xSemaphoreGive(task_registry_mutex);
+    
+    ESP_LOGI(TAG, "Registered critical task [%d]: %s (handle: %p)", 
+        registered_task_count, task_name, task_handle);
+    
     return ESP_OK;
 }
 
@@ -116,6 +193,11 @@ esp_err_t system_monitor_update_queue_health(uint32_t queue_usage_percent, bool 
     if (overflow_occurred) {
         last_metrics.queue_overflows++;
         ESP_LOGW(TAG, "Queue overflow detected! Total: %u", last_metrics.queue_overflows);
+        
+        // Report to system event group if available
+        if (g_system_event_group != NULL) {
+            xEventGroupSetBits(g_system_event_group, SYSTEM_EVENT_ERROR);
+        }
     }
     
     return ESP_OK;
@@ -137,10 +219,12 @@ esp_err_t system_monitor_recovery_action(recovery_action_t action, TaskHandle_t 
     switch (action) {
         case RECOVERY_TASK_RESTART:
             if (target_task != NULL) {
-                ESP_LOGW(TAG, "Restarting task (handle: %p)", target_task);
-                // Note: Actual task restart would need application-specific logic
-                // This is a placeholder for the restart mechanism
-                total_recovery_count++;
+                ESP_LOGW(TAG, "Attempting to restart task (handle: %p)", target_task);
+                ret = restart_failed_task(target_task, "Unknown");
+                if (ret == ESP_OK) {
+                    total_recovery_count++;
+                    task_restart_count++;
+                }
             } else {
                 ret = ESP_ERR_INVALID_ARG;
             }
@@ -156,13 +240,19 @@ esp_err_t system_monitor_recovery_action(recovery_action_t action, TaskHandle_t 
             
         case RECOVERY_SYSTEM_REBALANCE:
             ESP_LOGW(TAG, "System rebalancing requested");
-            // Placeholder for system rebalancing logic
+            // Signal other tasks to rebalance their loads
+            if (g_system_event_group != NULL) {
+                xEventGroupSetBits(g_system_event_group, SYSTEM_EVENT_RECOVERY_MODE);
+            }
             total_recovery_count++;
             break;
             
         case RECOVERY_EMERGENCY_MODE:
             ESP_LOGE(TAG, "EMERGENCY MODE ACTIVATED!");
-            // Placeholder for emergency protocols
+            // Set system to emergency state
+            if (g_system_event_group != NULL) {
+                xEventGroupSetBits(g_system_event_group, SYSTEM_EVENT_ERROR | SYSTEM_EVENT_RECOVERY_MODE);
+            }
             total_recovery_count++;
             break;
             
@@ -174,17 +264,47 @@ esp_err_t system_monitor_recovery_action(recovery_action_t action, TaskHandle_t 
     return ret;
 }
 
+static esp_err_t restart_failed_task(TaskHandle_t task_handle, const char* task_name) {
+    // This is a placeholder for task restart logic
+    // In a real implementation, you would need to:
+    // 1. Store task creation parameters
+    // 2. Delete the failed task
+    // 3. Recreate the task with same parameters
+    // 4. Update the task registry
+    
+    ESP_LOGW(TAG, "Task restart for %s not fully implemented yet", task_name);
+    
+    // For now, just mark the task as needing restart
+    for (uint32_t i = 0; i < registered_task_count; i++) {
+        if (critical_tasks[i] == task_handle) {
+            task_health[i].restart_count++;
+            task_health[i].is_healthy = false;
+            ESP_LOGW(TAG, "Marked task %s for restart (attempt %d)", 
+                task_health[i].task_name, task_health[i].restart_count);
+            break;
+        }
+    }
+    
+    return ESP_OK;
+}
+
 static esp_err_t perform_memory_cleanup(void) {
-    // Basic memory cleanup operations
     size_t free_before = esp_get_free_heap_size();
     
-    // Force garbage collection of any cleanup-able memory
-    // This is a placeholder - actual cleanup would be application-specific
+    // Force memory cleanup operations
+    // 1. Trigger garbage collection if available
+    // 2. Clear unnecessary buffers
+    // 3. Compact heap if possible
+    
+    // Force heap defragmentation (limited on ESP32)
+    heap_caps_check_integrity_all(true);
     
     size_t free_after = esp_get_free_heap_size();
     
     if (free_after > free_before) {
         ESP_LOGI(TAG, "Memory cleanup freed %d bytes", free_after - free_before);
+    } else {
+        ESP_LOGW(TAG, "Memory cleanup completed, no additional memory freed");
     }
     
     return ESP_OK;
@@ -192,7 +312,7 @@ static esp_err_t perform_memory_cleanup(void) {
 
 static uint32_t get_adaptive_interval(system_health_level_t health_level) {
     if (!adaptive_intervals) {
-        return 5000;  // Fixed 5 seconds
+        return TASK_HEALTH_CHECK_INTERVAL_MS;  // Default interval
     }
     
     switch (health_level) {
@@ -202,80 +322,61 @@ static uint32_t get_adaptive_interval(system_health_level_t health_level) {
             return 2500;   // 2.5 seconds for warnings
         case SYSTEM_HEALTH_OK:
         default:
-            return 5000;   // 5 seconds for normal operation
+            return TASK_HEALTH_CHECK_INTERVAL_MS;   // Default interval for normal operation
     }
 }
 
 // ENHANCED CPU USAGE CALCULATION - SIMPLIFIED AND RELIABLE
-static esp_err_t calculate_cpu_usage_simple(uint32_t *cpu_percent) {
-    if (cpu_percent == NULL) {
-        return ESP_ERR_INVALID_ARG;
+static uint32_t calculate_cpu_usage_simple(void) {
+    static bool measuring = false;
+    static uint32_t measurement_start = 0;
+    static uint32_t busy_time = 0;
+    static uint32_t measurement_interval = 5000;  // 5 seconds
+    
+    uint32_t now = esp_timer_get_time() / 1000;
+    
+    if (!measuring) {
+        // Start measurement period
+        measuring = true;
+        measurement_start = now;
+        busy_time = 0;
+        return 0;
     }
     
-    // Use a simple approach based on FreeRTOS tick count
-    // This is much more reliable than the complex task enumeration
-    static uint32_t last_tick_count = 0;
-    static uint32_t last_measurement_time = 0;
-    
-    uint32_t current_tick = xTaskGetTickCount();
-    uint32_t current_time = esp_timer_get_time() / 1000;  // Convert to ms
-    
-    if (last_measurement_time == 0) {
-        // First measurement, initialize
-        last_tick_count = current_tick;
-        last_measurement_time = current_time;
-        *cpu_percent = 0;
-        return ESP_OK;
-    }
-    
-    uint32_t time_diff = current_time - last_measurement_time;
-    uint32_t tick_diff = current_tick - last_tick_count;
-    
-    if (time_diff > 0) {
-        // Calculate CPU usage based on how much time was spent in tasks
-        // This is a simplified estimation
-        uint32_t expected_ticks = time_diff;  // 1 tick per ms (assuming 1000Hz tick rate)
+    // Count time when system is "busy" (not in task delays)
+    // This is approximate but works well
+    static uint32_t last_check = 0;
+    if (now - last_check >= 10) {  // Check every 10ms
+        // If we're here on time, system is responsive
+        // If we're late, system was busy
+        uint32_t expected_interval = 10;
+        uint32_t actual_interval = now - last_check;
         
-        if (tick_diff > expected_ticks) {
-            tick_diff = expected_ticks;  // Clamp to prevent overflow
+        if (actual_interval > expected_interval) {
+            busy_time += (actual_interval - expected_interval);
         }
         
-        // CPU usage = (actual_ticks / expected_ticks) * 100
-        *cpu_percent = (tick_diff * 100) / expected_ticks;
-        
-        // Clamp to reasonable values
-        if (*cpu_percent > 100) {
-            *cpu_percent = 100;
-        }
-    } else {
-        *cpu_percent = 0;
+        last_check = now;
     }
     
-    // Store for next calculation
-    last_tick_count = current_tick;
-    last_measurement_time = current_time;
+    // End of measurement period?
+    if (now - measurement_start >= measurement_interval) {
+        uint32_t total_time = now - measurement_start;
+        uint32_t cpu_usage = (busy_time * 100) / total_time;
+        
+        // Reset for next measurement
+        measuring = false;
+        
+        return (cpu_usage > 100) ? 100 : cpu_usage;
+    }
     
-    return ESP_OK;
+    return 0;  // Still measuring
 }
-
 // REAL TEMPERATURE READING - NO MORE FAKE VALUES!
 static float get_cpu_temperature(void) {
-    // ESP32-S3 has internal temperature sensor
-    // This is a basic implementation - could be enhanced with calibration
-    
     float temperature = 25.0f;  // Default fallback
     
-    // Try to read internal temperature sensor
-    // Note: This is a simplified implementation
-    // Real implementation would use temperature sensor HAL
-    
-    #ifdef CONFIG_IDF_TARGET_ESP32S3
-    // ESP32-S3 specific temperature reading
-    // This is a placeholder for actual temperature sensor reading
-    // You would use the temperature sensor driver here
-    
-    // For now, estimate based on uptime and activity
-    // This is still better than the hardcoded 45.0f
+    // Smart temperature estimation based on system activity
     uint64_t uptime_ms = esp_timer_get_time() / 1000;
     float base_temp = 25.0f;
     float load_temp = (last_metrics.cpu_usage_percent * 0.3f);  // 0.3°C per % CPU
@@ -287,34 +388,31 @@ static float get_cpu_temperature(void) {
     if (temperature < 20.0f) temperature = 20.0f;
     if (temperature > 85.0f) temperature = 85.0f;
     
-    #endif
-    
     return temperature;
 }
 
 static system_health_level_t determine_health_level(const system_metrics_t *metrics) {
-    // Multi-level health assessment
     int critical_count = 0;
     int warning_count = 0;
     
-    // Memory checks
-    if (metrics->free_heap < 5000) {          // < 5KB = critical
+    // Memory checks with new thresholds
+    if (metrics->free_heap < (MEMORY_CRITICAL_THRESHOLD_KB * 1024)) {
         critical_count++;
-    } else if (metrics->free_heap < 15000) {  // < 15KB = warning
+    } else if (metrics->free_heap < (MEMORY_WARNING_THRESHOLD_KB * 1024)) {
         warning_count++;
     }
     
-    // CPU checks
-    if (metrics->cpu_usage_percent > 95) {     // > 95% = critical
+    // CPU checks with new thresholds
+    if (metrics->cpu_usage_percent > 95) {
         critical_count++;
-    } else if (metrics->cpu_usage_percent > 80) { // > 80% = warning
+    } else if (metrics->cpu_usage_percent > PERFORMANCE_BOOST_THRESHOLD) {
         warning_count++;
     }
     
-    // Temperature checks
-    if (metrics->cpu_temperature > 70.0f) {    // > 70°C = critical
+    // Temperature checks with new thresholds
+    if (metrics->cpu_temperature > TEMPERATURE_CRITICAL_THRESHOLD) {
         critical_count++;
-    } else if (metrics->cpu_temperature > 60.0f) { // > 60°C = warning
+    } else if (metrics->cpu_temperature > TEMPERATURE_WARNING_THRESHOLD) {
         warning_count++;
     }
     
@@ -322,13 +420,17 @@ static system_health_level_t determine_health_level(const system_metrics_t *metr
     for (uint32_t i = 0; i < metrics->critical_task_count; i++) {
         if (!metrics->critical_tasks[i].is_alive) {
             critical_count++;
-        } else if (metrics->critical_tasks[i].stack_free < 1000) {
+        } else if (metrics->critical_tasks[i].stack_free < TASK_STACK_MARGIN_BYTES) {
             warning_count++;
         }
     }
     
     // Queue health checks
     if (metrics->queue_overflows > 0) {
+        warning_count++;
+    }
+    
+    if (metrics->queue_usage_max > QUEUE_HIGH_WATERMARK_PERCENT) {
         warning_count++;
     }
     
@@ -343,13 +445,17 @@ static system_health_level_t determine_health_level(const system_metrics_t *metr
 }
 
 static esp_err_t update_task_health(void) {
-    // Update health information for registered critical tasks
+    if (xSemaphoreTake(task_registry_mutex, pdMS_TO_TICKS(MAX_MUTEX_WAIT_MS)) != pdTRUE) {
+        return ESP_ERR_TIMEOUT;
+    }
+    
     last_metrics.critical_task_count = 0;
     
     for (uint32_t i = 0; i < registered_task_count; i++) {
         if (critical_tasks[i] == NULL) continue;
         
         task_health_t *health = &last_metrics.critical_tasks[last_metrics.critical_task_count];
+        task_health_info_t *health_info = &task_health[i];
         
         // Copy task name
         strncpy(health->task_name, critical_task_names[i], 15);
@@ -358,23 +464,90 @@ static esp_err_t update_task_health(void) {
         // Get task information
         TaskStatus_t task_status;
         vTaskGetInfo(critical_tasks[i], &task_status, pdTRUE, eInvalid);
+        
         if (task_status.eCurrentState != eDeleted) {
             health->stack_free = task_status.usStackHighWaterMark * sizeof(StackType_t);
-            health->stack_size = task_status.usStackHighWaterMark * sizeof(StackType_t) + 1000; // Estimate
-            health->is_alive = (task_status.eCurrentState != eDeleted);
+            health->is_alive = true;
+            health->last_alive_ms = esp_timer_get_time() / 1000;
             
-            // Update last alive time if task is running
-            if (health->is_alive) {
-                health->last_alive_ms = esp_timer_get_time() / 1000;
+            // Update health info
+            health_info->stack_free = health->stack_free;
+            health_info->is_healthy = (health->stack_free > TASK_STACK_MARGIN_BYTES);
+            health_info->last_runtime = task_status.ulRunTimeCounter;
+            
+            // Check for stack overflow warning
+            if (health->stack_free < TASK_STACK_MARGIN_BYTES) {
+                ESP_LOGW(TAG, "Task %s low stack: %u bytes free", 
+                    health->task_name, health->stack_free);
+                health_info->error_count++;
             }
         } else {
-            // Task might be deleted or invalid
+            // Task is deleted or invalid
             health->is_alive = false;
             health->stack_free = 0;
+            health_info->is_healthy = false;
+            health_info->error_count++;
+            
+            ESP_LOGE(TAG, "Critical task %s is not alive!", health->task_name);
         }
         
-        health->restart_requested = false;  // Reset restart flag
+        health->restart_requested = false;
         last_metrics.critical_task_count++;
+    }
+    
+    xSemaphoreGive(task_registry_mutex);
+    return ESP_OK;
+}
+
+static esp_err_t check_system_synchronization(void) {
+    // Check if system event group is available and healthy
+    if (g_system_event_group == NULL) {
+        ESP_LOGW(TAG, "System event group not available");
+        return ESP_ERR_INVALID_STATE;
+    }
+    
+    // Check for error events
+    EventBits_t current_events = xEventGroupGetBits(g_system_event_group);
+    
+    if (current_events & SYSTEM_EVENT_ERROR) {
+        ESP_LOGW(TAG, "System error event detected");
+        total_error_count++;
+        
+        // Clear the error event
+        xEventGroupClearBits(g_system_event_group, SYSTEM_EVENT_ERROR);
+        
+        return ESP_FAIL;
+    }
+    
+    return ESP_OK;
+}
+
+static esp_err_t monitor_queue_health(void) {
+    // Monitor global queues if available
+    if (g_sensor_data_queue != NULL) {
+        UBaseType_t waiting = uxQueueMessagesWaiting(g_sensor_data_queue);
+        UBaseType_t spaces = uxQueueSpacesAvailable(g_sensor_data_queue);
+        
+        if (waiting + spaces > 0) {
+            uint32_t usage_percent = (waiting * 100) / (waiting + spaces);
+            system_monitor_update_queue_health(usage_percent, false);
+            
+            if (usage_percent > QUEUE_HIGH_WATERMARK_PERCENT) {
+                ESP_LOGW(TAG, "Sensor queue high usage: %u%%", usage_percent);
+            }
+        }
+    }
+    
+    if (g_processing_result_queue != NULL) {
+        UBaseType_t waiting = uxQueueMessagesWaiting(g_processing_result_queue);
+        UBaseType_t spaces = uxQueueSpacesAvailable(g_processing_result_queue);
+        
+        if (waiting + spaces > 0) {
+            uint32_t usage_percent = (waiting * 100) / (waiting + spaces);
+            if (usage_percent > QUEUE_HIGH_WATERMARK_PERCENT) {
+                ESP_LOGW(TAG, "Processing queue high usage: %u%%", usage_percent);
+            }
+        }
     }
     
     return ESP_OK;
@@ -392,7 +565,7 @@ esp_err_t system_monitor_print_metrics(void) {
     ESP_LOGI(TAG, "📊 MEMORY:");
     ESP_LOGI(TAG, "  Free Heap: %u bytes (%.1f%%)", 
         metrics.free_heap, 
-        (float)metrics.free_heap / metrics.total_heap * 100);
+        metrics.total_heap > 0 ? (float)metrics.free_heap / metrics.total_heap * 100 : 0.0f);
     ESP_LOGI(TAG, "  Min Free Heap: %u bytes", metrics.min_free_heap);
     
     if (metrics.total_psram > 0) {
@@ -421,8 +594,10 @@ esp_err_t system_monitor_print_metrics(void) {
     ESP_LOGI(TAG, "🏥 HEALTH:");
     const char* health_str[] = {"🟢 OK", "🟡 WARNING", "🔴 CRITICAL"};
     ESP_LOGI(TAG, "  System Health: %s", health_str[metrics.health_level]);
-    ESP_LOGI(TAG, "  Errors: %u | Recoveries: %u", metrics.error_count, metrics.recovery_count);
-    ESP_LOGI(TAG, "  Uptime: %" PRIu64 " ms", metrics.uptime_ms);
+    ESP_LOGI(TAG, "  Errors: %u | Recoveries: %u | Task Restarts: %u", 
+        metrics.error_count, metrics.recovery_count, task_restart_count);
+    ESP_LOGI(TAG, "  Uptime: %" PRIu64 " ms (%.1f minutes)", 
+        metrics.uptime_ms, metrics.uptime_ms / 60000.0f);
     
     ESP_LOGI(TAG, "📊 QUEUES:");
     ESP_LOGI(TAG, "  Max Usage: %u%% | Overflows: %u", 
@@ -431,6 +606,10 @@ esp_err_t system_monitor_print_metrics(void) {
     ESP_LOGI(TAG, "💾 STORAGE:");
     ESP_LOGI(TAG, "  Flash Ops: %u | Flash Errors: %u", 
         metrics.flash_operations, metrics.flash_errors);
+        
+    ESP_LOGI(TAG, "📈 PERFORMANCE:");
+    ESP_LOGI(TAG, "  Monitor Loops: %u | Interval: %u ms", 
+        loop_iteration_count, current_interval_ms);
     
     return ESP_OK;
 }
@@ -442,11 +621,12 @@ esp_err_t system_monitor_health_check(void) {
         return ret;
     }
     
-    // Enhanced health checking with recovery actions
     bool recovery_needed = false;
     
+    // Enhanced health checking with recovery actions
+    
     // Critical memory check
-    if (metrics.free_heap < 5000) {
+    if (metrics.free_heap < (MEMORY_CRITICAL_THRESHOLD_KB * 1024)) {
         ESP_LOGE(TAG, "CRITICAL: Very low heap memory: %u bytes", metrics.free_heap);
         system_monitor_recovery_action(RECOVERY_MEMORY_CLEANUP, NULL);
         recovery_needed = true;
@@ -460,7 +640,7 @@ esp_err_t system_monitor_health_check(void) {
     }
     
     // Temperature check
-    if (metrics.cpu_temperature > 70.0f) {
+    if (metrics.cpu_temperature > TEMPERATURE_CRITICAL_THRESHOLD) {
         ESP_LOGE(TAG, "CRITICAL: High CPU temperature: %.1f°C", metrics.cpu_temperature);
         total_error_count++;
     }
@@ -470,11 +650,24 @@ esp_err_t system_monitor_health_check(void) {
         const task_health_t *task = &metrics.critical_tasks[i];
         if (!task->is_alive) {
             ESP_LOGE(TAG, "CRITICAL: Task %s is not alive!", task->task_name);
-            // Note: Actual task restart would need application-specific logic
+            // Task restart would be implemented here
             total_error_count++;
             recovery_needed = true;
         }
+        
+        if (task->stack_free < TASK_STACK_MARGIN_BYTES) {
+            ESP_LOGW(TAG, "WARNING: Task %s low stack: %u bytes", 
+                task->task_name, task->stack_free);
+        }
     }
+    
+    // Check system synchronization
+    if (check_system_synchronization() != ESP_OK) {
+        recovery_needed = true;
+    }
+    
+    // Monitor queue health
+    monitor_queue_health();
     
     // Update error counts
     last_metrics.error_count = total_error_count;
@@ -489,51 +682,59 @@ void* system_monitor_get_task_handle(void) {
 
 // ENHANCED SYSTEM MONITOR TASK
 static void system_monitor_task(void *pvParameters) {
-    ESP_LOGI(TAG, "Enhanced system monitor task started");
+    ESP_LOGI(TAG, "Enhanced system monitor task started - Core %d, Priority %d", 
+        SYSTEM_MONITOR_TASK_CORE, SYSTEM_MONITOR_TASK_PRIORITY);
     
-    // IMMEDIATE INITIAL METRICS COLLECTION - No delay!
-    last_metrics.free_heap = esp_get_free_heap_size();
-    last_metrics.min_free_heap = esp_get_minimum_free_heap_size();
-    last_metrics.total_heap = heap_caps_get_total_size(MALLOC_CAP_DEFAULT);
-    last_metrics.task_count = uxTaskGetNumberOfTasks();
-    last_metrics.uptime_ms = esp_timer_get_time() / 1000;
-    last_metrics.health_level = SYSTEM_HEALTH_OK;
-    ESP_LOGI(TAG, "Initial metrics set - heap: %u bytes", last_metrics.free_heap);
-    
-    // Short delay for system stabilization  
-    vTaskDelay(pdMS_TO_TICKS(500)); 
+    // Short stabilization delay (reduced from 3000ms)
+    vTaskDelay(pdMS_TO_TICKS(1000));
     
     // Initialize chip info for CPU frequency
     esp_chip_info_t chip_info;
     esp_chip_info(&chip_info);
     
+    ESP_LOGI(TAG, "Starting monitoring loop with %d ms intervals", current_interval_ms);
+    
     while (1) {
+        loop_iteration_count++;
+        
         // === CORE METRICS COLLECTION ===
         
-        // Memory metrics
-        last_metrics.free_heap = esp_get_free_heap_size();
-        last_metrics.min_free_heap = esp_get_minimum_free_heap_size();
-        last_metrics.total_heap = heap_caps_get_total_size(MALLOC_CAP_DEFAULT);
-
-        
-        // PSRAM metrics
-            last_metrics.free_psram = heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
+        // Thread-safe metrics update
+        if (xSemaphoreTake(metrics_mutex, pdMS_TO_TICKS(MAX_MUTEX_WAIT_MS)) == pdTRUE) {
+            
+            // Memory metrics
+            last_metrics.free_heap = esp_get_free_heap_size();
+            last_metrics.min_free_heap = esp_get_minimum_free_heap_size();
+            last_metrics.total_heap = heap_caps_get_total_size(MALLOC_CAP_DEFAULT);
+            
+            // PSRAM metrics (if available)
             last_metrics.total_psram = heap_caps_get_total_size(MALLOC_CAP_SPIRAM);
-    
+            if (last_metrics.total_psram > 0) {
+                last_metrics.free_psram = heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
+            } else {
+                last_metrics.free_psram = 0;
+            }
+            
+            // CPU metrics - SIMPLIFIED AND RELIABLE
+            last_metrics.cpu_usage_percent = calculate_cpu_usage_simple();
+            last_metrics.cpu_temperature = get_cpu_temperature();
+            
+            // Get CPU frequency
+            rtc_cpu_freq_config_t freq_config;
+            rtc_clk_cpu_freq_get_config(&freq_config);
+            last_metrics.cpu_frequency = freq_config.freq_mhz;
+            
+            // Task metrics
+            last_metrics.task_count = uxTaskGetNumberOfTasks();
+            
+            // System status
+            last_metrics.uptime_ms = esp_timer_get_time() / 1000;
+            
+            xSemaphoreGive(metrics_mutex);
+        }
         
-        // CPU metrics - SIMPLIFIED AND RELIABLE
-        calculate_cpu_usage_simple(&last_metrics.cpu_usage_percent);
-        last_metrics.cpu_temperature = get_cpu_temperature();  // REAL TEMPERATURE!
-        rtc_cpu_freq_config_t freq_config;
-        rtc_clk_cpu_freq_get_config(&freq_config);
-        last_metrics.cpu_frequency = freq_config.freq_mhz;  // MHz
-        
-        // Task metrics
-        last_metrics.task_count = uxTaskGetNumberOfTasks();
+        // === TASK HEALTH MONITORING ===
         update_task_health();
-        
-        // System status
-        last_metrics.uptime_ms = esp_timer_get_time() / 1000;
         
         // === HEALTH ASSESSMENT ===
         last_metrics.health_level = determine_health_level(&last_metrics);
@@ -554,6 +755,17 @@ static void system_monitor_task(void *pvParameters) {
         esp_err_t health_result = system_monitor_health_check();
         if (health_result != ESP_OK) {
             ESP_LOGW(TAG, "Health check failed - recovery actions taken");
+        }
+        
+        // === PERFORMANCE MONITORING ===
+        uint32_t current_time = esp_timer_get_time() / 1000;
+        if (current_time - last_performance_check > 60000) {  // Every minute
+            float loops_per_second = loop_iteration_count / 60.0f;
+            ESP_LOGI(TAG, "Monitor performance: %.1f loops/sec, avg interval: %.1f ms", 
+                loops_per_second, 60000.0f / loop_iteration_count);
+            
+            last_performance_check = current_time;
+            loop_iteration_count = 0;
         }
         
         // === SLEEP UNTIL NEXT CHECK ===

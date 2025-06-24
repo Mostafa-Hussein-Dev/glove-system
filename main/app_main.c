@@ -50,7 +50,8 @@
 static const char *TAG = "APP_MAIN";
 
 // You can change this to true to enable debug mode
-#define DEBUG_MODE_ENABLED false
+#define DEBUG_MODE_ENABLED true
+#define DEBUG_MODE_TIME_INTERVAL 5000
 
 // Global I2C master bus handle (defined here, declared in util/i2c_utils.h)
 i2c_master_bus_handle_t i2c_master_bus = NULL;
@@ -287,30 +288,94 @@ static esp_err_t init_i2c(void) {
 static esp_err_t init_system_config(void) {
     // Initialize default system configuration
     g_system_config.system_state = SYSTEM_STATE_INIT;
-    g_system_config.last_error = SYSTEM_ERROR_NONE;
-    g_system_config.output_mode = OUTPUT_MODE_TEXT_AND_AUDIO;
-    g_system_config.display_brightness = 100;
-    g_system_config.audio_volume = 80;
-    g_system_config.haptic_intensity = 80;
-    g_system_config.bluetooth_enabled = true;
+    
+    // Feature enable flags
     g_system_config.power_save_enabled = true;
-    g_system_config.touch_enabled = true;
-    g_system_config.calibration_required = true;
+    g_system_config.gesture_recognition_enabled = true;
+    g_system_config.audio_feedback_enabled = true;
+    g_system_config.haptic_feedback_enabled = true;
+    g_system_config.ble_enabled = true;
+    g_system_config.camera_enabled = true;
+    
+    // Performance settings
+    g_system_config.performance_mode = 1;      // 0=Power Save, 1=Balanced, 2=Performance
+    g_system_config.sensor_sensitivity = 80;   // 0-100%
+    g_system_config.processing_quality = 85;   // 0-100%
+    
+    // User preferences
+    g_system_config.volume_level = 80;         // 0-100%
+    g_system_config.brightness_level = 100;    // 0-100%
+    g_system_config.haptic_intensity = 80;     // 0-100%
+    
+    // Calibration status
+    g_system_config.sensors_calibrated = false;
+    g_system_config.imu_calibrated = false;
+    g_system_config.touch_calibrated = false;
+    
+    // System health initialization
+    g_system_config.system_healthy = true;
+    g_system_config.last_health_check = 0;
+    g_system_config.error_count = 0;
+    g_system_config.recovery_count = 0;
+    
+    // Task monitoring initialization
+    g_system_config.task_monitoring_enabled = true;
+    g_system_config.critical_task_failures = 0;
+    g_system_config.task_restarts = 0;
+    
+    // Load configuration from NVS if available
+    ESP_LOGI(TAG, "Enhanced configuration defaults set:");
+    ESP_LOGI(TAG, "  Performance mode: %d, Sensor sensitivity: %d%%", 
+        g_system_config.performance_mode, g_system_config.sensor_sensitivity);
+    ESP_LOGI(TAG, "  Features enabled: Gesture=%s, Audio=%s, Haptic=%s, BLE=%s", 
+        g_system_config.gesture_recognition_enabled ? "Y" : "N",
+        g_system_config.audio_feedback_enabled ? "Y" : "N",
+        g_system_config.haptic_feedback_enabled ? "Y" : "N",
+        g_system_config.ble_enabled ? "Y" : "N");
+    ESP_LOGI(TAG, "  Task monitoring: %s", 
+        g_system_config.task_monitoring_enabled ? "ENABLED" : "DISABLED");
     
     // Load configuration from NVS if available
     esp_err_t ret = system_config_load();
     if (ret != ESP_OK) {
-        ESP_LOGW(TAG, "Failed to load system configuration, using defaults");
+        ESP_LOGW(TAG, "Failed to load system configuration from NVS, using enhanced defaults");
         
-        // If loading failed, save the default configuration
+        // If loading failed, save the enhanced default configuration
         ret = system_config_save();
         if (ret != ESP_OK) {
-            ESP_LOGE(TAG, "Failed to save default system configuration: %s", esp_err_to_name(ret));
+            ESP_LOGE(TAG, "Failed to save enhanced default configuration: %s", esp_err_to_name(ret));
             return ret;
+        } else {
+            ESP_LOGI(TAG, "Enhanced default configuration saved to NVS");
+        }
+    } else {
+        ESP_LOGI(TAG, "Enhanced system configuration loaded from NVS");
+        
+        // Validate loaded configuration
+        if (g_system_config.performance_mode > 2) {
+            ESP_LOGW(TAG, "Invalid performance mode %d, resetting to 1", g_system_config.performance_mode);
+            g_system_config.performance_mode = 1;
+        }
+        
+        if (g_system_config.sensor_sensitivity > 100) {
+            ESP_LOGW(TAG, "Invalid sensor sensitivity %d, resetting to 80", g_system_config.sensor_sensitivity);
+            g_system_config.sensor_sensitivity = 80;
+        }
+        
+        // Ensure task monitoring is enabled for enhanced architecture
+        if (!g_system_config.task_monitoring_enabled) {
+            ESP_LOGI(TAG, "Enabling task monitoring for enhanced architecture");
+            g_system_config.task_monitoring_enabled = true;
         }
     }
     
-    ESP_LOGI(TAG, "System configuration initialized");
+    // Log final configuration
+    ESP_LOGI(TAG, "=== ENHANCED SYSTEM CONFIGURATION READY ===");
+    ESP_LOGI(TAG, "State: %d, Health: %s, Monitoring: %s", 
+        g_system_config.system_state,
+        g_system_config.system_healthy ? "OK" : "UNHEALTHY",
+        g_system_config.task_monitoring_enabled ? "ON" : "OFF");
+    
     return ESP_OK;
 }
 
@@ -434,27 +499,6 @@ static esp_err_t init_processing(void) {
         ESP_LOGI(TAG, "ML models loaded successfully");
     }
     
-    // Initialize sensor fusion
-    ret = sensor_fusion_init();
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize sensor fusion: %s", esp_err_to_name(ret));
-        return ret;
-    }
-    
-    // Initialize feature extraction
-    ret = feature_extraction_init();
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize feature extraction: %s", esp_err_to_name(ret));
-        return ret;
-    }
-    
-    // Initialize gesture detection with basic algorithm
-    ret = gesture_detection_init();
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize gesture detection: %s", esp_err_to_name(ret));
-        return ret;
-    }
-    
     ESP_LOGI(TAG, "Processing modules initialized successfully");
     return ESP_OK;
 }
@@ -463,7 +507,7 @@ static esp_err_t init_communication(void) {
     esp_err_t ret;
     
     // Initialize BLE service if enabled
-    if (g_system_config.bluetooth_enabled) {
+    if (g_system_config.ble_enabled) {
         ret = ble_service_init();
         if (ret != ESP_OK) {
             ESP_LOGE(TAG, "Failed to initialize BLE service: %s", esp_err_to_name(ret));
@@ -497,77 +541,152 @@ static esp_err_t init_output(void) {
 }
 
 static esp_err_t init_queues(void) {
-    ESP_LOGI(TAG, "Initializing queues with enhanced sizes...");
+    ESP_LOGI(TAG, "=== INITIALIZING ENHANCED QUEUE SYSTEM ===");
+    ESP_LOGI(TAG, "Queue Configuration (with overflow protection):");
     
-    // Create sensor data queue with increased size
+    // Create sensor data queue with enhanced size
     g_sensor_data_queue = xQueueCreate(SENSOR_QUEUE_SIZE, sizeof(sensor_data_t));
     if (g_sensor_data_queue == NULL) {
-        ESP_LOGE(TAG, "Failed to create sensor data queue (size: %d)", SENSOR_QUEUE_SIZE);
-        return ESP_FAIL;
+        ESP_LOGE(TAG, "Failed to create sensor data queue");
+        return ESP_ERR_NO_MEM;
     }
-    ESP_LOGI(TAG, "Sensor queue created: %d items", SENSOR_QUEUE_SIZE);
+    ESP_LOGI(TAG, "  Sensor queue: %d items (%d bytes)", 
+        SENSOR_QUEUE_SIZE, SENSOR_QUEUE_SIZE * sizeof(sensor_data_t));
     
-    // Create processing result queue with increased size
+    // Create processing result queue with enhanced size
     g_processing_result_queue = xQueueCreate(PROCESSING_QUEUE_SIZE, sizeof(processing_result_t));
     if (g_processing_result_queue == NULL) {
-        ESP_LOGE(TAG, "Failed to create processing result queue (size: %d)", PROCESSING_QUEUE_SIZE);
-        return ESP_FAIL;
+        ESP_LOGE(TAG, "Failed to create processing result queue");
+        return ESP_ERR_NO_MEM;
     }
-    ESP_LOGI(TAG, "Processing queue created: %d items", PROCESSING_QUEUE_SIZE);
+    ESP_LOGI(TAG, "  Processing queue: %d items (%d bytes)", 
+        PROCESSING_QUEUE_SIZE, PROCESSING_QUEUE_SIZE * sizeof(processing_result_t));
     
-    // Create output command queue with increased size
+    // Create output command queue with enhanced size
     g_output_command_queue = xQueueCreate(OUTPUT_QUEUE_SIZE, sizeof(output_command_t));
     if (g_output_command_queue == NULL) {
-        ESP_LOGE(TAG, "Failed to create output command queue (size: %d)", OUTPUT_QUEUE_SIZE);
-        return ESP_FAIL;
+        ESP_LOGE(TAG, "Failed to create output command queue");
+        return ESP_ERR_NO_MEM;
     }
-    ESP_LOGI(TAG, "Output queue created: %d items", OUTPUT_QUEUE_SIZE);
+    ESP_LOGI(TAG, "  Output queue: %d items (%d bytes)", 
+        OUTPUT_QUEUE_SIZE, OUTPUT_QUEUE_SIZE * sizeof(output_command_t));
     
-    // Create system command queue with increased size
+    // Create system command queue with enhanced size
     g_system_command_queue = xQueueCreate(COMMAND_QUEUE_SIZE, sizeof(system_command_t));
     if (g_system_command_queue == NULL) {
-        ESP_LOGE(TAG, "Failed to create system command queue (size: %d)", COMMAND_QUEUE_SIZE);
-        return ESP_FAIL;
+        ESP_LOGE(TAG, "Failed to create system command queue");
+        return ESP_ERR_NO_MEM;
     }
-    ESP_LOGI(TAG, "System queue created: %d items", COMMAND_QUEUE_SIZE);
+    ESP_LOGI(TAG, "  System queue: %d items (%d bytes)", 
+        COMMAND_QUEUE_SIZE, COMMAND_QUEUE_SIZE * sizeof(system_command_t));
     
-    // Calculate total queue memory usage
-    size_t total_queue_memory = 
+    // Calculate total memory usage
+    uint32_t total_queue_memory = 
         (SENSOR_QUEUE_SIZE * sizeof(sensor_data_t)) +
         (PROCESSING_QUEUE_SIZE * sizeof(processing_result_t)) +
         (OUTPUT_QUEUE_SIZE * sizeof(output_command_t)) +
         (COMMAND_QUEUE_SIZE * sizeof(system_command_t));
     
-    ESP_LOGI(TAG, "All queues created successfully. Total memory: %zu bytes (%.1f KB)", 
-             total_queue_memory, total_queue_memory / 1024.0f);
+    ESP_LOGI(TAG, "=== ENHANCED QUEUE SYSTEM READY ===");
+    ESP_LOGI(TAG, "Total queue memory: %u bytes (%.1f KB)", 
+        total_queue_memory, total_queue_memory / 1024.0f);
+    ESP_LOGI(TAG, "Queue overflow protection: %s", 
+        QUEUE_OVERFLOW_PROTECTION ? "ENABLED" : "DISABLED");
+    ESP_LOGI(TAG, "High watermark threshold: %d%%", QUEUE_HIGH_WATERMARK_PERCENT);
     
     return ESP_OK;
 }
 
 static esp_err_t init_tasks(void) {
-    ESP_LOGI(TAG, "Starting tasks initialization");
-
-    esp_err_t ret;
+    ESP_LOGI(TAG, "=== INITIALIZING ENHANCED TASK ARCHITECTURE ===");
+    ESP_LOGI(TAG, "Task Configuration:");
+    ESP_LOGI(TAG, "  Core 0: Sensor (%d), Monitor (%d), Output (%d), Power (%d)", 
+        SENSOR_TASK_PRIORITY, SYSTEM_MONITOR_TASK_PRIORITY, 
+        OUTPUT_TASK_PRIORITY, POWER_TASK_PRIORITY);
+    ESP_LOGI(TAG, "  Core 1: Processing (%d), Communication (%d)", 
+        PROCESSING_TASK_PRIORITY, COMMUNICATION_TASK_PRIORITY);
     
-    // Initialize sensor task
+    // === PHASE 1: INITIALIZE SYSTEM MONITOR FIRST ===
+    ESP_LOGI(TAG, "Phase 1: Initializing system monitor...");
+    esp_err_t ret = system_monitor_init();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize system monitor: %s", esp_err_to_name(ret));
+        return ret;
+    }
+    
+    // Wait for monitor to be ready
+    if (g_system_event_group != NULL) {
+        EventBits_t bits = xEventGroupWaitBits(
+            g_system_event_group,
+            SYSTEM_EVENT_MONITOR_READY,
+            pdFALSE,
+            pdTRUE,
+            pdMS_TO_TICKS(1000)
+        );
+        
+        if (!(bits & SYSTEM_EVENT_MONITOR_READY)) {
+            ESP_LOGW(TAG, "System monitor ready timeout");
+        }
+    }
+    
+    // === PHASE 2: INITIALIZE CORE 0 TASKS (Real-time + Control) ===
+    ESP_LOGI(TAG, "Phase 2: Initializing Core 0 tasks (Real-time + Control)...");
+    
+    // Initialize sensor task (highest priority)
     ret = sensor_task_init();
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to initialize sensor task: %s", esp_err_to_name(ret));
         return ret;
     }
     
-    // Initialize processing task
+    // Register sensor task with monitor
+    void* sensor_handle = sensor_task_get_handle();
+    if (sensor_handle != NULL) {
+        system_monitor_register_task((TaskHandle_t)sensor_handle, "sensor_task");
+    }
+    
+    // Initialize output task 
+    ret = output_task_init();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize output task: %s", esp_err_to_name(ret));
+        return ret;
+    }
+    
+    // Register output task with monitor
+    void* output_handle = output_task_get_handle();
+    if (output_handle != NULL) {
+        system_monitor_register_task((TaskHandle_t)output_handle, "output_task");
+    }
+    
+    // Initialize power task (lowest priority on Core 0)
+    ret = power_task_init();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize power task: %s", esp_err_to_name(ret));
+        return ret;
+    }
+    
+    // Register power task with monitor
+    void* power_handle = power_task_get_handle();
+    if (power_handle != NULL) {
+        system_monitor_register_task((TaskHandle_t)power_handle, "power_task");
+    }
+    
+    ESP_LOGI(TAG, "Core 0 tasks initialized successfully");
+    
+    // === PHASE 3: INITIALIZE CORE 1 TASKS (Processing + Communication) ===
+    ESP_LOGI(TAG, "Phase 3: Initializing Core 1 tasks (Processing + Communication)...");
+    
+    // Initialize processing task (highest priority on Core 1)
     ret = processing_task_init();
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to initialize processing task: %s", esp_err_to_name(ret));
         return ret;
     }
     
-    // Initialize output task
-    ret = output_task_init();
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize output task: %s", esp_err_to_name(ret));
-        return ret;
+    // Register processing task with monitor
+    void* processing_handle = processing_task_get_handle();
+    if (processing_handle != NULL) {
+        system_monitor_register_task((TaskHandle_t)processing_handle, "processing_task");
     }
     
     // Initialize communication task
@@ -577,20 +696,67 @@ static esp_err_t init_tasks(void) {
         return ret;
     }
     
-    // Initialize power task
-    ret = power_task_init();
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize power task: %s", esp_err_to_name(ret));
-        return ret;
+    // Register communication task with monitor
+    void* comm_handle = communication_task_get_handle();
+    if (comm_handle != NULL) {
+        system_monitor_register_task((TaskHandle_t)comm_handle, "comm_task");
     }
-
-    ret = register_critical_tasks();
-    if (ret != ESP_OK) {
-        ESP_LOGW(TAG, "Failed to register critical tasks: %s", esp_err_to_name(ret));
-        // Non-fatal, continue anyway
+    
+    ESP_LOGI(TAG, "Core 1 tasks initialized successfully");
+    
+    // === PHASE 4: ENABLE ENHANCED MONITORING ===
+    ESP_LOGI(TAG, "Phase 4: Enabling enhanced monitoring features...");
+    
+    // Enable adaptive monitoring intervals
+    system_monitor_set_adaptive_intervals(true);
+    
+    // Set initial queue monitoring
+    if (g_sensor_data_queue != NULL) {
+        ESP_LOGI(TAG, "Sensor queue configured: %d items", SENSOR_QUEUE_SIZE);
     }
-
-    ESP_LOGI(TAG, "All tasks initialized successfully");
+    if (g_processing_result_queue != NULL) {
+        ESP_LOGI(TAG, "Processing queue configured: %d items", PROCESSING_QUEUE_SIZE);
+    }
+    if (g_output_command_queue != NULL) {
+        ESP_LOGI(TAG, "Output queue configured: %d items", OUTPUT_QUEUE_SIZE);
+    }
+    if (g_system_command_queue != NULL) {
+        ESP_LOGI(TAG, "System queue configured: %d items", COMMAND_QUEUE_SIZE);
+    }
+    
+    // === PHASE 5: VERIFY TASK ARCHITECTURE ===
+    ESP_LOGI(TAG, "Phase 5: Verifying task architecture...");
+    
+    // Check that all critical tasks are registered
+    system_metrics_t initial_metrics;
+    ret = system_monitor_get_metrics(&initial_metrics);
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG, "Architecture verification:");
+        ESP_LOGI(TAG, "  Total tasks: %u", initial_metrics.task_count);
+        ESP_LOGI(TAG, "  Critical tasks monitored: %u", initial_metrics.critical_task_count);
+        ESP_LOGI(TAG, "  Free heap: %u bytes", initial_metrics.free_heap);
+        ESP_LOGI(TAG, "  System health: %s", 
+            (initial_metrics.health_level == SYSTEM_HEALTH_OK) ? "OK" :
+            (initial_metrics.health_level == SYSTEM_HEALTH_WARNING) ? "WARNING" : "CRITICAL");
+    }
+    
+    // === PHASE 6: SET SYSTEM EVENTS ===
+    if (g_system_event_group != NULL) {
+        xEventGroupSetBits(g_system_event_group, 
+            SYSTEM_EVENT_SENSOR_READY | 
+            SYSTEM_EVENT_PROCESSING_READY | 
+            SYSTEM_EVENT_OUTPUT_READY |
+            SYSTEM_EVENT_POWER_READY);
+    }
+    
+    ESP_LOGI(TAG, "=== ENHANCED TASK ARCHITECTURE INITIALIZED SUCCESSFULLY ===");
+    ESP_LOGI(TAG, "Architecture Summary:");
+    ESP_LOGI(TAG, "  Core 0 Load: Sensor + Monitor + Output + Power");
+    ESP_LOGI(TAG, "  Core 1 Load: Processing + Communication");
+    ESP_LOGI(TAG, "  Total Stack Allocated: ~%d KB", 
+        (SENSOR_TASK_STACK_SIZE + SYSTEM_MONITOR_TASK_STACK + OUTPUT_TASK_STACK_SIZE + 
+         POWER_TASK_STACK_SIZE + PROCESSING_TASK_STACK_SIZE + COMMUNICATION_TASK_STACK_SIZE) / 1024);
+    
     return ESP_OK;
 }
 
@@ -647,7 +813,6 @@ static void debug_mode_run(void) {
     //debug_display_system_info();
     
     uint32_t loop_count = 0;
-    uint32_t last_full_test_time = 0;
     
     while (1) {
         
@@ -666,6 +831,12 @@ static void debug_mode_run(void) {
 
         ESP_LOGI(TAG, "Testing System Monitor...");
         debug_test_enhanced_monitor();
+
+        ESP_LOGI(TAG, "Testing System Monitor Health Check...");
+        system_monitor_health_check();
+
+        ESP_LOGI(TAG, "Testing System Monitor Metrics...");
+        system_monitor_print_metrics();
 
         // Test output devices every 10 seconds
         /*
@@ -704,7 +875,7 @@ static void debug_mode_run(void) {
         
         ESP_LOGI(TAG, "=== DEBUG LOOP %lu COMPLETE ===\n", loop_count - 1);
         
-        vTaskDelay(pdMS_TO_TICKS(20));
+        vTaskDelay(pdMS_TO_TICKS(DEBUG_MODE_TIME_INTERVAL));
     }
 }
 
@@ -953,41 +1124,72 @@ static void debug_display_system_info(void) {
 }
 
 static void debug_test_enhanced_monitor(void) {
-    ESP_LOGI(TAG, "=== ENHANCED SYSTEM MONITOR TEST ===");
+    ESP_LOGI(TAG, "=== ENHANCED SYSTEM MONITOR & TASK ARCHITECTURE TEST ===");
     
+    // Test current system status
     system_metrics_t metrics;
     if (system_monitor_get_metrics(&metrics) == ESP_OK) {
-        ESP_LOGI(TAG, "📊 Current System Status:");
+        ESP_LOGI(TAG, "Current System Status:");
         ESP_LOGI(TAG, "  Health Level: %s", 
             (metrics.health_level == SYSTEM_HEALTH_OK) ? "🟢 OK" :
             (metrics.health_level == SYSTEM_HEALTH_WARNING) ? "🟡 WARNING" : "🔴 CRITICAL");
         
-        ESP_LOGI(TAG, "  Memory: %u/%u bytes (%.1f%% free)", 
+        ESP_LOGI(TAG, "Memory: %u/%u bytes (%.1f%% free)", 
             metrics.free_heap, metrics.total_heap,
-            (float)metrics.free_heap / metrics.total_heap * 100);
+            metrics.total_heap > 0 ? (float)metrics.free_heap / metrics.total_heap * 100 : 0.0f);
             
-        ESP_LOGI(TAG, "  CPU: %u%% usage, %.1f°C", 
-            metrics.cpu_usage_percent, metrics.cpu_temperature);
+        ESP_LOGI(TAG, "CPU: %u%% usage, %.1f°C, %u MHz", 
+            metrics.cpu_usage_percent, metrics.cpu_temperature, metrics.cpu_frequency);
             
-        ESP_LOGI(TAG, "  Tasks: %u total, %u critical monitored", 
+        ESP_LOGI(TAG, "Tasks: %u total, %u critical monitored", 
             metrics.task_count, metrics.critical_task_count);
-            
-        ESP_LOGI(TAG, "  Uptime: %.1f seconds", metrics.uptime_ms / 1000.0f);
-        ESP_LOGI(TAG, "  Errors: %u, Recoveries: %u", 
+        
+        ESP_LOGI(TAG, "Uptime: %.1f minutes", metrics.uptime_ms / 60000.0f);
+        ESP_LOGI(TAG, "Errors: %u, Recoveries: %u", 
             metrics.error_count, metrics.recovery_count);
+        
+        ESP_LOGI(TAG, "Queues: Max %u%% usage, %u overflows", 
+            metrics.queue_usage_max, metrics.queue_overflows);
     }
     
-    // Test recovery system
-    ESP_LOGI(TAG, "🔧 Testing recovery system...");
-    system_monitor_recovery_action(RECOVERY_MEMORY_CLEANUP, NULL);
+    // Test task architecture
+    ESP_LOGI(TAG, "Task Architecture Verification:");
+    ESP_LOGI(TAG, "  Core 0 Tasks: Sensor(%d), Monitor(%d), Output(%d), Power(%d)", 
+        SENSOR_TASK_PRIORITY, SYSTEM_MONITOR_TASK_PRIORITY, 
+        OUTPUT_TASK_PRIORITY, POWER_TASK_PRIORITY);
+    ESP_LOGI(TAG, "  Core 1 Tasks: Processing(%d), Communication(%d)", 
+        PROCESSING_TASK_PRIORITY, COMMUNICATION_TASK_PRIORITY);
     
     // Test queue health reporting
-    ESP_LOGI(TAG, "📊 Testing queue health reporting...");
+    ESP_LOGI(TAG, "Testing queue health reporting...");
     system_monitor_update_queue_health(75, false);  // 75% usage
-    system_monitor_update_queue_health(100, true);  // Overflow event
+    system_monitor_update_queue_health(95, false);  // High usage warning
+    
+    // Test recovery system
+    ESP_LOGI(TAG, "Testing recovery system...");
+    system_monitor_recovery_action(RECOVERY_MEMORY_CLEANUP, NULL);
+    
+    // Test adaptive intervals
+    ESP_LOGI(TAG, "Testing adaptive monitoring...");
+    system_health_level_t current_health = system_monitor_get_health_level();
+    ESP_LOGI(TAG, "  Current health: %d", current_health);
+    
+    // Display stack usage for all tasks
+    ESP_LOGI(TAG, "📚 Stack Usage Analysis:");
+    ESP_LOGI(TAG, "  Sensor Task: %d bytes allocated", SENSOR_TASK_STACK_SIZE);
+    ESP_LOGI(TAG, "  Processing Task: %d bytes allocated", PROCESSING_TASK_STACK_SIZE);
+    ESP_LOGI(TAG, "  System Monitor: %d bytes allocated", SYSTEM_MONITOR_TASK_STACK);
+    ESP_LOGI(TAG, "  Communication Task: %d bytes allocated", COMMUNICATION_TASK_STACK_SIZE);
+    ESP_LOGI(TAG, "  Output Task: %d bytes allocated", OUTPUT_TASK_STACK_SIZE);
+    ESP_LOGI(TAG, "  Power Task: %d bytes allocated", POWER_TASK_STACK_SIZE);
+    
+    uint32_t total_stack = SENSOR_TASK_STACK_SIZE + PROCESSING_TASK_STACK_SIZE + 
+                          SYSTEM_MONITOR_TASK_STACK + COMMUNICATION_TASK_STACK_SIZE + 
+                          OUTPUT_TASK_STACK_SIZE + POWER_TASK_STACK_SIZE;
+    ESP_LOGI(TAG, "  Total Stack Allocated: %u bytes (%.1f KB)", total_stack, total_stack / 1024.0f);
     
     vTaskDelay(pdMS_TO_TICKS(1000));
-    ESP_LOGI(TAG, "Enhanced system monitor test completed");
+    ESP_LOGI(TAG, "Enhanced system monitor and task architecture test completed");
 }
 
 // Main application entry point

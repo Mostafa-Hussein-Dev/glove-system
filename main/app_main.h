@@ -10,19 +10,6 @@
 #include "driver/i2c_master.h"
 
 /**
- * @brief System event bits for the event group
- */
-#define SYSTEM_EVENT_INIT_COMPLETE   (1 << 0)
-#define SYSTEM_EVENT_SENSOR_READY    (1 << 1)
-#define SYSTEM_EVENT_PROCESSING_READY (1 << 2)
-#define SYSTEM_EVENT_OUTPUT_READY    (1 << 3)
-#define SYSTEM_EVENT_BLE_READY       (1 << 4)
-#define SYSTEM_EVENT_POWER_READY     (1 << 5)
-#define SYSTEM_EVENT_LOW_BATTERY     (1 << 6)
-#define SYSTEM_EVENT_ERROR           (1 << 7)
-#define SYSTEM_EVENT_CALIBRATION     (1 << 8)
-
-/**
  * @brief Global system configuration
  */
 extern system_config_t g_system_config;

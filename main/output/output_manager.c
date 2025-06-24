@@ -174,10 +174,44 @@ esp_err_t output_manager_handle_command(output_command_t *command) {
 }
 
 esp_err_t output_manager_set_mode(output_mode_t mode) {
-    // Update system configuration
-    g_system_config.output_mode = mode;
+    ESP_LOGI(TAG, "Setting output mode to %d", mode);
     
-    ESP_LOGI(TAG, "Output mode set to %d", mode);
+    // Update system configuration feature flags based on mode
+    switch (mode) {
+        case OUTPUT_MODE_TEXT_ONLY:
+            g_system_config.audio_feedback_enabled = false;
+            g_system_config.haptic_feedback_enabled = false;
+            // Display is always enabled for text
+            break;
+            
+        case OUTPUT_MODE_AUDIO_ONLY:
+            g_system_config.audio_feedback_enabled = true;
+            g_system_config.haptic_feedback_enabled = false;
+            // Keep display enabled for status
+            break;
+            
+        case OUTPUT_MODE_TEXT_AND_AUDIO:
+            g_system_config.audio_feedback_enabled = true;
+            g_system_config.haptic_feedback_enabled = true;  // Enable haptic too for full experience
+            break;
+            
+        case OUTPUT_MODE_MINIMAL:
+            g_system_config.audio_feedback_enabled = false;
+            g_system_config.haptic_feedback_enabled = false;
+            // Minimal display updates only
+            break;
+            
+        default:
+            ESP_LOGW(TAG, "Unknown output mode %d, defaulting to TEXT_AND_AUDIO", mode);
+            g_system_config.audio_feedback_enabled = true;
+            g_system_config.haptic_feedback_enabled = true;
+            mode = OUTPUT_MODE_TEXT_AND_AUDIO;
+            break;
+    }
+    
+    ESP_LOGI(TAG, "Output mode set - Audio: %s, Haptic: %s", 
+        g_system_config.audio_feedback_enabled ? "ON" : "OFF",
+        g_system_config.haptic_feedback_enabled ? "ON" : "OFF");
     
     // Display current mode on screen
     char mode_text[32];
@@ -203,10 +237,26 @@ esp_err_t output_manager_set_mode(output_mode_t mode) {
     display_clear();
     display_draw_text("Output Mode:", 0, 16, DISPLAY_FONT_SMALL, DISPLAY_ALIGN_CENTER);
     display_draw_text(mode_text, 0, 32, DISPLAY_FONT_MEDIUM, DISPLAY_ALIGN_CENTER);
+    
+    // Show feature status
+    char status_text[64];
+    snprintf(status_text, sizeof(status_text), "Audio:%s Haptic:%s", 
+        g_system_config.audio_feedback_enabled ? "ON" : "OFF",
+        g_system_config.haptic_feedback_enabled ? "ON" : "OFF");
+    display_draw_text(status_text, 0, 48, DISPLAY_FONT_SMALL, DISPLAY_ALIGN_CENTER);
+    
     display_update();
     
-    // Generate feedback
-    audio_play_beep(1000, 100);
+    // Generate feedback only if audio is enabled
+    if (g_system_config.audio_feedback_enabled) {
+        audio_play_beep(1000, 100);
+    }
+    
+    // Save configuration to NVS
+    esp_err_t ret = system_config_save();
+    if (ret != ESP_OK) {
+        ESP_LOGW(TAG, "Failed to save configuration: %s", esp_err_to_name(ret));
+    }
     
     return ESP_OK;
 }

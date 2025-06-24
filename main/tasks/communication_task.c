@@ -26,51 +26,22 @@ static uint32_t last_status_update_ms = 0;
 // Forward declarations
 static void communication_task(void *arg);
 static void ble_command_handler(const uint8_t *data, size_t length);
-
-static void check_system_health(void) {
-    // Check queue health
-    UBaseType_t sensor_items = uxQueueMessagesWaiting(g_sensor_data_queue);
-    UBaseType_t processing_items = uxQueueMessagesWaiting(g_processing_result_queue);
-    UBaseType_t output_items = uxQueueMessagesWaiting(g_output_command_queue);
-    UBaseType_t system_items = uxQueueMessagesWaiting(g_system_command_queue);
-    
-    // Check memory health
-    size_t free_heap = heap_caps_get_free_size(MALLOC_CAP_DEFAULT);
-    
-    // Log warnings if queues are getting full
-    if (sensor_items > (SENSOR_QUEUE_SIZE * 0.8)) {
-        ESP_LOGW(TAG, "Sensor queue high: %u/%d", (unsigned int)sensor_items, SENSOR_QUEUE_SIZE);
-    }
-    if (processing_items > (PROCESSING_QUEUE_SIZE * 0.8)) {
-        ESP_LOGW(TAG, "Processing queue high: %u/%d", (unsigned int)processing_items, PROCESSING_QUEUE_SIZE);
-    }
-    if (output_items > (OUTPUT_QUEUE_SIZE * 0.8)) {
-        ESP_LOGW(TAG, "Output queue high: %u/%d", (unsigned int)output_items, OUTPUT_QUEUE_SIZE);
-    }
-    if (system_items > (COMMAND_QUEUE_SIZE * 0.8)) {
-        ESP_LOGW(TAG, "System queue high: %u/%d", (unsigned int)system_items, COMMAND_QUEUE_SIZE);
-    }
-    
-    // Log memory warnings
-    if (free_heap < 50000) {  // Less than 50KB
-        ESP_LOGW(TAG, "Low memory warning: %zu bytes free", free_heap);
-        if (free_heap < 20000) {  // Less than 20KB - critical
-            ESP_LOGE(TAG, "CRITICAL: Very low memory: %zu bytes", free_heap);
-            buffer_emergency_cleanup();  // Emergency cleanup
-        }
-    }
-}
+static void print_real_task_stats(void);
 
 esp_err_t communication_task_init(void) {
-    // Create the communication task
+    ESP_LOGI(TAG, "Initializing communication task with enhanced architecture...");
+    ESP_LOGI(TAG, "  Core: %d, Priority: %d, Stack: %d bytes", 
+        COMMUNICATION_TASK_CORE, COMMUNICATION_TASK_PRIORITY, COMMUNICATION_TASK_STACK_SIZE);
+    
+    // Create the communication task with new configuration
     BaseType_t ret = xTaskCreatePinnedToCore(
         communication_task,
-        "communication_task",
-        COMMUNICATION_TASK_STACK_SIZE,
+        "comm_task",
+        COMMUNICATION_TASK_STACK_SIZE,  // UPDATED: Increased from 6144 to 8192
         NULL,
-        COMMUNICATION_TASK_PRIORITY,
+        COMMUNICATION_TASK_PRIORITY,    // SAME: Priority 7
         &communication_task_handle,
-        COMMUNICATION_TASK_CORE
+        COMMUNICATION_TASK_CORE         // UPDATED: Moved from Core 0 to Core 1
     );
     
     if (ret != pdPASS) {
@@ -78,7 +49,9 @@ esp_err_t communication_task_init(void) {
         return ESP_FAIL;
     }
     
-    ESP_LOGI(TAG, "Communication task initialized on core %d", COMMUNICATION_TASK_CORE);
+    ESP_LOGI(TAG, "Communication task initialized on core %d (moved from core 0)", 
+        COMMUNICATION_TASK_CORE);
+    ESP_LOGI(TAG, "This avoids I2C conflicts with sensor task");
     return ESP_OK;
 }
 
@@ -97,7 +70,7 @@ static void communication_task(void *arg) {
     ble_service_register_command_callback(ble_command_handler);
     
     // Enable BLE if configured
-    if (g_system_config.bluetooth_enabled) {
+    if (g_system_config.ble_enabled) {
         ble_service_enable();
     }
     
@@ -112,14 +85,14 @@ static void communication_task(void *arg) {
         if (xQueueReceive(g_system_command_queue, &system_cmd, 0) == pdTRUE) {
             // Handle system commands
             switch (system_cmd.type) {
-                case SYS_CMD_ENABLE_BLE:
+                case SYS_CMD_ENABLE_FEATURE:
                     ble_service_enable();
-                    g_system_config.bluetooth_enabled = true;
+                    g_system_config.ble_enabled = true;
                     break;
                     
-                case SYS_CMD_DISABLE_BLE:
+                case SYS_CMD_DISABLE_FEATURE:
                     ble_service_disable();
-                    g_system_config.bluetooth_enabled = false;
+                    g_system_config.ble_enabled = false;
                     break;
                     
                 default:
@@ -143,18 +116,17 @@ static void communication_task(void *arg) {
                     ble_service_send_status(
                         battery_status.percentage,
                         (uint8_t)g_system_config.system_state,
-                        (uint8_t)g_system_config.last_error
+                        (uint8_t)g_system_config.error_count
                     );
                 }
             }
             
-            // Periodic system health check (every 10 seconds)
-            uint32_t current_time_ms = esp_timer_get_time() / 1000;
-            if (current_time_ms - last_status_update_ms >= 10000) {
-                check_system_health();
-                last_status_update_ms = current_time_ms;
-            }
+            last_status_update_ms = current_time_ms;
         }
+        
+        
+    
+
         // Short delay to prevent CPU hogging
         vTaskDelay(pdMS_TO_TICKS(50));
     }
@@ -187,8 +159,32 @@ static void ble_command_handler(const uint8_t *data, size_t length) {
             if (length >= 2) {
                 uint8_t mode = data[1];
                 if (mode <= OUTPUT_MODE_MINIMAL) {
-                    // Update system config
-                    g_system_config.output_mode = (output_mode_t)mode;
+                    // Update system config using new enhanced feature flags
+                    switch ((output_mode_t)mode) {
+                        case OUTPUT_MODE_TEXT_ONLY:
+                            g_system_config.audio_feedback_enabled = false;
+                            g_system_config.haptic_feedback_enabled = false;
+                            ESP_LOGI(TAG, "BLE: Set output mode to TEXT_ONLY");
+                            break;
+                        case OUTPUT_MODE_AUDIO_ONLY:
+                            g_system_config.audio_feedback_enabled = true;
+                            g_system_config.haptic_feedback_enabled = false;
+                            ESP_LOGI(TAG, "BLE: Set output mode to AUDIO_ONLY");
+                            break;
+                        case OUTPUT_MODE_TEXT_AND_AUDIO:
+                            g_system_config.audio_feedback_enabled = true;
+                            g_system_config.haptic_feedback_enabled = true;
+                            ESP_LOGI(TAG, "BLE: Set output mode to TEXT_AND_AUDIO");
+                            break;
+                        case OUTPUT_MODE_MINIMAL:
+                            g_system_config.audio_feedback_enabled = false;
+                            g_system_config.haptic_feedback_enabled = false;
+                            ESP_LOGI(TAG, "BLE: Set output mode to MINIMAL");
+                            break;
+                        default:
+                            ESP_LOGW(TAG, "BLE: Unknown output mode %d", mode);
+                            break;
+                    }
                     
                     // Create output command
                     output_command_t cmd = {
@@ -225,7 +221,9 @@ static void ble_command_handler(const uint8_t *data, size_t length) {
                     // Create system command
                     system_command_t cmd = {
                         .type = SYS_CMD_SET_POWER_MODE,
-                        .data.power_mode.enable_power_save = (power_mode != POWER_MODE_PERFORMANCE)
+                        .parameter = power_mode,
+                        .timestamp = esp_timer_get_time() / 1000,
+                        .source_task = xTaskGetCurrentTaskHandle()
                     };
                     
                     // Send to system command queue
@@ -243,7 +241,9 @@ static void ble_command_handler(const uint8_t *data, size_t length) {
                     // Create system command
                     system_command_t cmd = {
                         .type = SYS_CMD_CHANGE_STATE,
-                        .data.change_state.new_state = (system_state_t)state
+                        .parameter = state,
+                        .timestamp = esp_timer_get_time() / 1000,
+                        .source_task = xTaskGetCurrentTaskHandle()
                     };
                     
                     // Send to system command queue
@@ -261,7 +261,10 @@ static void ble_command_handler(const uint8_t *data, size_t length) {
                 // Create system command
                 system_command_t cmd = {
                     .type = SYS_CMD_SLEEP,
-                    .data.sleep.sleep_duration_sec = sleep_duration
+                    .parameter = sleep_duration,
+                    .data = NULL,
+                    .timestamp = esp_timer_get_time() / 1000,
+                    .source_task = xTaskGetCurrentTaskHandle()
                 };
                 
                 // Send to system command queue
@@ -380,6 +383,8 @@ static void ble_command_handler(const uint8_t *data, size_t length) {
     }
 }
 
+
 void* communication_task_get_handle(void) {
+    extern TaskHandle_t communication_task_handle;  // Declare external reference
     return (void*)communication_task_handle;
 }
