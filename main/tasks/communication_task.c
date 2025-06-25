@@ -18,362 +18,529 @@ static const char *TAG = "COMM_TASK";
 
 // Task handle
 static TaskHandle_t communication_task_handle = NULL;
+static QueueHandle_t comm_queue = NULL;
+static bool task_running = false;
+static bool camera_enabled = false;
+static uint32_t last_camera_attempt = 0;
+
+// External queue references
+extern QueueHandle_t g_processing_result_queue;
+extern QueueHandle_t g_system_command_queue;
+
+#define COMMUNICATION_QUEUE_SIZE        10
+#define CAMERA_RETRY_DELAY_MS          5000
+#define CAMERA_CONNECTION_TIMEOUT_MS   30000
+
+typedef enum {
+    PROCESS_CAMERA_FRAME = 1,
+    PROCESS_SENSOR_DATA,
+    PROCESS_GESTURE_ANALYSIS
+} processing_command_type_t;
+
+// Processing command structure
+typedef struct {
+    processing_command_type_t type;
+    union {
+        ble_camera_frame_t frame;
+        // Add other data types as needed
+    } data;
+} processing_command_t;
+
+typedef enum {
+    COMM_CMD_SEND_GESTURE = 1,
+    COMM_CMD_SEND_TEXT,
+    COMM_CMD_SEND_STATUS,
+    COMM_CMD_SEND_DEBUG,
+    COMM_CMD_START_CAMERA,
+    COMM_CMD_STOP_CAMERA,
+    COMM_CMD_CAPTURE_FRAME,
+    COMM_CMD_RECONNECT_CAMERA
+} communication_command_t;
+
+// Command data structure
+typedef struct {
+    communication_command_t cmd;
+    union {
+        struct {
+            uint8_t gesture_id;
+            char gesture_name[32];
+            float confidence;
+        } gesture;
+        struct {
+            char text[256];
+        } text;
+        struct {
+            uint8_t battery_level;
+            uint8_t state;
+            uint8_t error;
+        } status;
+        struct {
+            char message[128];
+        } debug;
+    } data;
+} communication_cmd_t;
 
 // Last status update time
-static uint32_t last_status_update_ms = 0;
 #define STATUS_UPDATE_INTERVAL_MS 5000  // Update status every 5 seconds
 
 // Forward declarations
-static void communication_task(void *arg);
-static void ble_command_handler(const uint8_t *data, size_t length);
-
+static void communication_task(void *param);
+static esp_err_t handle_communication_command(const communication_cmd_t *cmd);
+static void camera_management_task(void);
+static void process_camera_frames(void);
+static void handle_ble_command(const uint8_t *data, size_t length);
+static esp_err_t send_camera_frame_for_processing(const ble_camera_frame_t *frame);
 
 esp_err_t communication_task_init(void) {
-    ESP_LOGI(TAG, "Initializing communication task with enhanced architecture...");
-    ESP_LOGI(TAG, "  Core: %d, Priority: %d, Stack: %d bytes", 
-        COMMUNICATION_TASK_CORE, COMMUNICATION_TASK_PRIORITY, COMMUNICATION_TASK_STACK_SIZE);
+    if (task_running) {
+        ESP_LOGW(TAG, "Communication task already running");
+        return ESP_OK;
+    }
     
-    // Create the communication task with new configuration
-    BaseType_t ret = xTaskCreatePinnedToCore(
-        communication_task,
-        "comm_task",
-        COMMUNICATION_TASK_STACK_SIZE,  // UPDATED: Increased from 6144 to 8192
-        NULL,
-        COMMUNICATION_TASK_PRIORITY,    // SAME: Priority 7
-        &communication_task_handle,
-        COMMUNICATION_TASK_CORE         // UPDATED: Moved from Core 0 to Core 1
-    );
+    ESP_LOGI(TAG, "Initializing communication task...");
     
-    if (ret != pdPASS) {
-        ESP_LOGE(TAG, "Failed to create communication task");
+    // Create command queue
+    comm_queue = xQueueCreate(COMMUNICATION_QUEUE_SIZE, sizeof(communication_cmd_t));
+    if (!comm_queue) {
+        ESP_LOGE(TAG, "Failed to create communication queue");
         return ESP_FAIL;
     }
     
-    ESP_LOGI(TAG, "Communication task initialized on core %d (moved from core 0)", 
-        COMMUNICATION_TASK_CORE);
-    ESP_LOGI(TAG, "This avoids I2C conflicts with sensor task");
+    // Initialize BLE service
+    esp_err_t ret = ble_service_init();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize BLE service: %s", esp_err_to_name(ret));
+        vQueueDelete(comm_queue);
+        return ret;
+    }
+    
+    // Register BLE command callback
+    ble_service_register_command_callback(handle_ble_command);
+    
+    // Initialize BLE camera
+    ret = ble_camera_init();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize BLE camera: %s", esp_err_to_name(ret));
+        ble_service_deinit();
+        vQueueDelete(comm_queue);
+        return ret;
+    }
+    
+    // Create communication task
+    BaseType_t task_ret = xTaskCreatePinnedToCore(
+        communication_task,
+        "communication_task",
+        COMMUNICATION_TASK_STACK_SIZE,
+        NULL,
+        COMMUNICATION_TASK_PRIORITY,
+        &communication_task_handle,
+        COMMUNICATION_TASK_CORE
+    );
+    
+    if (task_ret != pdPASS) {
+        ESP_LOGE(TAG, "Failed to create communication task");
+        ble_camera_deinit();
+        ble_service_deinit();
+        vQueueDelete(comm_queue);
+        return ESP_FAIL;
+    }
+    
+    task_running = true;
+    ESP_LOGI(TAG, "Communication task initialized successfully");
     return ESP_OK;
 }
 
-static void communication_task(void *arg) {
-    ESP_LOGI(TAG, "Communication task started");
-    
-    // Set communication task as ready
-    xEventGroupSetBits(g_system_event_group, SYSTEM_EVENT_BLE_READY);
-    
-    // Wait for system initialization to complete
-    xEventGroupWaitBits(g_system_event_group, 
-                        SYSTEM_EVENT_INIT_COMPLETE, 
-                        pdFALSE, pdTRUE, portMAX_DELAY);
-    
-    // Register BLE command callback
-    ble_service_register_command_callback(ble_command_handler);
-    
-    // Enable BLE if configured
-    if (g_system_config.ble_enabled) {
-        ble_service_enable();
+esp_err_t communication_task_deinit(void) {
+    if (!task_running) {
+        return ESP_OK;
     }
     
-    // Initialize last status update time
-    last_status_update_ms = esp_timer_get_time() / 1000;
+    ESP_LOGI(TAG, "Deinitializing communication task...");
     
-    // System command processing
-    system_command_t system_cmd;
-    
-    while (1) {
-        // Process any incoming system commands
-        if (xQueueReceive(g_system_command_queue, &system_cmd, 0) == pdTRUE) {
-            // Handle system commands
-            switch (system_cmd.type) {
-                case SYS_CMD_ENABLE_FEATURE:
-                    ble_service_enable();
-                    g_system_config.ble_enabled = true;
-                    break;
-                    
-                case SYS_CMD_DISABLE_FEATURE:
-                    ble_service_disable();
-                    g_system_config.ble_enabled = false;
-                    break;
-                    
-                default:
-                    // Forward to other subsystems or tasks if needed
-                    if (xQueueSend(g_system_command_queue, &system_cmd, 0) != pdTRUE) {
-                        ESP_LOGW(TAG, "Failed to forward system command (queue full)");
-                    }
-                    break;
-            }
-        }
-        
-        // Periodically send status updates over BLE if connected
-        uint32_t current_time_ms = esp_timer_get_time() / 1000;
-        if (current_time_ms - last_status_update_ms >= STATUS_UPDATE_INTERVAL_MS) {
-            bool connected = false;
-            if (ble_service_is_connected(&connected) == ESP_OK && connected) {
-                // Get battery status
-                battery_status_t battery_status;
-                if (power_management_get_battery_status(&battery_status) == ESP_OK) {
-                    // Send status update
-                    ble_service_send_status(
-                        battery_status.percentage,
-                        (uint8_t)g_system_config.system_state,
-                        (uint8_t)g_system_config.error_count
-                    );
-                }
-            }
-            
-            last_status_update_ms = current_time_ms;
-        }
-        
-        
-    
-
-        // Short delay to prevent CPU hogging
-        vTaskDelay(pdMS_TO_TICKS(50));
-    }
-}
-
-void communication_task_deinit(void) {
-    // Cleanup resources when task is deleted
-    if (communication_task_handle != NULL) {
+    // Stop task
+    task_running = false;
+    if (communication_task_handle) {
         vTaskDelete(communication_task_handle);
         communication_task_handle = NULL;
     }
     
+    // Cleanup resources
+    if (comm_queue) {
+        vQueueDelete(comm_queue);
+        comm_queue = NULL;
+    }
+    
+    // Deinitialize BLE components
+    ble_camera_deinit();
+    ble_service_deinit();
+    
     ESP_LOGI(TAG, "Communication task deinitialized");
+    return ESP_OK;
 }
 
-// Handle BLE commands from mobile app
-static void ble_command_handler(const uint8_t *data, size_t length) {
-    if (data == NULL || length < 1) {
+esp_err_t communication_task_start(void) {
+    if (!task_running) {
+        ESP_LOGE(TAG, "Communication task not initialized");
+        return ESP_ERR_INVALID_STATE;
+    }
+    
+    ESP_LOGI(TAG, "Starting communication services...");
+    
+    // Enable BLE service
+    esp_err_t ret = ble_service_enable();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to enable BLE service: %s", esp_err_to_name(ret));
+        return ret;
+    }
+    
+    // Enable camera
+    camera_enabled = true;
+    
+    ESP_LOGI(TAG, "Communication services started");
+    return ESP_OK;
+}
+
+esp_err_t communication_task_stop(void) {
+    ESP_LOGI(TAG, "Stopping communication services...");
+    
+    // Disable camera
+    camera_enabled = false;
+    if (ble_camera_is_connected()) {
+        ble_camera_disconnect();
+    }
+    
+    // Disable BLE service
+    ble_service_disable();
+    
+    ESP_LOGI(TAG, "Communication services stopped");
+    return ESP_OK;
+}
+
+esp_err_t communication_send_gesture(uint8_t gesture_id, const char *gesture_name, float confidence) {
+    if (!task_running || !comm_queue) {
+        return ESP_ERR_INVALID_STATE;
+    }
+    
+    communication_cmd_t cmd = {
+        .cmd = COMM_CMD_SEND_GESTURE,
+        .data.gesture = {
+            .gesture_id = gesture_id,
+            .confidence = confidence
+        }
+    };
+    
+    if (gesture_name) {
+        strncpy(cmd.data.gesture.gesture_name, gesture_name, sizeof(cmd.data.gesture.gesture_name) - 1);
+        cmd.data.gesture.gesture_name[sizeof(cmd.data.gesture.gesture_name) - 1] = '\0';
+    }
+    
+    if (xQueueSend(comm_queue, &cmd, pdMS_TO_TICKS(100)) != pdTRUE) {
+        ESP_LOGW(TAG, "Failed to queue gesture command");
+        return ESP_FAIL;
+    }
+    
+    return ESP_OK;
+}
+
+esp_err_t communication_send_text(const char *text) {
+    if (!task_running || !comm_queue || !text) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    
+    communication_cmd_t cmd = {
+        .cmd = COMM_CMD_SEND_TEXT
+    };
+    
+    strncpy(cmd.data.text.text, text, sizeof(cmd.data.text.text) - 1);
+    cmd.data.text.text[sizeof(cmd.data.text.text) - 1] = '\0';
+    
+    if (xQueueSend(comm_queue, &cmd, pdMS_TO_TICKS(100)) != pdTRUE) {
+        ESP_LOGW(TAG, "Failed to queue text command");
+        return ESP_FAIL;
+    }
+    
+    return ESP_OK;
+}
+
+esp_err_t communication_send_status(uint8_t battery_level, uint8_t state, uint8_t error) {
+    if (!task_running || !comm_queue) {
+        return ESP_ERR_INVALID_STATE;
+    }
+    
+    communication_cmd_t cmd = {
+        .cmd = COMM_CMD_SEND_STATUS,
+        .data.status = {
+            .battery_level = battery_level,
+            .state = state,
+            .error = error
+        }
+    };
+    
+    if (xQueueSend(comm_queue, &cmd, pdMS_TO_TICKS(100)) != pdTRUE) {
+        ESP_LOGW(TAG, "Failed to queue status command");
+        return ESP_FAIL;
+    }
+    
+    return ESP_OK;
+}
+
+esp_err_t communication_send_debug(const char *message) {
+    if (!task_running || !comm_queue || !message) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    
+    communication_cmd_t cmd = {
+        .cmd = COMM_CMD_SEND_DEBUG
+    };
+    
+    strncpy(cmd.data.debug.message, message, sizeof(cmd.data.debug.message) - 1);
+    cmd.data.debug.message[sizeof(cmd.data.debug.message) - 1] = '\0';
+    
+    if (xQueueSend(comm_queue, &cmd, pdMS_TO_TICKS(100)) != pdTRUE) {
+        ESP_LOGW(TAG, "Failed to queue debug command");
+        return ESP_FAIL;
+    }
+    
+    return ESP_OK;
+}
+
+esp_err_t communication_capture_camera_frame(void) {
+    if (!task_running || !comm_queue) {
+        return ESP_ERR_INVALID_STATE;
+    }
+    
+    communication_cmd_t cmd = {
+        .cmd = COMM_CMD_CAPTURE_FRAME
+    };
+    
+    if (xQueueSend(comm_queue, &cmd, pdMS_TO_TICKS(100)) != pdTRUE) {
+        ESP_LOGW(TAG, "Failed to queue capture frame command");
+        return ESP_FAIL;
+    }
+    
+    return ESP_OK;
+}
+
+// Main communication task
+static void communication_task(void *param) {
+    communication_cmd_t cmd;
+    TickType_t last_camera_check = 0;
+    
+    ESP_LOGI(TAG, "Communication task started");
+    
+    while (task_running) {
+        // Process commands from queue
+        if (xQueueReceive(comm_queue, &cmd, pdMS_TO_TICKS(100)) == pdTRUE) {
+            handle_communication_command(&cmd);
+        }
+        
+        // Camera management - check every 1 second
+        TickType_t current_time = xTaskGetTickCount();
+        if ((current_time - last_camera_check) > pdMS_TO_TICKS(1000)) {
+            camera_management_task();
+            last_camera_check = current_time;
+        }
+        
+        // Process camera frames if available
+        if (camera_enabled && ble_camera_is_connected()) {
+            process_camera_frames();
+        }
+        
+        // Small delay to prevent task from consuming too much CPU
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+    
+    ESP_LOGI(TAG, "Communication task ended");
+    vTaskDelete(NULL);
+}
+
+static esp_err_t handle_communication_command(const communication_cmd_t *cmd) {
+    if (!cmd) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    
+    esp_err_t ret = ESP_OK;
+    
+    switch (cmd->cmd) {
+        case COMM_CMD_SEND_GESTURE:
+            ret = ble_service_send_gesture(cmd->data.gesture.gesture_id,
+                                         cmd->data.gesture.gesture_name,
+                                         cmd->data.gesture.confidence);
+            break;
+            
+        case COMM_CMD_SEND_TEXT:
+            ret = ble_service_send_text(cmd->data.text.text);
+            break;
+            
+        case COMM_CMD_SEND_STATUS:
+            ret = ble_service_send_status(cmd->data.status.battery_level,
+                                        cmd->data.status.state,
+                                        cmd->data.status.error);
+            break;
+            
+        case COMM_CMD_SEND_DEBUG:
+            ret = ble_service_send_debug(cmd->data.debug.message);
+            break;
+            
+        case COMM_CMD_START_CAMERA:
+            if (ble_camera_is_connected()) {
+                ret = ble_camera_start_streaming();
+            } else {
+                ESP_LOGW(TAG, "Camera not connected, cannot start streaming");
+                ret = ESP_ERR_INVALID_STATE;
+            }
+            break;
+            
+        case COMM_CMD_STOP_CAMERA:
+            if (ble_camera_is_connected()) {
+                ret = ble_camera_stop_streaming();
+            }
+            break;
+            
+        case COMM_CMD_CAPTURE_FRAME:
+            if (ble_camera_is_connected()) {
+                ble_camera_frame_t frame;
+                ret = ble_camera_capture_frame(&frame);
+                if (ret == ESP_OK) {
+                    send_camera_frame_for_processing(&frame);
+                }
+            } else {
+                ESP_LOGW(TAG, "Camera not connected, cannot capture frame");
+                ret = ESP_ERR_INVALID_STATE;
+            }
+            break;
+            
+        case COMM_CMD_RECONNECT_CAMERA:
+            if (ble_camera_is_connected()) {
+                ble_camera_disconnect();
+                vTaskDelay(pdMS_TO_TICKS(1000));
+            }
+            ret = ble_camera_connect("ESP32CAM-SLG");
+            break;
+            
+        default:
+            ESP_LOGW(TAG, "Unknown communication command: %d", cmd->cmd);
+            ret = ESP_ERR_INVALID_ARG;
+            break;
+    }
+    
+    if (ret != ESP_OK) {
+        ESP_LOGW(TAG, "Command %d failed: %s", cmd->cmd, esp_err_to_name(ret));
+    }
+    
+    return ret;
+}
+
+static void camera_management_task(void) {
+    if (!camera_enabled) {
         return;
     }
     
-    // First byte is command ID
+    uint32_t current_time = esp_timer_get_time() / 1000;
+    
+    // Check if camera is connected
+    if (!ble_camera_is_connected()) {
+        // Try to connect if enough time has passed since last attempt
+        if ((current_time - last_camera_attempt) > CAMERA_RETRY_DELAY_MS) {
+            ESP_LOGI(TAG, "Attempting to connect to ESP32-CAM...");
+            
+            esp_err_t ret = ble_camera_connect("ESP32CAM-SLG");
+            if (ret != ESP_OK) {
+                ESP_LOGW(TAG, "Camera connection attempt failed: %s", esp_err_to_name(ret));
+            }
+            
+            last_camera_attempt = current_time;
+        }
+    } else {
+        // Camera is connected, check status
+        ble_camera_stats_t stats;
+        if (ble_camera_get_stats(&stats) == ESP_OK) {
+            // Log stats periodically (every 30 seconds)
+            static uint32_t last_stats_log = 0;
+            if ((current_time - last_stats_log) > 30000) {
+                ESP_LOGI(TAG, "Camera stats: frames_rx=%lu, frames_dropped=%lu, fps=%.1f",
+                         stats.frames_received, stats.frames_dropped, stats.frame_rate);
+                last_stats_log = current_time;
+            }
+        }
+    }
+}
+
+static void process_camera_frames(void) {
+    // Check if frames are available
+    if (!ble_camera_frame_available()) {
+        return;
+    }
+    
+    // Get frame
+    ble_camera_frame_t frame;
+    esp_err_t ret = ble_camera_capture_frame(&frame);
+    if (ret == ESP_OK && frame.valid) {
+        // Send frame for gesture processing
+        send_camera_frame_for_processing(&frame);
+        
+        // Release frame resources
+        ble_camera_release_frame();
+    }
+}
+
+static esp_err_t send_camera_frame_for_processing(const ble_camera_frame_t *frame) {
+    // Create processing command with frame data
+    processing_command_t cmd = {
+        .type = PROCESS_CAMERA_FRAME,
+        .data.frame = *frame  // Copy frame data
+    };
+    
+    // Send to processing task queue
+    if (g_processing_result_queue) {
+        return xQueueSend(g_processing_result_queue, &cmd, pdMS_TO_TICKS(100));
+    }
+    
+    return ESP_ERR_INVALID_STATE;
+}
+
+static void handle_ble_command(const uint8_t *data, size_t length) {
+    if (!data || length == 0) {
+        return;
+    }
+    
     uint8_t cmd_id = data[0];
+    ESP_LOGI(TAG, "Received BLE command: 0x%02x", cmd_id);
     
-    ESP_LOGI(TAG, "Received BLE command: 0x%02x, length: %d", cmd_id, length);
-    
-    // Process commands based on ID
     switch (cmd_id) {
-        case 0x01: // Set output mode
-            if (length >= 2) {
-                uint8_t mode = data[1];
-                if (mode <= OUTPUT_MODE_MINIMAL) {
-                    // Update system config using new enhanced feature flags
-                    switch ((output_mode_t)mode) {
-                        case OUTPUT_MODE_TEXT_ONLY:
-                            g_system_config.audio_feedback_enabled = false;
-                            g_system_config.haptic_feedback_enabled = false;
-                            ESP_LOGI(TAG, "BLE: Set output mode to TEXT_ONLY");
-                            break;
-                        case OUTPUT_MODE_AUDIO_ONLY:
-                            g_system_config.audio_feedback_enabled = true;
-                            g_system_config.haptic_feedback_enabled = false;
-                            ESP_LOGI(TAG, "BLE: Set output mode to AUDIO_ONLY");
-                            break;
-                        case OUTPUT_MODE_TEXT_AND_AUDIO:
-                            g_system_config.audio_feedback_enabled = true;
-                            g_system_config.haptic_feedback_enabled = true;
-                            ESP_LOGI(TAG, "BLE: Set output mode to TEXT_AND_AUDIO");
-                            break;
-                        case OUTPUT_MODE_MINIMAL:
-                            g_system_config.audio_feedback_enabled = false;
-                            g_system_config.haptic_feedback_enabled = false;
-                            ESP_LOGI(TAG, "BLE: Set output mode to MINIMAL");
-                            break;
-                        default:
-                            ESP_LOGW(TAG, "BLE: Unknown output mode %d", mode);
-                            break;
-                    }
-                    
-                    // Create output command
-                    output_command_t cmd = {
-                        .type = OUTPUT_CMD_SET_MODE,
-                        .data.set_mode.mode = (output_mode_t)mode
-                    };
-                    
-                    // Send to output queue
-                    if (xQueueSend(g_output_command_queue, &cmd, 0) != pdTRUE) {
-                        ESP_LOGW(TAG, "Failed to send output mode command (queue full)");
-                    }
-                }
-            }
-            break;
-            
-        case 0x02: // Calibration command
+        case 0x01: // Start camera streaming
             {
-                // Create system command
-                system_command_t cmd = {
-                    .type = SYS_CMD_CALIBRATE
-                };
-                
-                // Send to system command queue
-                if (xQueueSend(g_system_command_queue, &cmd, 0) != pdTRUE) {
-                    ESP_LOGW(TAG, "Failed to send calibration command (queue full)");
-                }
+                communication_cmd_t cmd = { .cmd = COMM_CMD_START_CAMERA };
+                xQueueSend(comm_queue, &cmd, pdMS_TO_TICKS(100));
             }
             break;
             
-        case 0x03: // Power mode command
-            if (length >= 2) {
-                uint8_t power_mode = data[1];
-                if (power_mode <= POWER_MODE_MAX_POWER_SAVE) {
-                    // Create system command
-                    system_command_t cmd = {
-                        .type = SYS_CMD_SET_POWER_MODE,
-                        .parameter = power_mode,
-                        .timestamp = esp_timer_get_time() / 1000,
-                        .source_task = xTaskGetCurrentTaskHandle()
-                    };
-                    
-                    // Send to system command queue
-                    if (xQueueSend(g_system_command_queue, &cmd, 0) != pdTRUE) {
-                        ESP_LOGW(TAG, "Failed to send power mode command (queue full)");
-                    }
-                }
-            }
-            break;
-            
-        case 0x04: // System state command
-            if (length >= 2) {
-                uint8_t state = data[1];
-                if (state <= SYSTEM_STATE_ERROR) {
-                    // Create system command
-                    system_command_t cmd = {
-                        .type = SYS_CMD_CHANGE_STATE,
-                        .parameter = state,
-                        .timestamp = esp_timer_get_time() / 1000,
-                        .source_task = xTaskGetCurrentTaskHandle()
-                    };
-                    
-                    // Send to system command queue
-                    if (xQueueSend(g_system_command_queue, &cmd, 0) != pdTRUE) {
-                        ESP_LOGW(TAG, "Failed to send state change command (queue full)");
-                    }
-                }
-            }
-            break;
-            
-        case 0x05: // Sleep command
-            if (length >= 3) {
-                uint16_t sleep_duration = (data[1] << 8) | data[2];
-                
-                // Create system command
-                system_command_t cmd = {
-                    .type = SYS_CMD_SLEEP,
-                    .parameter = sleep_duration,
-                    .data = NULL,
-                    .timestamp = esp_timer_get_time() / 1000,
-                    .source_task = xTaskGetCurrentTaskHandle()
-                };
-                
-                // Send to system command queue
-                if (xQueueSend(g_system_command_queue, &cmd, 0) != pdTRUE) {
-                    ESP_LOGW(TAG, "Failed to send sleep command (queue full)");
-                }
-            }
-            break;
-            
-        case 0x06: // Restart command
+        case 0x02: // Stop camera streaming
             {
-                // Create system command
-                system_command_t cmd = {
-                    .type = SYS_CMD_RESTART
-                };
-                
-                // Send to system command queue
-                if (xQueueSend(g_system_command_queue, &cmd, 0) != pdTRUE) {
-                    ESP_LOGW(TAG, "Failed to send restart command (queue full)");
-                }
+                communication_cmd_t cmd = { .cmd = COMM_CMD_STOP_CAMERA };
+                xQueueSend(comm_queue, &cmd, pdMS_TO_TICKS(100));
             }
             break;
             
-        case 0x07: // Factory reset command
+        case 0x03: // Capture single frame
             {
-                // Create system command
-                system_command_t cmd = {
-                    .type = SYS_CMD_FACTORY_RESET
-                };
-                
-                // Send to system command queue
-                if (xQueueSend(g_system_command_queue, &cmd, 0) != pdTRUE) {
-                    ESP_LOGW(TAG, "Failed to send factory reset command (queue full)");
-                }
+                communication_cmd_t cmd = { .cmd = COMM_CMD_CAPTURE_FRAME };
+                xQueueSend(comm_queue, &cmd, pdMS_TO_TICKS(100));
             }
             break;
             
-        case 0x08: // Display text command
-            if (length >= 3) {
-                uint8_t text_len = data[1];
-                if (text_len > 0 && length >= 2 + text_len) {
-                    // Create output command
-                    output_command_t cmd = {
-                        .type = OUTPUT_CMD_DISPLAY_TEXT,
-                        .data.display.size = 0,  // Small font
-                        .data.display.line = 1,  // Line 1
-                        .data.display.clear_first = true  // Clear first
-                    };
-                    
-                    // Copy text (with null termination)
-                    size_t copy_len = text_len;
-                    if (copy_len > sizeof(cmd.data.display.text) - 1) {
-                        copy_len = sizeof(cmd.data.display.text) - 1;
-                    }
-                    memcpy(cmd.data.display.text, &data[2], copy_len);
-                    cmd.data.display.text[copy_len] = '\0';
-                    
-                    // Send to output queue
-                    if (xQueueSend(g_output_command_queue, &cmd, 0) != pdTRUE) {
-                        ESP_LOGW(TAG, "Failed to send display text command (queue full)");
-                    }
-                }
+        case 0x04: // Reconnect camera
+            {
+                communication_cmd_t cmd = { .cmd = COMM_CMD_RECONNECT_CAMERA };
+                xQueueSend(comm_queue, &cmd, pdMS_TO_TICKS(100));
             }
             break;
             
-        case 0x09: // Speak text command
-            if (length >= 3) {
-                uint8_t text_len = data[1];
-                if (text_len > 0 && length >= 2 + text_len) {
-                    // Create output command
-                    output_command_t cmd = {
-                        .type = OUTPUT_CMD_SPEAK_TEXT,
-                        .data.speak.priority = 0  // Highest priority
-                    };
-                    
-                    // Copy text (with null termination)
-                    size_t copy_len = text_len;
-                    if (copy_len > sizeof(cmd.data.speak.text) - 1) {
-                        copy_len = sizeof(cmd.data.speak.text) - 1;
-                    }
-                    memcpy(cmd.data.speak.text, &data[2], copy_len);
-                    cmd.data.speak.text[copy_len] = '\0';
-                    
-                    // Send to output queue
-                    if (xQueueSend(g_output_command_queue, &cmd, 0) != pdTRUE) {
-                        ESP_LOGW(TAG, "Failed to send speak text command (queue full)");
-                    }
-                }
-            }
-            break;
-            
-        case 0x0A: // Haptic feedback command
-            if (length >= 4) {
-                uint8_t pattern = data[1];
-                uint8_t intensity = data[2];
-                uint8_t duration = data[3];
-                
-                // Create output command
-                output_command_t cmd = {
-                    .type = OUTPUT_CMD_HAPTIC_FEEDBACK,
-                    .data.haptic.pattern = pattern,
-                    .data.haptic.intensity = intensity,
-                    .data.haptic.duration_ms = duration * 10  // Convert to ms (0-2550ms)
-                };
-                
-                // Send to output queue
-                if (xQueueSend(g_output_command_queue, &cmd, 0) != pdTRUE) {
-                    ESP_LOGW(TAG, "Failed to send haptic feedback command (queue full)");
-                }
+        case 0x10: // Send debug info
+            {
+                communication_cmd_t cmd = { .cmd = COMM_CMD_SEND_DEBUG };
+                strcpy(cmd.data.debug.message, "Debug info requested via BLE");
+                xQueueSend(comm_queue, &cmd, pdMS_TO_TICKS(100));
             }
             break;
             
@@ -382,7 +549,6 @@ static void ble_command_handler(const uint8_t *data, size_t length) {
             break;
     }
 }
-
 
 void* communication_task_get_handle(void) {
     extern TaskHandle_t communication_task_handle;  // Declare external reference

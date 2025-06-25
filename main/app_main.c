@@ -54,7 +54,7 @@
 static const char *TAG = "APP_MAIN";
 
 // You can change this to true to enable debug mode
-#define DEBUG_MODE_ENABLED false
+#define DEBUG_MODE_ENABLED true
 #define DEBUG_MODE_TIME_INTERVAL 5000
 
 // Global I2C master bus handle (defined here, declared in util/i2c_utils.h)
@@ -141,6 +141,13 @@ esp_err_t app_init(void) {
         return ret;
     }
 
+    // Initialize communication
+    ret = init_communication();
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize communication: %s", esp_err_to_name(ret));
+        return ret;
+    }
+
     // Initialize drivers
     ret = init_drivers();
     if (ret != ESP_OK) {
@@ -173,13 +180,6 @@ esp_err_t app_init(void) {
     ret = init_processing();
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to initialize processing: %s", esp_err_to_name(ret));
-        return ret;
-    }
-    
-    // Initialize communication
-    ret = init_communication();
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize communication: %s", esp_err_to_name(ret));
         return ret;
     }
     
@@ -511,13 +511,21 @@ static esp_err_t init_processing(void) {
 static esp_err_t init_communication(void) {
     esp_err_t ret;
     
+    // ADD THIS DEBUG
+    ESP_LOGI(TAG, "BLE enabled in config: %s", g_system_config.ble_enabled ? "YES" : "NO");
+    
+    g_system_config.ble_enabled = true;
     // Initialize BLE service if enabled
     if (g_system_config.ble_enabled) {
+        ESP_LOGI(TAG, "Starting BLE service initialization...");
         ret = ble_service_init();
         if (ret != ESP_OK) {
             ESP_LOGE(TAG, "Failed to initialize BLE service: %s", esp_err_to_name(ret));
             return ret;
         }
+        ESP_LOGI(TAG, "BLE service initialized successfully");
+    } else {
+        ESP_LOGW(TAG, "BLE service disabled in configuration - SKIPPING!");
     }
     
     ESP_LOGI(TAG, "Communication modules initialized successfully");
@@ -696,6 +704,7 @@ static esp_err_t init_tasks(void) {
     
     // Initialize communication task
     ret = communication_task_init();
+    communication_task_start();
     if (ret != ESP_OK) {
         ESP_LOGE(TAG, "Failed to initialize communication task: %s", esp_err_to_name(ret));
         return ret;
@@ -800,7 +809,7 @@ static void debug_mode_run(void) {
     
     uint32_t loop_count = 0;
     uint32_t current_time = esp_timer_get_time() / 1000;
-    uint32_t last_full_test_time;
+    uint32_t last_full_test_time = 0;
     
     while (1) {
         
