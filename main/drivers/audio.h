@@ -83,4 +83,20 @@ uint8_t audio_get_volume(void);
  */
 bool audio_is_active(void);
 
+/**
+ * @brief Play gesture audio file
+ * 
+ * @param gesture_name Gesture name (e.g., "HELLO", "ONE", "THANK_YOU")
+ * @return ESP_OK on success
+ */
+esp_err_t audio_play_gesture(const char* gesture_name);
+
+/**
+ * @brief Check if audio file exists for gesture
+ * 
+ * @param gesture_name Gesture name
+ * @return true if file exists
+ */
+bool audio_gesture_exists(const char* gesture_name);
+
 #endif /* DRIVERS_AUDIO_H */

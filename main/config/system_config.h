@@ -12,11 +12,11 @@
  */
 
 /* Task priorities */
-#define SENSOR_TASK_PRIORITY          (11)
-#define PROCESSING_TASK_PRIORITY      (10)
-#define SYSTEM_MONITOR_TASK_PRIORITY  (8)
-#define OUTPUT_TASK_PRIORITY          (6)
-#define COMMUNICATION_TASK_PRIORITY   (7)
+#define SENSOR_TASK_PRIORITY          (10)
+#define PROCESSING_TASK_PRIORITY      (9)
+#define SYSTEM_MONITOR_TASK_PRIORITY  (6)
+#define OUTPUT_TASK_PRIORITY          (7)
+#define COMMUNICATION_TASK_PRIORITY   (8)
 #define POWER_TASK_PRIORITY           (5)
 
 /* Task stack sizes */
@@ -42,7 +42,7 @@
 #define TOUCH_SAMPLE_RATE_HZ        (10)
 
 /* Queue sizes - INCREASED for better throughput */
-#define SENSOR_QUEUE_SIZE           (100)  // Increased from 10
+#define SENSOR_QUEUE_SIZE           (50)  // Increased from 10
 #define PROCESSING_QUEUE_SIZE       (15)  // Increased from 5  
 #define OUTPUT_QUEUE_SIZE           (10)  // Increased from 5
 #define COMMAND_QUEUE_SIZE          (10)  // Increased from 5

@@ -1,5 +1,9 @@
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <errno.h>
+#include <dirent.h>
 #include "esp_log.h"
 #include "esp_system.h"
 #include "esp_mac.h"
@@ -50,7 +54,7 @@
 static const char *TAG = "APP_MAIN";
 
 // You can change this to true to enable debug mode
-#define DEBUG_MODE_ENABLED true
+#define DEBUG_MODE_ENABLED false
 #define DEBUG_MODE_TIME_INTERVAL 5000
 
 // Global I2C master bus handle (defined here, declared in util/i2c_utils.h)
@@ -82,7 +86,7 @@ static esp_err_t init_communication(void);
 static esp_err_t init_output(void);
 static esp_err_t init_queues(void);
 static esp_err_t init_tasks(void);
-static esp_err_t register_critical_tasks(void);
+static void list_spiffs_files(void);
 
 // Debug mode functions
 static void debug_mode_run(void);
@@ -93,7 +97,6 @@ static void debug_test_touch_sensors(void);
 static void debug_test_display(void);
 static void debug_test_audio(void);
 static void debug_test_haptic(void);
-static void debug_test_power_system(void);
 static void debug_test_enhanced_monitor(void);
 static void debug_display_system_info(void);
 
@@ -129,6 +132,8 @@ esp_err_t app_init(void) {
         return ret;
     }
     
+    list_spiffs_files();
+
     // Initialize I2C bus (shared between multiple devices)
     ret = init_i2c();
     if (ret != ESP_OK) {
@@ -241,7 +246,7 @@ static esp_err_t init_spiffs(void) {
         }
         return ret;
     }
-    
+
     size_t total = 0, used = 0;
     ret = esp_spiffs_info(NULL, &total, &used);
     if (ret != ESP_OK) {
@@ -707,9 +712,6 @@ static esp_err_t init_tasks(void) {
     // === PHASE 4: ENABLE ENHANCED MONITORING ===
     ESP_LOGI(TAG, "Phase 4: Enabling enhanced monitoring features...");
     
-    // Enable adaptive monitoring intervals
-    system_monitor_set_adaptive_intervals(true);
-    
     // Set initial queue monitoring
     if (g_sensor_data_queue != NULL) {
         ESP_LOGI(TAG, "Sensor queue configured: %d items", SENSOR_QUEUE_SIZE);
@@ -760,50 +762,34 @@ static esp_err_t init_tasks(void) {
     return ESP_OK;
 }
 
-static esp_err_t register_critical_tasks(void) {
-    ESP_LOGI(TAG, "Registering critical tasks with system monitor");
+static void list_spiffs_files(void) {
+    ESP_LOGI(TAG, "=== SPIFFS File List ===");
     
-    // Register all critical tasks for monitoring
-    // Note: Task handles should be made available from respective task modules
-    
-    // System monitor itself is automatically monitored
-    
-    // Register sensor task if available
-    void* sensor_task_handle = sensor_task_get_handle();  // You'll need to add this function
-    if (sensor_task_handle != NULL) {
-        system_monitor_register_task((TaskHandle_t)sensor_task_handle, "sensor_task");
+    DIR *dir = opendir("/spiffs");
+    if (dir == NULL) {
+        ESP_LOGE(TAG, "Failed to open SPIFFS directory");
+        return;
     }
     
-    // Register processing task if available  
-    void* processing_task_handle = processing_task_get_handle();  // You'll need to add this function
-    if (processing_task_handle != NULL) {
-        system_monitor_register_task((TaskHandle_t)processing_task_handle, "proc_task");
+    struct dirent *entry;
+    int file_count = 0;
+    while ((entry = readdir(dir)) != NULL) {
+        ESP_LOGI(TAG, "File %d: %s", ++file_count, entry->d_name);
+        
+        // Check file size
+        char filepath[64];
+        snprintf(filepath, sizeof(filepath), "/spiffs/%s", entry->d_name);
+        
+        struct stat st;
+        if (stat(filepath, &st) == 0) {
+            ESP_LOGI(TAG, "  Size: %ld bytes", st.st_size);
+        }
     }
     
-    // Register output task if available
-    void* output_task_handle = output_task_get_handle();  // You'll need to add this function
-    if (output_task_handle != NULL) {
-        system_monitor_register_task((TaskHandle_t)output_task_handle, "output_task");
-    }
-    
-    // Register communication task if available
-    void* comm_task_handle = communication_task_get_handle();  // You'll need to add this function
-    if (comm_task_handle != NULL) {
-        system_monitor_register_task((TaskHandle_t)comm_task_handle, "comm_task");
-    }
-    
-    // Register power task if available
-    void* power_task_handle = power_task_get_handle();  // You'll need to add this function
-    if (power_task_handle != NULL) {
-        system_monitor_register_task((TaskHandle_t)power_task_handle, "power_task");
-    }
-    
-    // Enable adaptive monitoring intervals for better responsiveness
-    system_monitor_set_adaptive_intervals(true);
-    
-    ESP_LOGI(TAG, "Critical task registration completed");
-    return ESP_OK;
+    closedir(dir);
+    ESP_LOGI(TAG, "Total files: %d", file_count);
 }
+
 
 
 static void debug_mode_run(void) {
@@ -813,6 +799,8 @@ static void debug_mode_run(void) {
     //debug_display_system_info();
     
     uint32_t loop_count = 0;
+    uint32_t current_time = esp_timer_get_time() / 1000;
+    uint32_t last_full_test_time;
     
     while (1) {
         
@@ -829,6 +817,12 @@ static void debug_mode_run(void) {
         ESP_LOGI(TAG, "Testing Touch Sensors...");
         debug_test_touch_sensors();
 
+        ESP_LOGI(TAG, "Testing Audio...");
+        debug_test_audio();
+            
+        ESP_LOGI(TAG, "Testing Haptic...");
+        debug_test_haptic();
+
         ESP_LOGI(TAG, "Testing System Monitor...");
         debug_test_enhanced_monitor();
 
@@ -838,17 +832,15 @@ static void debug_mode_run(void) {
         ESP_LOGI(TAG, "Testing System Monitor Metrics...");
         system_monitor_print_metrics();
 
+        ESP_LOGI(TAG, "Displaying System Info...");
+        debug_display_system_info();
+        
+
+
         // Test output devices every 10 seconds
-        /*
         if (current_time - last_full_test_time > 10000) {
             ESP_LOGI(TAG, "Testing Display...");
             debug_test_display();
-            
-            ESP_LOGI(TAG, "Testing Audio...");
-            debug_test_audio();
-            
-            ESP_LOGI(TAG, "Testing Haptic...");
-            debug_test_haptic();
 
             ESP_LOGI(TAG, "Testing ML Status...");
             debug_ml_status();
@@ -856,8 +848,6 @@ static void debug_mode_run(void) {
             ESP_LOGI(TAG, "Testing ML Inference Status...");
             debug_ml_inference_test();
 
-            
-            
             // Test camera less frequently (every 20 seconds) due to performance
             static uint32_t last_camera_test = 0;
             if (current_time - last_camera_test > 20000) {
@@ -871,7 +861,7 @@ static void debug_mode_run(void) {
             
         }
         
-        */   
+          
         
         ESP_LOGI(TAG, "=== DEBUG LOOP %lu COMPLETE ===\n", loop_count - 1);
         
@@ -1070,7 +1060,7 @@ static void debug_test_display(void) {
 
 static void debug_test_audio(void) {
     // Test a short beep or tone
-    esp_err_t ret = audio_play_beep(5000, 100); // 1kHz tone for 100ms
+    esp_err_t ret = audio_play_gesture("hello"); // 1kHz tone for 100ms
     if (ret == ESP_OK) {
         ESP_LOGI(TAG, "✓ Audio OK: Test tone played");
     } else {

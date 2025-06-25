@@ -25,3 +25,5 @@ list(APPEND CMAKE_CXX_IMPLICIT_INCLUDE_DIRECTORIES
 # Force include C++ headers
 idf_build_set_property(COMPILE_OPTIONS "-I${IDF_PATH}/tools/xtensa-esp32s3-elf/xtensa-esp32s3-elf/include/c++/8.4.0" APPEND)
 idf_build_set_property(COMPILE_OPTIONS "-I${IDF_PATH}/tools/xtensa-esp32s3-elf/xtensa-esp32s3-elf/include/c++/8.4.0/xtensa-esp32s3-elf" APPEND)
+
+# spiffs_create_partition_image(spiffs data/ FLASH_IN_PROJECT)

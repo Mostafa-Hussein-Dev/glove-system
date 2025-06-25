@@ -39,7 +39,7 @@ static void handle_system_command(system_command_t *cmd);
 static void enter_power_save_mode(void);
 static void exit_power_save_mode(void);
 static void check_battery_status(void);
-static void print_real_task_stats(void);
+
 
 esp_err_t power_task_init(void) {
     ESP_LOGI(TAG, "Initializing power task with enhanced architecture...");
@@ -167,6 +167,7 @@ static void power_task(void *arg) {
                 }
             } 
 
+            //TODOS: Remove comments
             // System health level management
             system_health_level_t health = system_monitor_get_health_level();
             switch (health) {
@@ -195,15 +196,9 @@ static void power_task(void *arg) {
         } else {
             ESP_LOGE(TAG, "Failed to get system metrics");
         }
-
-        static uint32_t last_stats_time = 0;
-        if (current_time_ms - last_stats_time > 10000) {
-            print_real_task_stats();
-            last_stats_time = current_time_ms;
-        }
         
         // Short delay to prevent CPU hogging
-        vTaskDelay(pdMS_TO_TICKS(300));
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
 

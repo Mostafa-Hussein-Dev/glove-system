@@ -105,7 +105,6 @@ static void extract_frequency_features(const sliding_window_t* window, float* fe
 static void normalize_features(float* features, int count);
 static float calculate_derivative(const float* values, int count, float dt);
 static float calculate_velocity_magnitude(float vx, float vy, float vz);
-static void calculate_fft_magnitude(const float* input, int size, float* magnitude);
 
 /**
  * 🏴‍☠️ INITIALIZE THE PIRATE'S TREASURE SORTING FACILITY
@@ -359,7 +358,7 @@ static void extract_imu_features(const sliding_window_t* window, float* features
     
     // ⚓ STATISTICAL FEATURES FOR EACH IMU CHANNEL (45 features: 9 channels × 5 stats)
     if (window->count >= STATISTICAL_WINDOW_SIZE) {
-        float* imu_channels[9]; // Pointers to orientation[3], accel[3], gyro[3]
+
         
         for (int channel = 0; channel < 9; channel++) {
             float channel_values[STATISTICAL_WINDOW_SIZE];

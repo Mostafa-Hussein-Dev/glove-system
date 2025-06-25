@@ -326,53 +326,56 @@ static uint32_t get_adaptive_interval(system_health_level_t health_level) {
     }
 }
 
-// ENHANCED CPU USAGE CALCULATION - SIMPLIFIED AND RELIABLE
 static uint32_t calculate_cpu_usage_simple(void) {
-    static bool measuring = false;
-    static uint32_t measurement_start = 0;
-    static uint32_t busy_time = 0;
-    static uint32_t measurement_interval = 5000;  // 5 seconds
+    static uint32_t last_idle_time = 0;
+    static uint32_t last_total_time = 0;
+    static bool first_run = true;
     
-    uint32_t now = esp_timer_get_time() / 1000;
+    // Get runtime stats
+    UBaseType_t task_count = uxTaskGetNumberOfTasks();
+    TaskStatus_t *task_array = pvPortMalloc(task_count * sizeof(TaskStatus_t));
     
-    if (!measuring) {
-        // Start measurement period
-        measuring = true;
-        measurement_start = now;
-        busy_time = 0;
-        return 0;
+    if (task_array == NULL) {
+        ESP_LOGW(TAG, "Failed to allocate memory for CPU calculation");
+        return 0;  // Return 0% instead of wrong value
     }
     
-    // Count time when system is "busy" (not in task delays)
-    // This is approximate but works well
-    static uint32_t last_check = 0;
-    if (now - last_check >= 10) {  // Check every 10ms
-        // If we're here on time, system is responsive
-        // If we're late, system was busy
-        uint32_t expected_interval = 10;
-        uint32_t actual_interval = now - last_check;
-        
-        if (actual_interval > expected_interval) {
-            busy_time += (actual_interval - expected_interval);
+    uint32_t total_runtime = 0;
+    UBaseType_t actual_tasks = uxTaskGetSystemState(task_array, task_count, &total_runtime);
+    
+    // Find IDLE task runtime
+    uint32_t idle_time = 0;
+    for (UBaseType_t i = 0; i < actual_tasks; i++) {
+        if (strstr(task_array[i].pcTaskName, "IDLE") != NULL) {
+            idle_time += task_array[i].ulRunTimeCounter;
         }
-        
-        last_check = now;
     }
     
-    // End of measurement period?
-    if (now - measurement_start >= measurement_interval) {
-        uint32_t total_time = now - measurement_start;
-        uint32_t cpu_usage = (busy_time * 100) / total_time;
+    vPortFree(task_array);
+    
+    uint32_t cpu_usage = 0;
+    
+    if (!first_run && total_runtime > last_total_time) {
+        uint32_t total_delta = total_runtime - last_total_time;
+        uint32_t idle_delta = (idle_time > last_idle_time) ? 
+                               (idle_time - last_idle_time) : 0;
         
-        // Reset for next measurement
-        measuring = false;
-        
-        return (cpu_usage > 100) ? 100 : cpu_usage;
+        if (idle_delta <= total_delta && total_delta > 0) {
+            cpu_usage = 100 - ((idle_delta * 100) / total_delta);
+            
+            // Sanity check
+            if (cpu_usage > 100) cpu_usage = 0;
+        }
     }
     
-    return 0;  // Still measuring
+    // Store for next calculation
+    last_idle_time = idle_time;
+    last_total_time = total_runtime;
+    first_run = false;
+    
+    return cpu_usage;
 }
-// REAL TEMPERATURE READING - NO MORE FAKE VALUES!
+
 static float get_cpu_temperature(void) {
     float temperature = 25.0f;  // Default fallback
     

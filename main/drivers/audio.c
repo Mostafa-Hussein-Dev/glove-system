@@ -10,9 +10,16 @@
 #include "config/pin_definitions.h"
 #include "util/debug.h"
 #include "math.h"
+#include "esp_spiffs.h"
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <errno.h>
 
 static const char *TAG = "AUDIO";
 static i2s_chan_handle_t tx_chan = NULL;
+
+#define AUDIO_FILE_BUFFER_SIZE 1024
+#define AUDIO_FILES_PATH "/spiffs/audio/"
 
 // I2S configuration
 #define I2S_NUM I2S_NUM_0
@@ -32,7 +39,7 @@ static int16_t audio_buffer[AUDIO_BUFFER_SIZE];
 // Audio state
 static bool audio_initialized = false;
 static bool audio_playback_active = false;
-static uint8_t audio_volume = 80;  // 0-100
+static uint8_t audio_volume = 50;  // 0-100
 
 // Queue for audio commands
 static QueueHandle_t audio_command_queue = NULL;
@@ -51,7 +58,6 @@ typedef struct {
 // Forward declarations
 static void audio_task(void *pvParameters);
 esp_err_t audio_play_tone(uint16_t frequency, uint16_t duration_ms);
-static void audio_speak_text(const char *text);
 
 esp_err_t audio_init(void) {
     esp_err_t ret;
@@ -140,7 +146,7 @@ esp_err_t audio_init(void) {
         ESP_LOGE(TAG, "Failed to create audio task");
         vQueueDelete(audio_command_queue);
         i2s_channel_disable(tx_chan);
-        i2s_del_channel(tx_chan);
+        i2s_del_channel(tx_chan); 
         return ESP_ERR_NO_MEM;
     }
     
@@ -287,15 +293,20 @@ esp_err_t audio_play_tone(uint16_t frequency, uint16_t duration_ms) {
 }
 
 esp_err_t audio_speak(const char *text) {
-    if (!audio_initialized || text == NULL) {
+    if (!audio_initialized) {
         return ESP_ERR_INVALID_STATE;
     }
     
+    // Try to play gesture audio file first
+    if (audio_gesture_exists(text)) {
+        return audio_play_gesture(text);
+    }
+    
+    // Fallback to existing beep system
     audio_command_data_t cmd = {
         .command = AUDIO_CMD_SPEAK_TEXT
     };
     
-    // Copy text (with truncation if needed)
     strncpy(cmd.text, text, sizeof(cmd.text) - 1);
     cmd.text[sizeof(cmd.text) - 1] = '\0';
     
@@ -351,6 +362,73 @@ bool audio_is_active(void) {
     return audio_playback_active;
 }
 
+esp_err_t audio_play_gesture(const char* gesture_name) {
+    if (!audio_initialized || !gesture_name) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    
+    // Build file path
+    char filepath[64];
+    snprintf(filepath, sizeof(filepath), "%s%s.raw", AUDIO_FILES_PATH, gesture_name);
+    
+    // Open file
+    FILE* audio_file = fopen(filepath, "rb");
+    if (!audio_file) {
+        ESP_LOGW(TAG, "Audio file not found: %s", filepath);
+        // Fallback to beep
+        return audio_play_beep(800, 200);
+    }
+    
+    ESP_LOGI(TAG, "Playing audio: %s", gesture_name);
+
+    // Read and play file in chunks
+    static int16_t file_buffer[AUDIO_FILE_BUFFER_SIZE];
+    size_t bytes_read;
+    size_t bytes_written;
+    
+    for (int i = 0; i < 100; i++) {
+        file_buffer[i] = 0;  // Start with silence
+    }
+    i2s_channel_write(tx_chan, file_buffer, 200, &bytes_written, pdMS_TO_TICKS(100));
+
+    i2s_channel_disable(tx_chan);
+    vTaskDelay(pdMS_TO_TICKS(10));
+    i2s_channel_enable(tx_chan);
+
+    while ((bytes_read = fread(file_buffer, 1, sizeof(file_buffer), audio_file)) > 0) {
+        // Write to I2S
+        esp_err_t ret = i2s_channel_write(tx_chan, file_buffer, bytes_read, 
+                                         &bytes_written, pdMS_TO_TICKS(1000));
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "I2S write failed: %s", esp_err_to_name(ret));
+            break;
+        }
+    }
+
+    for (int i = 0; i < 100; i++) {
+        file_buffer[i] = 0;  // End with silence
+    }
+    i2s_channel_write(tx_chan, file_buffer, 200, &bytes_written, pdMS_TO_TICKS(100));
+
+    
+    fclose(audio_file);
+    return ESP_OK;
+}
+
+bool audio_gesture_exists(const char* gesture_name) {
+    if (!gesture_name) return false;
+    
+    char filepath[64];
+    snprintf(filepath, sizeof(filepath), "%s%s.raw", AUDIO_FILES_PATH, gesture_name);
+    
+    FILE* file = fopen(filepath, "rb");
+    if (file) {
+        fclose(file);
+        return true;
+    }
+    return false;
+}
+
 // Audio task function
 static void audio_task(void *pvParameters) {
     audio_command_data_t cmd;
@@ -362,12 +440,6 @@ static void audio_task(void *pvParameters) {
                 case AUDIO_CMD_PLAY_TONE:
                     audio_playback_active = true;
                     audio_play_tone(cmd.tone_freq, cmd.duration_ms);
-                    audio_playback_active = false;
-                    break;
-                    
-                case AUDIO_CMD_SPEAK_TEXT:
-                    audio_playback_active = true;
-                    audio_speak_text(cmd.text);
                     audio_playback_active = false;
                     break;
                     
@@ -386,16 +458,3 @@ static void audio_task(void *pvParameters) {
     }
 }
 
-// Very simple text-to-speech (just beeps for now - would need a real TTS engine)
-static void audio_speak_text(const char *text) {
-    // For a real implementation, we'd integrate a TTS engine here
-    // For now, just beep with different tones based on text length
-    ESP_LOGI(TAG, "TTS (simulated): %s", text);
-    
-    // Play a sequence of beeps to simulate speech
-    for (int i = 0; i < strlen(text) && i < 10; i++) {
-        uint16_t freq = 500 + (text[i] % 1000);  // Generate frequency based on character
-        audio_play_tone(freq, 100);
-        vTaskDelay(pdMS_TO_TICKS(50));  // Short pause between beeps
-    }
-}

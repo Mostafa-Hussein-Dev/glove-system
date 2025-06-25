@@ -7,7 +7,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 
-static const char *TAG = "BUFFER_FIXED";
+static const char *TAG = "BUFFER";
 
 // Global statistics for monitoring
 static struct {

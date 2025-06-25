@@ -26,7 +26,7 @@ static uint32_t last_status_update_ms = 0;
 // Forward declarations
 static void communication_task(void *arg);
 static void ble_command_handler(const uint8_t *data, size_t length);
-static void print_real_task_stats(void);
+
 
 esp_err_t communication_task_init(void) {
     ESP_LOGI(TAG, "Initializing communication task with enhanced architecture...");

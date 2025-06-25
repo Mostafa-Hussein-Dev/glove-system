@@ -19,7 +19,7 @@ idf_component_register(
         "ml/model_manager.cpp"                   
         "ml/data_preprocessor.cpp"
         "ml/ml_test.cpp"
-        "communication/ble_service.c"
+        "communication/ble_services.c"
         "output/text_generation.c"
         "output/output_manager.c"
         "tasks/sensor_task.c"

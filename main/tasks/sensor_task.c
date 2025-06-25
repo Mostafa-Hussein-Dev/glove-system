@@ -46,8 +46,6 @@ static esp_err_t sample_imu(void);
 static esp_err_t sample_camera(void);
 static esp_err_t sample_touch_sensors(void);
 static void touch_callback(bool *status);
-static void output_sensor_data_for_collection(const sensor_data_t* data);
-static void print_real_task_stats(void);
 
 // Sensor task declaration
 static void sensor_task(void *arg);
@@ -172,7 +170,7 @@ static void sensor_task(void *arg) {
 
                 
         // High-frequency task - minimal delay for real-time response
-        vTaskDelay(pdMS_TO_TICKS(50));  // 10ms = 100Hz loop rate
+        vTaskDelay(pdMS_TO_TICKS(100));  // 10ms = 100Hz loop rate
     }
 }
 
@@ -263,54 +261,6 @@ static esp_err_t sample_touch_sensors(void) {
     current_sensor_data.touch_data_valid = true;
     
     return ESP_OK;
-}
-
-static void output_sensor_data_for_collection(const sensor_data_t* data) {
-    if (!data) return;
-    
-    // Create JSON object for sensor data
-    cJSON *json = cJSON_CreateObject();
-    
-    // Add flex sensor data
-    if (data->flex_data_valid) {
-        cJSON *flex_array = cJSON_CreateArray();
-        for (int i = 0; i < FINGER_COUNT * 2; i++) {
-            cJSON_AddItemToArray(flex_array, cJSON_CreateNumber(data->flex_data.angles[i]));
-        }
-        cJSON_AddItemToObject(json, "flex_data", flex_array);
-    }
-    
-    // Add IMU data
-    if (data->imu_data_valid) {
-        cJSON *imu_obj = cJSON_CreateObject();
-        
-        cJSON *accel_array = cJSON_CreateArray();
-        cJSON *gyro_array = cJSON_CreateArray();
-        cJSON *orient_array = cJSON_CreateArray();
-        
-        for (int i = 0; i < 3; i++) {
-            cJSON_AddItemToArray(accel_array, cJSON_CreateNumber(data->imu_data.accel[i]));
-            cJSON_AddItemToArray(gyro_array, cJSON_CreateNumber(data->imu_data.gyro[i]));
-            cJSON_AddItemToArray(orient_array, cJSON_CreateNumber(data->imu_data.orientation[i]));
-        }
-        
-        cJSON_AddItemToObject(imu_obj, "accel", accel_array);
-        cJSON_AddItemToObject(imu_obj, "gyro", gyro_array);
-        cJSON_AddItemToObject(imu_obj, "orientation", orient_array);
-        cJSON_AddItemToObject(json, "imu_data", imu_obj);
-    }
-    
-    // Add timestamp
-    cJSON_AddItemToObject(json, "timestamp", cJSON_CreateNumber(data->timestamp));
-    
-    // Output JSON string
-    char *json_string = cJSON_Print(json);
-    if (json_string) {
-        printf("SENSOR_DATA:%s\n", json_string);
-        free(json_string);
-    }
-    
-    cJSON_Delete(json);
 }
 
 static void touch_callback(bool *status) {

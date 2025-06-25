@@ -63,19 +63,15 @@ esp_err_t flex_sensor_read_finger(finger_t finger, uint16_t* raw_value, float* a
 esp_err_t flex_sensor_calibrate_auto(void);
 esp_err_t flex_sensor_calibrate_flat(void);
 esp_err_t flex_sensor_calibrate_bent(void);
-esp_err_t flex_sensor_validate_calibration(void);
 
 // Data persistence
 esp_err_t flex_sensor_save_calibration(void);
 esp_err_t flex_sensor_load_calibration(void);
-esp_err_t flex_sensor_reset_calibration(void);
-esp_err_t flex_sensor_get_calibration(flex_sensor_calibration_t* calibration);
 
 // Advanced features
 esp_err_t flex_sensor_set_filtering(bool enable);
 esp_err_t flex_sensor_get_health_status(flex_sensor_health_t* health);
 esp_err_t flex_sensor_test_connectivity(void);
-esp_err_t flex_sensor_calibrate_noise_floor(void);
 
 #endif /* DRIVERS_FLEX_SENSOR_H */
 
@@ -142,7 +138,6 @@ static esp_err_t read_adc_with_validation(adc_channel_t channel, uint16_t* value
 static esp_err_t detect_sensor_direction(finger_t finger);
 static void calculate_calibration_factors(void);
 static bool validate_adc_value(finger_t finger, uint16_t value);
-static esp_err_t check_sensor_connectivity(finger_t finger);
 void flex_sensor_test_calibration_math(finger_t finger);
 
 
@@ -412,7 +407,7 @@ esp_err_t flex_sensor_read_raw(uint16_t* raw_values) {
    
    esp_err_t overall_result = ESP_OK;
 
-   /*
+   
    for (int i = 0; i < FINGER_COUNT; i++) {
         uint16_t raw_value;
         esp_err_t ret = read_adc_with_validation(adc_channels[i], &raw_value);
@@ -434,8 +429,8 @@ esp_err_t flex_sensor_read_raw(uint16_t* raw_values) {
             overall_result = ESP_FAIL;
         }
     }
-    */
     
+    /*
     for (int i = 0; i < FINGER_COUNT; i++) {
        int temp_value;
        esp_err_t ret = adc_oneshot_read(adc_handle, adc_channels[i], &temp_value);
@@ -448,8 +443,9 @@ esp_err_t flex_sensor_read_raw(uint16_t* raw_values) {
            sensor_health.read_errors[i]++;
            sensor_health.sensor_connected[i] = false;
            overall_result = ESP_FAIL;
-       }
-   }
+        }
+    }
+    */
    
    return overall_result;
 }
@@ -788,58 +784,6 @@ esp_err_t flex_sensor_calibrate_bent(void) {
     return ESP_OK;
 }
 
-esp_err_t flex_sensor_validate_calibration(void) {
-    if (!driver_initialized) {
-        return ESP_ERR_INVALID_STATE;
-    }
-    
-    ESP_LOGI(TAG, "Validating sensor calibration...");
-    
-    bool all_valid = true;
-    
-    for (int finger = 0; finger < FINGER_COUNT; finger++) {
-        bool finger_valid = true;
-        
-        // Check if calibrated
-        if (!sensor_calibration.calibrated[finger]) {
-            ESP_LOGW(TAG, "Finger %d: Not calibrated", finger);
-            finger_valid = false;
-        }
-        
-        // Check calibration range
-        uint16_t range = abs((int)sensor_calibration.bent_value[finger] - 
-                           (int)sensor_calibration.flat_value[finger]);
-        if (range < MIN_CALIBRATION_RANGE) {
-            ESP_LOGW(TAG, "Finger %d: Calibration range too small (%d)", finger, range);
-            finger_valid = false;
-        }
-        
-        // Check sensor connectivity
-        if (!sensor_health.sensor_connected[finger]) {
-            ESP_LOGW(TAG, "Finger %d: Sensor not connected", finger);
-            finger_valid = false;
-        }
-        
-        // Check for excessive errors
-        if (sensor_health.read_errors[finger] > 100) {
-            ESP_LOGW(TAG, "Finger %d: Too many read errors (%lu)", 
-                     finger, sensor_health.read_errors[finger]);
-            finger_valid = false;
-        }
-        
-        if (finger_valid) {
-            ESP_LOGI(TAG, "Finger %d: Valid (range=%d, flat=%d, bent=%d)", 
-                     finger, range, 
-                     sensor_calibration.flat_value[finger],
-                     sensor_calibration.bent_value[finger]);
-        } else {
-            all_valid = false;
-        }
-    }
-    
-    return all_valid ? ESP_OK : ESP_ERR_INVALID_STATE;
-}
-
 esp_err_t flex_sensor_save_calibration(void) {
     if (!driver_initialized) {
         return ESP_ERR_INVALID_STATE;
@@ -969,53 +913,6 @@ esp_err_t flex_sensor_load_calibration(void) {
     return ESP_OK;
 }
 
-esp_err_t flex_sensor_reset_calibration(void) {
-    if (!driver_initialized) {
-        return ESP_ERR_INVALID_STATE;
-    }
-    
-    ESP_LOGI(TAG, "Resetting flex sensor calibration to defaults...");
-    
-    // Reset to default values
-    esp_err_t ret = init_calibration_defaults();
-    if (ret != ESP_OK) {
-        return ret;
-    }
-    
-    // Clear NVS data
-    nvs_handle_t nvs_handle;
-    ret = nvs_open(FLEX_SENSOR_NVS_NAMESPACE, NVS_READWRITE, &nvs_handle);
-    if (ret == ESP_OK) {
-        nvs_erase_key(nvs_handle, FLEX_SENSOR_NVS_KEY);
-        nvs_erase_key(nvs_handle, "health");
-        nvs_commit(nvs_handle);
-        nvs_close(nvs_handle);
-        ESP_LOGI(TAG, "NVS calibration data cleared");
-    } else {
-        ESP_LOGW(TAG, "Could not clear NVS data: %s", esp_err_to_name(ret));
-    }
-    
-    // Reset error counters
-    for (int i = 0; i < FINGER_COUNT; i++) {
-        sensor_health.read_errors[i] = 0;
-        sensor_health.sensor_connected[i] = false;
-        sensor_health.sensor_stable[i] = false;
-        sensor_health.noise_level[i] = 0;
-    }
-    
-    ESP_LOGI(TAG, "Flex sensor calibration reset completed");
-    return ESP_OK;
-}
-
-esp_err_t flex_sensor_get_calibration(flex_sensor_calibration_t* calibration) {
-    if (!driver_initialized || calibration == NULL) {
-        return ESP_ERR_INVALID_ARG;
-    }
-    
-    memcpy(calibration, &sensor_calibration, sizeof(flex_sensor_calibration_t));
-    return ESP_OK;
-}
-
 esp_err_t flex_sensor_set_filtering(bool enable) {
     if (!driver_initialized) {
         return ESP_ERR_INVALID_STATE;
@@ -1043,67 +940,6 @@ esp_err_t flex_sensor_set_filtering(bool enable) {
     }
     
     ESP_LOGI(TAG, "Flex sensor filtering %s", enable ? "enabled" : "disabled");
-    return ESP_OK;
-}
-
-esp_err_t flex_sensor_calibrate_noise_floor(void) {
-    if (!driver_initialized) {
-        return ESP_ERR_INVALID_STATE;
-    }
-    
-    ESP_LOGI(TAG, "Calibrating noise floor - keep sensors still for 5 seconds...");
-    
-    uint16_t readings[FINGER_COUNT][100];
-    uint8_t valid_samples[FINGER_COUNT] = {0};
-    
-    // Disable filtering temporarily for raw noise measurement
-    bool prev_filtering = filtering_enabled;
-    filtering_enabled = false;
-    
-    // Collect samples
-    for (int sample = 0; sample < 100; sample++) {
-        for (int finger = 0; finger < FINGER_COUNT; finger++) {
-            uint16_t value;
-            if (read_adc_with_validation(adc_channels[finger], &value) == ESP_OK) {
-                readings[finger][valid_samples[finger]] = value;
-                valid_samples[finger]++;
-            }
-        }
-        vTaskDelay(pdMS_TO_TICKS(50));
-    }
-    
-    // Restore filtering
-    filtering_enabled = prev_filtering;
-    
-    // Calculate noise statistics
-    for (int finger = 0; finger < FINGER_COUNT; finger++) {
-        if (valid_samples[finger] > 10) {
-            uint32_t sum = 0;
-            uint32_t sum_sq = 0;
-            
-            for (int i = 0; i < valid_samples[finger]; i++) {
-                sum += readings[finger][i];
-                sum_sq += readings[finger][i] * readings[finger][i];
-            }
-            
-            float mean = (float)sum / valid_samples[finger];
-            float variance = ((float)sum_sq / valid_samples[finger]) - (mean * mean);
-            float std_dev = sqrtf(variance);
-            
-            sensor_health.noise_level[finger] = (uint16_t)std_dev;
-            sensor_health.sensor_stable[finger] = (std_dev < STABILITY_THRESHOLD);
-            
-            ESP_LOGI(TAG, "Finger %d: Mean=%.1f, StdDev=%.1f, Samples=%d, Stable=%s", 
-                     finger, mean, std_dev, valid_samples[finger],
-                     sensor_health.sensor_stable[finger] ? "YES" : "NO");
-        } else {
-            ESP_LOGW(TAG, "Finger %d: Insufficient samples for noise analysis", finger);
-            sensor_health.noise_level[finger] = 9999;
-            sensor_health.sensor_stable[finger] = false;
-        }
-    }
-    
-    ESP_LOGI(TAG, "Noise floor calibration completed");
     return ESP_OK;
 }
 

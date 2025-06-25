@@ -29,7 +29,6 @@ static sensor_data_buffer_t sensor_data_buffer;
 
 // Processing task function
 static void processing_task(void *arg);
-static void print_real_task_stats(void);
 
 static esp_err_t process_ml_inference(sensor_data_t* sensor_data, sensor_data_buffer_t* data_buffer, processing_result_t* result) {
     ml_input_t static_input, dynamic_input;
@@ -297,7 +296,7 @@ static void processing_task(void *arg) {
         }
 
 
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 

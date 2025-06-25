@@ -62,13 +62,10 @@ esp_err_t flex_sensor_read_finger(finger_t finger, uint16_t* raw_value, float* a
 esp_err_t flex_sensor_calibrate_auto(void);
 esp_err_t flex_sensor_calibrate_flat(void);
 esp_err_t flex_sensor_calibrate_bent(void);
-esp_err_t flex_sensor_validate_calibration(void);
 
 // Data persistence
 esp_err_t flex_sensor_save_calibration(void);
 esp_err_t flex_sensor_load_calibration(void);
-esp_err_t flex_sensor_reset_calibration(void);
-esp_err_t flex_sensor_get_calibration(flex_sensor_calibration_t* calibration);
 
 // Advanced features
 esp_err_t flex_sensor_set_filtering(bool enable);

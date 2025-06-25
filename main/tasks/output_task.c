@@ -23,7 +23,7 @@ static TaskHandle_t output_task_handle = NULL;
 
 // Output task function
 static void output_task(void *arg);
-static void print_real_task_stats(void);
+
 
 esp_err_t output_task_init(void) {
     ESP_LOGI(TAG, "Initializing output task with enhanced architecture...");
