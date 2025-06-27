@@ -23,7 +23,7 @@ static i2s_chan_handle_t tx_chan = NULL;
 
 // I2S configuration
 #define I2S_NUM I2S_NUM_0
-#define I2S_SAMPLE_RATE 16000
+#define I2S_SAMPLE_RATE 44100
 #define I2S_BITS_PER_SAMPLE 16
 #define I2S_DMA_BUFFER_SIZE 512
 #define I2S_DMA_BUFFER_COUNT 8
@@ -39,7 +39,7 @@ static int16_t audio_buffer[AUDIO_BUFFER_SIZE];
 // Audio state
 static bool audio_initialized = false;
 static bool audio_playback_active = false;
-static uint8_t audio_volume = 50;  // 0-100
+static uint8_t audio_volume = 10;  // 0-100
 
 // Queue for audio commands
 static QueueHandle_t audio_command_queue = NULL;
@@ -80,7 +80,7 @@ esp_err_t audio_init(void) {
     // Configure I2S standard
     i2s_std_config_t std_cfg = {
         .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(I2S_SAMPLE_RATE),
-        .slot_cfg = I2S_STD_MSB_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_MONO),
+        .slot_cfg = I2S_STD_MSB_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO),
         .gpio_cfg = {
             .mclk = I2S_GPIO_UNUSED,
             .bclk = I2S_BCK_PIN,
@@ -123,7 +123,7 @@ esp_err_t audio_init(void) {
     // Enable MAX98357A
     gpio_set_level(I2S_SD_PIN, 1);
     
-    // Create audio command queue
+    // Create audio command slot_cfg 
     audio_command_queue = xQueueCreate(10, sizeof(audio_command_data_t));
     if (audio_command_queue == NULL) {
         ESP_LOGE(TAG, "Failed to create audio command queue");
@@ -236,13 +236,16 @@ esp_err_t audio_play_tone(uint16_t frequency, uint16_t duration_ms) {
    // Calculate parameters
    uint32_t sample_count = I2S_SAMPLE_RATE * duration_ms / 1000;
    float volume_scale = (float)audio_volume / 100.0f;
-   float volume_factor = 32767.0f * volume_scale;
+   float volume_factor = 16383.0f * volume_scale; //Was 32767.0f
    
    // Calculate wave parameters
    float angular_frequency = 2.0f * M_PI * frequency / I2S_SAMPLE_RATE;
    
    ESP_LOGI(TAG, "Playing tone: %dHz for %dms (%lu samples)", frequency, duration_ms, sample_count);
    
+   // Clear buffer first to prevent garbage data
+   memset(audio_buffer, 0, sizeof(audio_buffer));
+
    // Generate sine wave and send to I2S
    for (uint32_t i = 0; i < sample_count; i += AUDIO_BUFFER_SIZE / 2) {
        uint32_t buffer_samples = (i + AUDIO_BUFFER_SIZE / 2 < sample_count) ? 
@@ -256,6 +259,12 @@ esp_err_t audio_play_tone(uint16_t frequency, uint16_t duration_ms) {
            // Fill left and right channels with the same data
            audio_buffer[j*2] = sample;      // Left channel
            audio_buffer[j*2+1] = sample;    // Right channel
+       }
+
+       // ADDED: Pad remaining buffer with zeros to prevent artifacts
+       for (uint32_t j = buffer_samples; j < AUDIO_BUFFER_SIZE / 2; j++) {
+           audio_buffer[j*2] = 0;
+           audio_buffer[j*2+1] = 0;
        }
        
        // Send to I2S with timeout and error checking
@@ -273,17 +282,8 @@ esp_err_t audio_play_tone(uint16_t frequency, uint16_t duration_ms) {
        }
    }
    
-   // Flush buffer with error handling
-   esp_err_t disable_ret = i2s_channel_disable(tx_chan);
-   if (disable_ret != ESP_OK) {
-       ESP_LOGW(TAG, "Failed to disable I2S channel: %s", esp_err_to_name(disable_ret));
-   }
-   
-   esp_err_t enable_ret = i2s_channel_enable(tx_chan);
-   if (enable_ret != ESP_OK) {
-       ESP_LOGE(TAG, "Failed to re-enable I2S channel: %s", esp_err_to_name(enable_ret));
-       return enable_ret;
-   }
+   memset(audio_buffer, 0, sizeof(audio_buffer));
+   i2s_channel_write(tx_chan, audio_buffer, 1024, &i2s_bytes_written, pdMS_TO_TICKS(100));
    
    if (ret == ESP_OK) {
        ESP_LOGI(TAG, "Tone playback completed successfully");
@@ -299,6 +299,7 @@ esp_err_t audio_speak(const char *text) {
     
     // Try to play gesture audio file first
     if (audio_gesture_exists(text)) {
+        audio_play_beep(1000, 200);
         return audio_play_gesture(text);
     }
     
@@ -333,7 +334,7 @@ esp_err_t audio_stop(void) {
     }
     
     // Wait for playback to stop (short delay)
-    vTaskDelay(pdMS_TO_TICKS(50));
+    vTaskDelay(pdMS_TO_TICKS(200));
     
     return ESP_OK;
 }
@@ -381,38 +382,61 @@ esp_err_t audio_play_gesture(const char* gesture_name) {
     
     ESP_LOGI(TAG, "Playing audio: %s", gesture_name);
 
-    // Read and play file in chunks
+    // ✅ FIXED: Proper buffer declarations
     static int16_t file_buffer[AUDIO_FILE_BUFFER_SIZE];
+    static int16_t stereo_buffer[AUDIO_FILE_BUFFER_SIZE * 2]; // For stereo conversion
     size_t bytes_read;
     size_t bytes_written;
+    esp_err_t ret = ESP_OK;
     
-    for (int i = 0; i < 100; i++) {
-        file_buffer[i] = 0;  // Start with silence
-    }
-    i2s_channel_write(tx_chan, file_buffer, 200, &bytes_written, pdMS_TO_TICKS(100));
+    // ✅ FIXED: Proper silence padding at start
+    memset(stereo_buffer, 0, 400 * sizeof(int16_t)); // 200 stereo samples = 400 int16_t
+    i2s_channel_write(tx_chan, stereo_buffer, 800, &bytes_written, pdMS_TO_TICKS(100)); // 400 samples * 2 bytes
 
-    i2s_channel_disable(tx_chan);
-    vTaskDelay(pdMS_TO_TICKS(10));
-    i2s_channel_enable(tx_chan);
+    // ✅ REMOVED: No channel disable/enable - this was causing clicking!
+    // i2s_channel_disable(tx_chan);
+    // vTaskDelay(pdMS_TO_TICKS(10));
+    // i2s_channel_enable(tx_chan);
 
+    // ✅ FIXED: Proper file reading and stereo conversion
     while ((bytes_read = fread(file_buffer, 1, sizeof(file_buffer), audio_file)) > 0) {
-        // Write to I2S
-        esp_err_t ret = i2s_channel_write(tx_chan, file_buffer, bytes_read, 
-                                         &bytes_written, pdMS_TO_TICKS(1000));
+        // Convert mono samples to stereo
+        size_t samples_read = bytes_read / sizeof(int16_t);
+        
+        for (size_t i = 0; i < samples_read; i++) {
+            // ✅ FIXED: Convert mono to stereo and reduce volume
+            int16_t sample = file_buffer[i] / 2; // Reduce volume to prevent clipping
+            stereo_buffer[i * 2] = sample;      // Left channel
+            stereo_buffer[i * 2 + 1] = sample;  // Right channel
+        }
+        
+        // ✅ FIXED: Write correct amount of stereo data
+        size_t stereo_bytes = samples_read * 2 * sizeof(int16_t);
+        ret = i2s_channel_write(tx_chan, stereo_buffer, stereo_bytes, 
+                               &bytes_written, pdMS_TO_TICKS(1000));
+        
         if (ret != ESP_OK) {
             ESP_LOGE(TAG, "I2S write failed: %s", esp_err_to_name(ret));
             break;
         }
+        
+        if (bytes_written != stereo_bytes) {
+            ESP_LOGW(TAG, "Incomplete I2S write: expected %zu, wrote %zu", 
+                     stereo_bytes, bytes_written);
+        }
     }
 
-    for (int i = 0; i < 100; i++) {
-        file_buffer[i] = 0;  // End with silence
-    }
-    i2s_channel_write(tx_chan, file_buffer, 200, &bytes_written, pdMS_TO_TICKS(100));
-
+    // ✅ FIXED: Proper silence padding at end
+    memset(stereo_buffer, 0, 400 * sizeof(int16_t));
+    i2s_channel_write(tx_chan, stereo_buffer, 800, &bytes_written, pdMS_TO_TICKS(100));
     
     fclose(audio_file);
-    return ESP_OK;
+    
+    if (ret == ESP_OK) {
+        ESP_LOGI(TAG, "Audio file playback completed successfully");
+    }
+    
+    return ret;
 }
 
 bool audio_gesture_exists(const char* gesture_name) {
@@ -447,6 +471,13 @@ static void audio_task(void *pvParameters) {
                     // Reset I2S for immediate stop
                     i2s_channel_disable(tx_chan);
                     i2s_channel_enable(tx_chan); 
+                    audio_playback_active = false;
+                    break;
+
+                case AUDIO_CMD_SPEAK_TEXT:
+                    ESP_LOGI(TAG, "Fallback beep for: %s", cmd.text);
+                    audio_playback_active = true;
+                    audio_play_tone(800, 200);  // Fallback beep
                     audio_playback_active = false;
                     break;
                     

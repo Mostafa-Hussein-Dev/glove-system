@@ -73,6 +73,9 @@ esp_err_t display_init(void) {
     display_initialized = true;
     display_powered_on = true;
 
+    display_flip_vertical(false);
+    display_flip_horizontal(false);
+
     display_show_splash_screen();
 
     return ESP_OK;

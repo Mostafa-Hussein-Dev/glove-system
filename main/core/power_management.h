@@ -5,13 +5,12 @@
 #include "config/system_config.h"
 
 /**
- * @brief Power modes for the system
+ * @brief Simplified Power modes for the system
  */
 typedef enum {
-    POWER_MODE_PERFORMANCE,    // Maximum performance, no power saving
-    POWER_MODE_BALANCED,       // Balance between performance and power saving
-    POWER_MODE_POWER_SAVE,     // Prioritize power saving
-    POWER_MODE_MAX_POWER_SAVE  // Maximum power saving
+    POWER_MODE_PERFORMANCE,    // Maximum performance - 240MHz, all peripherals ON
+    POWER_MODE_BALANCED,       // Balance mode - 160MHz, smart peripheral control
+    POWER_MODE_POWER_SAVE      // Power saving - 80MHz, minimal peripherals
 } power_mode_t;
 
 /**
@@ -20,10 +19,19 @@ typedef enum {
 typedef struct {
     uint16_t voltage_mv;       // Battery voltage in millivolts
     uint8_t percentage;        // Battery percentage (0-100)
-    bool is_charging;          // Whether the battery is charging
-    bool is_low;               // Whether the battery is low
-    bool is_critical;          // Whether the battery is critically low
+    bool is_charging;          // Whether USB is connected and charging
+    bool is_low;               // Below 20% (3.4V)
+    bool is_critical;          // Below 10% (3.3V)
 } battery_status_t;
+
+/**
+ * @brief Sleep detection result
+ */
+typedef enum {
+    SLEEP_ACTION_NONE,         // Stay awake
+    SLEEP_ACTION_LIGHT,        // Enter light sleep
+    SLEEP_ACTION_DEEP          // Enter deep sleep
+} sleep_action_t;
 
 /**
  * @brief Initialize power management subsystem
@@ -33,7 +41,7 @@ typedef struct {
 esp_err_t power_management_init(void);
 
 /**
- * @brief Set power mode
+ * @brief Set power mode (simplified)
  * 
  * @param mode Power mode
  * @return ESP_OK on success, error code otherwise
@@ -48,7 +56,7 @@ esp_err_t power_management_set_mode(power_mode_t mode);
 power_mode_t power_management_get_mode(void);
 
 /**
- * @brief Get battery status
+ * @brief Get battery status with proper ADC reading
  * 
  * @param status Pointer to store battery status
  * @return ESP_OK on success, error code otherwise
@@ -56,35 +64,41 @@ power_mode_t power_management_get_mode(void);
 esp_err_t power_management_get_battery_status(battery_status_t* status);
 
 /**
+ * @brief Check if system should sleep (simplified logic)
+ * 
+ * @param inactive_time_ms Time since last activity
+ * @param low_battery True if battery is low
+ * @return Sleep action to take
+ */
+sleep_action_t power_management_check_sleep(uint32_t inactive_time_ms, bool low_battery);
+
+/**
  * @brief Enter light sleep mode
  * 
- * @param sleep_duration_ms Sleep duration in milliseconds (0 for indefinite)
+ * @param wakeup_time_ms Wake up after this time (0 = wait for interrupt)
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t power_management_light_sleep(uint32_t sleep_duration_ms);
+esp_err_t power_management_light_sleep(uint32_t wakeup_time_ms);
 
 /**
  * @brief Enter deep sleep mode
  * 
- * @param sleep_duration_ms Sleep duration in milliseconds (0 for indefinite)
+ * @param wakeup_time_ms Wake up after this time (0 = indefinite)
  * @return ESP_OK on success, error code otherwise
  */
-esp_err_t power_management_deep_sleep(uint32_t sleep_duration_ms);
+esp_err_t power_management_deep_sleep(uint32_t wakeup_time_ms);
 
 /**
- * @brief Wake up from sleep mode
- * 
- * @return ESP_OK on success, error code otherwise
+ * @brief Reset activity timer (call when user activity detected)
  */
-esp_err_t power_management_wake_up(void);
+void power_management_reset_activity(void);
 
 /**
- * @brief Set CPU frequency
+ * @brief Get time since last activity
  * 
- * @param frequency_mhz Frequency in MHz
- * @return ESP_OK on success, error code otherwise
+ * @return Time in milliseconds since last activity
  */
-esp_err_t power_management_set_cpu_frequency(uint32_t frequency_mhz);
+uint32_t power_management_get_inactive_time(void);
 
 /**
  * @brief Enable/disable peripheral power

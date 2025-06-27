@@ -22,39 +22,31 @@ static const char *TAG = "POWER_TASK";
 // Task handle
 static TaskHandle_t power_task_handle = NULL;
 
-// Last battery check time
-static uint32_t last_battery_check_ms = 0;
-#define BATTERY_CHECK_INTERVAL_MS 30000  // Check battery every 30 seconds
-
-// Last system status display time
-static uint32_t last_status_display_ms = 0;
-#define STATUS_DISPLAY_INTERVAL_MS 60000  // Display status every 60 seconds
-
-// Inactivity tracking
-static uint32_t last_activity_time_ms = 0;
+// Monitoring intervals
+#define BATTERY_CHECK_INTERVAL_MS    30000   // Check battery every 30 seconds
+#define STATUS_DISPLAY_INTERVAL_MS   60000   // Display status every 60 seconds
 
 // Forward declarations
 static void power_task(void *arg);
 static void handle_system_command(system_command_t *cmd);
-static void enter_power_save_mode(void);
-static void exit_power_save_mode(void);
-static void check_battery_status(void);
+static void check_battery_and_power(void);
+static void handle_sleep_logic(void);
 
 
 esp_err_t power_task_init(void) {
-    ESP_LOGI(TAG, "Initializing power task with enhanced architecture...");
-    ESP_LOGI(TAG, "  Core: %d, Priority: %d, Stack: %d bytes", 
+    ESP_LOGI(TAG, "Initializing simplified power task...");
+    ESP_LOGI(TAG, "Core: %d, Priority: %d, Stack: %d bytes", 
         POWER_TASK_CORE, POWER_TASK_PRIORITY, POWER_TASK_STACK_SIZE);
     
-    // Create the power task with new configuration
+    // Create the power task
     BaseType_t ret = xTaskCreatePinnedToCore(
         power_task,
         "power_task",
-        POWER_TASK_STACK_SIZE,      // UPDATED: Reduced from 4096 to 3072
+        POWER_TASK_STACK_SIZE,
         NULL,
-        POWER_TASK_PRIORITY,        // UPDATED: Decreased from 6 to 5
+        POWER_TASK_PRIORITY,
         &power_task_handle,
-        POWER_TASK_CORE             // SAME: Core 0 for background monitoring
+        POWER_TASK_CORE
     );
     
     if (ret != pdPASS) {
@@ -62,292 +54,91 @@ esp_err_t power_task_init(void) {
         return ESP_FAIL;
     }
     
-    ESP_LOGI(TAG, "Power task initialized on core %d with lowest priority %d", 
-        POWER_TASK_CORE, POWER_TASK_PRIORITY);
+    ESP_LOGI(TAG, "Power task initialized successfully");
     return ESP_OK;
 }
-
 static void power_task(void *arg) {
-    ESP_LOGI(TAG, "Power task started");
+    ESP_LOGI(TAG, "Power task started - simplified implementation");
     
-    // Wait for system initialization to complete
+    // Wait for system initialization
     xEventGroupWaitBits(g_system_event_group, 
                         SYSTEM_EVENT_INIT_COMPLETE, 
                         pdFALSE, pdTRUE, portMAX_DELAY);
     
     // Initialize timestamps
-    uint32_t current_time_ms = esp_timer_get_time() / 1000;
-    last_battery_check_ms = current_time_ms;
-    last_status_display_ms = current_time_ms;
-    last_activity_time_ms = current_time_ms;
-    
-    // System command processing
-    system_command_t system_cmd;
+    uint32_t last_battery_check_ms = 0;
+    uint32_t last_status_display_ms = 0;
     
     while (1) {
-        current_time_ms = esp_timer_get_time() / 1000;
+        uint32_t current_time_ms = esp_timer_get_time() / 1000;
         
-        // Check for system commands
+        // 1. Handle system commands (high priority)
+        system_command_t system_cmd;
         if (xQueueReceive(g_system_command_queue, &system_cmd, 0) == pdTRUE) {
             handle_system_command(&system_cmd);
         }
         
-        // Check battery status periodically
+        // 2. Check battery status periodically
         if (current_time_ms - last_battery_check_ms >= BATTERY_CHECK_INTERVAL_MS) {
-            check_battery_status();
+            check_battery_and_power();
             last_battery_check_ms = current_time_ms;
         }
         
-        // Periodically display system status (if in idle state)
+        // 3. Display system status when idle
         if (g_system_config.system_state == SYSTEM_STATE_IDLE && 
             current_time_ms - last_status_display_ms >= STATUS_DISPLAY_INTERVAL_MS) {
             
-            // Get battery status
             battery_status_t battery_status;
             if (power_management_get_battery_status(&battery_status) == ESP_OK) {
-                // Create output command for status display
                 output_command_t cmd = {
                     .type = OUTPUT_CMD_SHOW_STATUS
                 };
-                
-                // Send to output queue
-                if (xQueueSend(g_output_command_queue, &cmd, 0) != pdTRUE) {
-                    ESP_LOGW(TAG, "Failed to send status display command (queue full)");
-                }
+                xQueueSend(g_output_command_queue, &cmd, 0);
             }
-            
             last_status_display_ms = current_time_ms;
         }
         
-        // Check for inactivity and handle power management
-        if (g_system_config.power_save_enabled) {
-            // Process inactivity timeout
-            power_management_process_inactivity(current_time_ms);
+        // 4. Handle sleep logic (simplified)
+        handle_sleep_logic();
+        
+        // 5. Simple memory check
+        size_t free_heap = esp_get_free_heap_size();
+        if (free_heap < 10000) {  // 10KB threshold
+            ESP_LOGW(TAG, "Low memory: %d bytes", free_heap);
+            // Switch to power save mode
+            if (power_management_get_mode() != POWER_MODE_POWER_SAVE) {
+                power_management_set_mode(POWER_MODE_POWER_SAVE);
+            }
         }
         
-        // Check system health with direct heap check
-        // === ENHANCED SYSTEM HEALTH MONITORING ===
-        system_metrics_t metrics;
-
-        if (system_monitor_get_metrics(&metrics) == ESP_OK) {
-
-            // Memory management
-            if (metrics.free_heap < 5000) {  // Critical threshold - CHECK FIRST
-                ESP_LOGE(TAG, "CRITICAL memory situation: %u bytes", metrics.free_heap);
-                // Trigger automatic memory cleanup
-                system_monitor_recovery_action(RECOVERY_MEMORY_CLEANUP, NULL);
-            } else if (metrics.free_heap < 15000) {  // Warning threshold
-                ESP_LOGW(TAG, "Low memory warning: %u bytes (%.1f%% free)", 
-                    metrics.free_heap,
-                    (float)metrics.free_heap / metrics.total_heap * 100);
-            } else {
-                ESP_LOGD(TAG, "Memory OK: %u bytes", metrics.free_heap);
-            }
-            
-            // CPU usage management
-            if (metrics.cpu_usage_percent > 80) {
-                ESP_LOGW(TAG, "High CPU usage: %u%%", metrics.cpu_usage_percent);
-                
-                // Boost performance mode temporarily if not already in performance mode
-                if (power_management_get_mode() != POWER_MODE_PERFORMANCE) {
-                    ESP_LOGI(TAG, "Boosting to balanced mode due to high CPU usage");
-                    power_management_set_mode(POWER_MODE_BALANCED);
-                }
-            } 
-            
-            // Temperature management
-            if (metrics.cpu_temperature > 60.0f) {
-                ESP_LOGW(TAG, "High temperature: %.1f°C", metrics.cpu_temperature);
-                
-                if (metrics.cpu_temperature > 70.0f) {
-                    ESP_LOGE(TAG, "CRITICAL temperature: %.1f°C - enabling power save", 
-                        metrics.cpu_temperature);
-                    // Force power save mode to cool down
-                    power_management_set_mode(POWER_MODE_MAX_POWER_SAVE);
-                }
-            } 
-
-            //TODOS: Remove comments
-            // System health level management
-            system_health_level_t health = system_monitor_get_health_level();
-            switch (health) {
-                case SYSTEM_HEALTH_CRITICAL:
-                    ESP_LOGE(TAG, "🔴 SYSTEM HEALTH CRITICAL - Taking emergency actions");
-                    // Force lowest power mode
-                    //power_management_set_mode(POWER_MODE_MAX_POWER_SAVE);
-                    break;
-                    
-                case SYSTEM_HEALTH_WARNING:
-                    ESP_LOGW(TAG, "🟡 System health warning - Optimizing power");
-                    // Use balanced mode
-                    //if (power_management_get_mode() == POWER_MODE_PERFORMANCE) {
-                    //    power_management_set_mode(POWER_MODE_BALANCED);
-                    //}
-                    break;
-                    
-                case SYSTEM_HEALTH_OK:
-                default:
-                    // System is healthy, normal power management
-                    break;
-            }
-
-        
-            
-        } else {
-            ESP_LOGE(TAG, "Failed to get system metrics");
-        }
-        
-        // Short delay to prevent CPU hogging
+        // Sleep for 1 second
         vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
 
-void power_task_deinit(void) {
-    // Cleanup resources when task is deleted
-    if (power_task_handle != NULL) {
-        vTaskDelete(power_task_handle);
-        power_task_handle = NULL;
-    }
-    
-    ESP_LOGI(TAG, "Power task deinitialized");
-}
-
 static void handle_system_command(system_command_t *cmd) {
-    if (cmd == NULL) return;
-    
     switch (cmd->type) {
-        case SYS_CMD_CHANGE_STATE:
-            // Update system state
-            ESP_LOGI(TAG, "Changing system state from %d to %d", 
-                g_system_config.system_state, cmd->parameter);
-            g_system_config.system_state = (system_state_t)cmd->parameter;
-
-            // Handle state-specific actions
-            switch (g_system_config.system_state) {
-                case SYSTEM_STATE_SLEEP:
-                    power_management_set_mode(POWER_MODE_MAX_POWER_SAVE);
-                    break;
-                    
-                case SYSTEM_STATE_STANDBY:
-                    power_management_set_mode(POWER_MODE_POWER_SAVE);
-                    break;
-                    
-                case SYSTEM_STATE_ACTIVE:
-                    power_management_set_mode(POWER_MODE_BALANCED);
-                    break;
-                    
-                default:
-                    break;
-            }
-            
-            // Reset inactivity timer
-            power_management_reset_inactivity_timer();
-            last_activity_time_ms = esp_timer_get_time() / 1000;
-            break;
-            
-        case SYS_CMD_CALIBRATE:
-            ESP_LOGI(TAG, "Executing calibration command");
-            
-            // Set system state to calibration
-            g_system_config.system_state = SYSTEM_STATE_CALIBRATION;
-            
-            // Create output command for calibration instructions
-            output_command_t out_cmd = {
-                .type = OUTPUT_CMD_DISPLAY_TEXT,
-                .data.display.clear_first = true,
-                .data.display.line = 0,
-                .data.display.size = 0
-            };
-            
-            strcpy(out_cmd.data.display.text, "Calibration Mode");
-            xQueueSend(g_output_command_queue, &out_cmd, 0);
-            
-            // Execute calibration sequence here
-            // This would involve flex sensor calibration, IMU calibration, etc.
-            // For now, this is just a placeholder
-            
-            // Reset inactivity timer
-            power_management_reset_inactivity_timer();
-            last_activity_time_ms = esp_timer_get_time() / 1000;
-            break;
-            
         case SYS_CMD_SET_POWER_MODE:
-            if ((bool)cmd->parameter) {
-                enter_power_save_mode();
-            } else {
-                exit_power_save_mode();
-            }
-            break;
-            
-        case SYS_CMD_RESTART:
-            ESP_LOGI(TAG, "System restart requested");
-            
-            // Display restart message
-            output_command_t restart_cmd = {
-                .type = OUTPUT_CMD_DISPLAY_TEXT,
-                .data.display.clear_first = true,
-                .data.display.line = 0,
-                .data.display.size = 0
-            };
-            
-            strcpy(restart_cmd.data.display.text, "Restarting...");
-            xQueueSend(g_output_command_queue, &restart_cmd, 0);
-            
-            // Give some time for the message to be displayed
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            
-            // Restart the system
-            esp_restart();
+            ESP_LOGI(TAG, "Setting power mode: %d", (power_mode_t)cmd->parameter);
+            power_management_set_mode((power_mode_t)cmd->parameter);
             break;
             
         case SYS_CMD_SLEEP:
-            ESP_LOGI(TAG, "Sleep command received: %d seconds", 
-                (uint16_t)cmd->parameter);
-            
-            // Display sleep message
-            output_command_t sleep_cmd = {
-                .type = OUTPUT_CMD_DISPLAY_TEXT,
-                .data.display.clear_first = true,
-                .data.display.line = 0,
-                .data.display.size = 0
-            };
-            
-            sprintf(sleep_cmd.data.display.text, "Sleeping for %d sec...", 
-                    (uint16_t)cmd->parameter);
-            xQueueSend(g_output_command_queue, &sleep_cmd, 0);
-            
-            // Give some time for the message to be displayed
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            
-            // Prepare for sleep
-            g_system_config.system_state = SYSTEM_STATE_SLEEP;
-            
-            // Enter deep sleep
-            power_management_deep_sleep(cmd->parameter * 1000);
+            ESP_LOGI(TAG, "Manual sleep command received");
+            power_management_light_sleep(30000);  // 30 second sleep
             break;
             
-        case SYS_CMD_FACTORY_RESET:
-            ESP_LOGI(TAG, "Factory reset requested");
+        case SYS_CMD_CHANGE_STATE:
+            ESP_LOGD(TAG, "User activity detected");
+            power_management_reset_activity();
             
-            // Display factory reset message
-            output_command_t reset_cmd = {
-                .type = OUTPUT_CMD_DISPLAY_TEXT,
-                .data.display.clear_first = true,
-                .data.display.line = 0,
-                .data.display.size = 0
-            };
-            
-            strcpy(reset_cmd.data.display.text, "Factory reset...");
-            xQueueSend(g_output_command_queue, &reset_cmd, 0);
-            
-            // Give some time for the message to be displayed
-            vTaskDelay(pdMS_TO_TICKS(1000));
-            
-            // Perform factory reset actions here
-            // This would involve clearing NVS, resetting calibration, etc.
-            
-            // Restart the system after reset
-            esp_restart();
+            // If we're in power save mode and battery isn't critical, go to balanced
+            battery_status_t battery;
+            if (power_management_get_battery_status(&battery) == ESP_OK) {
+                if (!battery.is_critical && power_management_get_mode() == POWER_MODE_POWER_SAVE) {
+                    power_management_set_mode(POWER_MODE_BALANCED);
+                }
+            }
             break;
             
         default:
@@ -356,126 +147,40 @@ static void handle_system_command(system_command_t *cmd) {
     }
 }
 
-static void enter_power_save_mode(void) {
-    ESP_LOGI(TAG, "Entering power save mode");
-    
-    // Enable power save mode
-    g_system_config.power_save_enabled = true;
-    
-    // Choose appropriate power mode based on system state
-    power_mode_t target_mode;
-    switch (g_system_config.system_state) {
-        case SYSTEM_STATE_SLEEP:
-            target_mode = POWER_MODE_MAX_POWER_SAVE;
-            break;
-        case SYSTEM_STATE_STANDBY:
-            target_mode = POWER_MODE_POWER_SAVE;
-            break;
-        case SYSTEM_STATE_IDLE:
-            target_mode = POWER_MODE_POWER_SAVE;
-            break;
-        default:
-            target_mode = POWER_MODE_BALANCED;
-            break;
-    }
-    
-    // Apply the power mode
-    power_management_set_mode(target_mode);
-    
-    // Display power save mode enabled
-    output_command_t cmd = {
-        .type = OUTPUT_CMD_DISPLAY_TEXT,
-        .data.display.clear_first = false,
-        .data.display.line = 5,
-        .data.display.size = 0
-    };
-    
-    strcpy(cmd.data.display.text, "Power Save: ON");
-    xQueueSend(g_output_command_queue, &cmd, 0);
-}
-
-static void exit_power_save_mode(void) {
-    ESP_LOGI(TAG, "Exiting power save mode");
-    
-    // Disable power save mode
-    g_system_config.power_save_enabled = false;
-    
-    // Set to performance mode
-    power_management_set_mode(POWER_MODE_PERFORMANCE);
-    
-    // Display power save mode disabled
-    output_command_t cmd = {
-        .type = OUTPUT_CMD_DISPLAY_TEXT,
-        .data.display.clear_first = false,
-        .data.display.line = 5,
-        .data.display.size = 0
-    };
-    
-    strcpy(cmd.data.display.text, "Power Save: OFF");
-    xQueueSend(g_output_command_queue, &cmd, 0);
-}
-
-static void check_battery_status(void) {
+static void check_battery_and_power(void) {
     battery_status_t battery_status;
+    esp_err_t ret = power_management_get_battery_status(&battery_status);
     
-    if (power_management_get_battery_status(&battery_status) != ESP_OK) {
-        ESP_LOGW(TAG, "Failed to get battery status");
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to get battery status");
         return;
     }
     
-    ESP_LOGI(TAG, "Battery status: %d%% (%d mV), charging: %s, low: %s, critical: %s",
-             battery_status.percentage, battery_status.voltage_mv,
-             battery_status.is_charging ? "yes" : "no",
-             battery_status.is_low ? "yes" : "no",
-             battery_status.is_critical ? "yes" : "no");
+    ESP_LOGI(TAG, "Battery: %.2fV (%d%%), %s%s%s", 
+             battery_status.voltage_mv / 1000.0f,
+             battery_status.percentage,
+             battery_status.is_charging ? "CHARGING" : "NOT_CHARGING",
+             battery_status.is_low ? ", LOW" : "",
+             battery_status.is_critical ? ", CRITICAL" : "");
     
-    // Handle low battery
-    if (battery_status.is_critical && g_system_config.system_state != SYSTEM_STATE_CHARGING) {
-        ESP_LOGW(TAG, "Battery critically low, entering power save mode");
-        
-        // Set error state
+    // Handle battery-based power management
+    if (battery_status.is_critical) {
+        ESP_LOGE(TAG, "CRITICAL BATTERY - Entering power save mode");
         g_system_config.system_state = SYSTEM_STATE_LOW_BATTERY;
-        g_system_config.error_count = SYSTEM_ERROR_BATTERY;
+        power_management_set_mode(POWER_MODE_POWER_SAVE);
         
-        // Set max power save mode
-        power_management_set_mode(POWER_MODE_MAX_POWER_SAVE);
-        
-        // Display low battery warning
-        output_command_t cmd = {
-            .type = OUTPUT_CMD_SHOW_ERROR,
-            .data.error.error_code = SYSTEM_ERROR_BATTERY,
-            .data.error.error_text = "Battery critically low!"
-        };
-        
-        xQueueSend(g_output_command_queue, &cmd, 0);
-        
-        // Set low battery event bit
+        // Set low battery event
         xEventGroupSetBits(g_system_event_group, SYSTEM_EVENT_LOW_BATTERY);
-    }
-    else if (battery_status.is_low && g_system_config.system_state != SYSTEM_STATE_LOW_BATTERY && 
-             g_system_config.system_state != SYSTEM_STATE_CHARGING) {
-        ESP_LOGW(TAG, "Battery low, entering power save mode");
         
-        // Display low battery warning
-        output_command_t cmd = {
-            .type = OUTPUT_CMD_SHOW_BATTERY,
-            .data.battery.percentage = battery_status.percentage,
-            .data.battery.show_graphic = true
-        };
-        
-        xQueueSend(g_output_command_queue, &cmd, 0);
-        
-        // Enter power save mode
-        if (g_system_config.power_save_enabled == false) {
-            enter_power_save_mode();
-        }
-        else {
-            // Already in power save mode, use a more aggressive mode
+    } else if (battery_status.is_low && !battery_status.is_charging) {
+        ESP_LOGW(TAG, "Low battery - Switching to power save mode");
+        if (g_system_config.system_state != SYSTEM_STATE_LOW_BATTERY) {
+            g_system_config.system_state = SYSTEM_STATE_LOW_BATTERY;
             power_management_set_mode(POWER_MODE_POWER_SAVE);
         }
-    }
-    else if (battery_status.is_charging) {
-        // Update system state if charging
+        
+    } else if (battery_status.is_charging) {
+        // Handle charging state
         if (g_system_config.system_state != SYSTEM_STATE_CHARGING) {
             ESP_LOGI(TAG, "Device is charging");
             g_system_config.system_state = SYSTEM_STATE_CHARGING;
@@ -486,50 +191,71 @@ static void check_battery_status(void) {
                 .data.battery.percentage = battery_status.percentage,
                 .data.battery.show_graphic = true
             };
-            
             xQueueSend(g_output_command_queue, &cmd, 0);
         }
+        
+    } else if (!battery_status.is_low && !battery_status.is_critical) {
+        // Battery is good - normal operation
+        if (g_system_config.system_state == SYSTEM_STATE_LOW_BATTERY || 
+            g_system_config.system_state == SYSTEM_STATE_CHARGING) {
+            
+            ESP_LOGI(TAG, "Battery recovered - Normal operation");
+            g_system_config.system_state = SYSTEM_STATE_IDLE;
+            xEventGroupClearBits(g_system_event_group, SYSTEM_EVENT_LOW_BATTERY);
+            
+            // Return to balanced mode
+            power_management_set_mode(POWER_MODE_BALANCED);
+        }
     }
-    else if (g_system_config.system_state == SYSTEM_STATE_CHARGING && !battery_status.is_charging) {
-        // Was charging, but not anymore
-        ESP_LOGI(TAG, "Charging complete or disconnected");
-        
-        // Return to idle state
-        g_system_config.system_state = SYSTEM_STATE_IDLE;
-        
-        // Display battery status
-        output_command_t cmd = {
-            .type = OUTPUT_CMD_SHOW_BATTERY,
-            .data.battery.percentage = battery_status.percentage,
-            .data.battery.show_graphic = true
-        };
-        
-        xQueueSend(g_output_command_queue, &cmd, 0);
+}
+
+static void handle_sleep_logic(void) {
+    // Get inactive time
+    uint32_t inactive_time_ms = power_management_get_inactive_time();
+    
+    // Get current battery status
+    battery_status_t battery;
+    if (power_management_get_battery_status(&battery) != ESP_OK) {
+        return;  // Can't check battery, skip sleep logic
     }
-    else if (g_system_config.system_state == SYSTEM_STATE_LOW_BATTERY && 
-             !battery_status.is_low && !battery_status.is_critical) {
-        // Battery was low but now recovered
-        ESP_LOGI(TAG, "Battery level recovered");
-        
-        // Return to idle state
-        g_system_config.system_state = SYSTEM_STATE_IDLE;
-        g_system_config.error_count = SYSTEM_ERROR_NONE;
-        
-        // Clear low battery event bit
-        xEventGroupClearBits(g_system_event_group, SYSTEM_EVENT_LOW_BATTERY);
-        
-        // Display battery status
-        output_command_t cmd = {
-            .type = OUTPUT_CMD_SHOW_BATTERY,
-            .data.battery.percentage = battery_status.percentage,
-            .data.battery.show_graphic = true
-        };
-        
-        xQueueSend(g_output_command_queue, &cmd, 0);
-        
-        // Return to balanced power mode
-        power_management_set_mode(POWER_MODE_BALANCED);
+    
+    // Skip sleep if charging
+    if (battery.is_charging) {
+        return;
     }
+    
+    // Skip sleep if system is busy
+    if (g_system_config.system_state != SYSTEM_STATE_IDLE) {
+        return;
+    }
+    
+    // Check what sleep action to take
+    sleep_action_t sleep_action = power_management_check_sleep(inactive_time_ms, battery.is_low);
+    
+    switch (sleep_action) {
+        case SLEEP_ACTION_LIGHT:
+            ESP_LOGI(TAG, "Entering light sleep due to inactivity (%d ms)", inactive_time_ms);
+            power_management_light_sleep(30000);  // 30 seconds
+            break;
+            
+        case SLEEP_ACTION_DEEP:
+            ESP_LOGI(TAG, "Entering deep sleep due to long inactivity (%d ms)", inactive_time_ms);
+            power_management_deep_sleep(300000);  // 5 minutes
+            break;
+            
+        case SLEEP_ACTION_NONE:
+        default:
+            // Stay awake
+            break;
+    }
+}
+
+void power_task_deinit(void) {
+    if (power_task_handle != NULL) {
+        vTaskDelete(power_task_handle);
+        power_task_handle = NULL;
+    }
+    ESP_LOGI(TAG, "Power task deinitialized");
 }
 
 void* power_task_get_handle(void) {

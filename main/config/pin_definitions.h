@@ -14,9 +14,9 @@
 
 #define FLEX_SENSOR_THUMB_ADC_CHANNEL      ADC_CHANNEL_0   // GPIO1
 #define FLEX_SENSOR_INDEX_ADC_CHANNEL      ADC_CHANNEL_1   // GPIO2
-#define FLEX_SENSOR_MIDDLE_ADC_CHANNEL     ADC_CHANNEL_2   // GPIO4
-#define FLEX_SENSOR_RING_ADC_CHANNEL       ADC_CHANNEL_3   // GPIO5
-#define FLEX_SENSOR_PINKY_ADC_CHANNEL      ADC_CHANNEL_4   // GPIO6
+#define FLEX_SENSOR_MIDDLE_ADC_CHANNEL     ADC_CHANNEL_4   // GPIO3
+#define FLEX_SENSOR_RING_ADC_CHANNEL       ADC_CHANNEL_5   // GPIO4
+#define FLEX_SENSOR_PINKY_ADC_CHANNEL      ADC_CHANNEL_6   // GPIO5
 
 /* IMU (MPU6050) I2C Pins */
 #define I2C_MASTER_NUM              I2C_NUM_0
@@ -38,9 +38,9 @@
 
 /* Audio Output (I2S) Pins */
 #define I2S_MCLK_PIN                0  // Not used for MAX98357A
-#define I2S_BCK_PIN                 45  
+#define I2S_BCK_PIN                 47  
 #define I2S_WS_PIN                  46  
-#define I2S_DATA_OUT_PIN            47   
+#define I2S_DATA_OUT_PIN            45   
 #define I2S_SD_PIN                  48  
 
 /* Haptic Feedback Motor Pin */

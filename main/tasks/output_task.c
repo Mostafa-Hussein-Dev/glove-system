@@ -9,7 +9,6 @@
 #include "drivers/display.h"
 #include "drivers/audio.h"
 #include "drivers/haptic.h"
-#include "output/text_generation.h"
 #include "output/output_manager.h"
 #include "app_main.h"
 #include "config/system_config.h"
@@ -86,6 +85,7 @@ static void output_task(void *arg) {
         // Add this code wherever processing results are received from queue
         UBaseType_t result_queue_items = uxQueueMessagesWaiting(g_processing_result_queue);
         if (result_queue_items > (PROCESSING_QUEUE_SIZE * 0.9)) {
+            
             ESP_LOGW(TAG, "Processing result queue nearly full: %u/%d items", 
                     (unsigned int)result_queue_items, PROCESSING_QUEUE_SIZE);
             
@@ -101,12 +101,10 @@ static void output_task(void *arg) {
 
         // Check for processing results
         if (xQueueReceive(g_processing_result_queue, &result, 0) == pdTRUE) {
-            // Generate text from the recognition result
-            char text[64];
-            text_generation_generate_text(&result, text, sizeof(text));
+            ESP_LOGI(TAG, "Gesture recognized: %s (confidence: %.2f)", 
+             result.gesture_name, result.confidence);
             
             // Create output commands based on the current output mode
-            bool display_enabled = true;  // Display is always available
             bool audio_enabled = g_system_config.audio_feedback_enabled;
             bool haptic_enabled = g_system_config.haptic_feedback_enabled;
 
@@ -114,7 +112,7 @@ static void output_task(void *arg) {
             if (!audio_enabled && !haptic_enabled) {
                 // TEXT_ONLY mode
                 command.type = OUTPUT_CMD_DISPLAY_TEXT;
-                strncpy(command.data.display.text, text, sizeof(command.data.display.text) - 1);
+                strncpy(command.data.display.text, result.gesture_name, sizeof(command.data.display.text) - 1);
                 command.data.display.size = DISPLAY_FONT_SMALL;
                 command.data.display.line = 1;
                 command.data.display.clear_first = true;
@@ -123,10 +121,9 @@ static void output_task(void *arg) {
                 output_manager_handle_command(&command);
                 
             } else if (audio_enabled && !haptic_enabled) {
-                // AUDIO_ONLY mode - but still show text for status
-                // Display the text
+
                 command.type = OUTPUT_CMD_DISPLAY_TEXT;
-                strncpy(command.data.display.text, text, sizeof(command.data.display.text) - 1);
+                strncpy(command.data.display.text, result.gesture_name, sizeof(command.data.display.text) - 1);
                 command.data.display.size = DISPLAY_FONT_SMALL;
                 command.data.display.line = 1;
                 command.data.display.clear_first = true;
@@ -135,7 +132,7 @@ static void output_task(void *arg) {
                 
                 // Speak the text
                 command.type = OUTPUT_CMD_SPEAK_TEXT;
-                strncpy(command.data.speak.text, text, sizeof(command.data.speak.text) - 1);
+                strncpy(command.data.speak.text, result.gesture_name, sizeof(command.data.speak.text) - 1);
                 command.data.speak.priority = 0;
                 
                 output_manager_handle_command(&command);
@@ -144,7 +141,7 @@ static void output_task(void *arg) {
                 // TEXT_AND_AUDIO mode (full experience)
                 // Display the text
                 command.type = OUTPUT_CMD_DISPLAY_TEXT;
-                strncpy(command.data.display.text, text, sizeof(command.data.display.text) - 1);
+                strncpy(command.data.display.text, result.gesture_name, sizeof(command.data.display.text) - 1);
                 command.data.display.size = DISPLAY_FONT_SMALL;
                 command.data.display.line = 1;
                 command.data.display.clear_first = true;
@@ -153,7 +150,7 @@ static void output_task(void *arg) {
                 
                 // Speak the text
                 command.type = OUTPUT_CMD_SPEAK_TEXT;
-                strncpy(command.data.speak.text, text, sizeof(command.data.speak.text) - 1);
+                strncpy(command.data.speak.text, result.gesture_name, sizeof(command.data.speak.text) - 1);
                 command.data.speak.priority = 0;
                 
                 output_manager_handle_command(&command);

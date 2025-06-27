@@ -41,7 +41,6 @@
 #include "processing/feature_extraction.h"
 #include "processing/gesture_detection.h"
 #include "communication/ble_service.h"
-#include "output/text_generation.h"
 #include "output/output_manager.h"
 #include "tasks/sensor_task.h"
 #include "tasks/processing_task.h"
@@ -535,13 +534,6 @@ static esp_err_t init_communication(void) {
 static esp_err_t init_output(void) {
     esp_err_t ret;
     
-    // Initialize text generation
-    ret = text_generation_init();
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to initialize text generation: %s", esp_err_to_name(ret));
-        return ret;
-    }
-    
     // Initialize output manager
     ret = output_manager_init();
     if (ret != ESP_OK) {
@@ -807,11 +799,11 @@ static void debug_mode_run(void) {
     // Display system information
     //debug_display_system_info();
     
-    uint32_t loop_count = 0;
-    uint32_t current_time = esp_timer_get_time() / 1000;
-    uint32_t last_full_test_time = 0;
+uint32_t loop_count = 0;
+    static uint32_t last_full_test_time = 0; 
     
     while (1) {
+        uint32_t current_time = esp_timer_get_time() / 1000; 
         
         ESP_LOGI("INIT", "\033[2J\033[H"); 
         ESP_LOGI(TAG, "=== DEBUG LOOP %lu ===\n", loop_count++);
@@ -826,6 +818,7 @@ static void debug_mode_run(void) {
         ESP_LOGI(TAG, "Testing Touch Sensors...");
         debug_test_touch_sensors();
 
+        /*
         ESP_LOGI(TAG, "Testing Audio...");
         debug_test_audio();
             
@@ -843,11 +836,10 @@ static void debug_mode_run(void) {
 
         ESP_LOGI(TAG, "Displaying System Info...");
         debug_display_system_info();
-        
 
-
-        // Test output devices every 10 seconds
-        if (current_time - last_full_test_time > 10000) {
+        if (last_full_test_time == 0 || (current_time - last_full_test_time > 10000)) {
+            ESP_LOGI(TAG, "=== RUNNING 10-SECOND TESTS ===");
+            
             ESP_LOGI(TAG, "Testing Display...");
             debug_test_display();
 
@@ -857,24 +849,17 @@ static void debug_mode_run(void) {
             ESP_LOGI(TAG, "Testing ML Inference Status...");
             debug_ml_inference_test();
 
-            // Test camera less frequently (every 20 seconds) due to performance
-            static uint32_t last_camera_test = 0;
-            if (current_time - last_camera_test > 20000) {
-                ESP_LOGI(TAG, "Testing Camera...");
-                debug_test_ble_camera();
-                last_camera_test = current_time;
-            }
-            
+            ESP_LOGI(TAG, "Testing Camera...");
+            debug_test_ble_camera();            
            
-            last_full_test_time = current_time;
-            
+            last_full_test_time = current_time;  
+            ESP_LOGI(TAG, "=== 10-SECOND TESTS COMPLETE ===");
         }
-        
-          
-        
+        */
+
         ESP_LOGI(TAG, "=== DEBUG LOOP %lu COMPLETE ===\n", loop_count - 1);
         
-        vTaskDelay(pdMS_TO_TICKS(DEBUG_MODE_TIME_INTERVAL));
+        vTaskDelay(pdMS_TO_TICKS(40));
     }
 }
 
@@ -926,7 +911,7 @@ static void debug_test_imu(void) {
 }
 
 static void debug_test_ble_camera(void) {
-    ESP_LOGI(TAG, "--- BLE Camera Test ---");
+    ESP_LOGI(TAG, "=== BLE Camera Test ===");
     
     // Initialize BLE camera
     esp_err_t ret = ble_camera_init();
@@ -939,7 +924,16 @@ static void debug_test_ble_camera(void) {
     
     // Attempt to connect
     ESP_LOGI(TAG, "Attempting to connect to ESP32 CAMERA...");
-    ret = ble_camera_connect(DEVICE_NAME);
+    if (!ble_camera_is_connected()) {
+        ESP_LOGW(TAG, "Camera not connected, attempting connection...");
+            ble_camera_disconnect();  // Clean disconnect first
+        vTaskDelay(pdMS_TO_TICKS(1000));  // Wait 1 second
+        ble_camera_connect(DEVICE_NAME);
+        return;
+    }
+
+    ESP_LOGI(TAG, "Camera connected! Testing capture...");
+
     debug_camera_state();
     if (ret != ESP_OK) {
         ESP_LOGW(TAG, "⚠ BLE Camera: Connection failed (camera may not be available)");

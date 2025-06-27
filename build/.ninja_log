@@ -3,16 +3,16 @@
 30509	31433	7724357670633442	esp-idf/esp_hw_support/CMakeFiles/__idf_esp_hw_support.dir/rtc_module.c.obj	34e942ce415bf91a
 37717	38271	7724357742727399	esp-idf/spi_flash/CMakeFiles/__idf_spi_flash.dir/spi_flash_chip_th.c.obj	f878afb2d93167c1
 302	380	7724084531319728	project_elf_src_esp32s3.c	f016268f0f5fe48
+6307	7729	7724357428631841	esp-idf/wpa_supplicant/CMakeFiles/__idf_wpa_supplicant.dir/src/eap_common/eap_wsc_common.c.obj	1dfa2b9a7d2acb3a
+135922	137336	7724358724789557	esp-idf/main/CMakeFiles/__idf_main.dir/util/i2c_utils.c.obj	629a03c9e7211692
 31942	32526	7724357684970195	esp-idf/esp_hw_support/CMakeFiles/__idf_esp_hw_support.dir/port/esp32s3/chip_info.c.obj	6caa3099c68fa797
 2183	2263	7724357387388664	esp-idf/esp_gdbstub/CMakeFiles/__idf_esp_gdbstub.dir/src/port/xtensa/xt_debugexception.S.obj	b25286ce50a648c7
-135922	137336	7724358724789557	esp-idf/main/CMakeFiles/__idf_main.dir/util/i2c_utils.c.obj	629a03c9e7211692
-6307	7729	7724357428631841	esp-idf/wpa_supplicant/CMakeFiles/__idf_wpa_supplicant.dir/src/eap_common/eap_wsc_common.c.obj	1dfa2b9a7d2acb3a
 97559	101259	7724358341196580	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/micro_interpreter_context.cc.obj	5c0fb4e695903827
 30160	30797	7724357667147946	esp-idf/freertos/CMakeFiles/__idf_freertos.dir/esp_additions/idf_additions.c.obj	f1373077a0c0c4a0
 11319	11997	7724357478741982	esp-idf/esp_netif/CMakeFiles/__idf_esp_netif.dir/esp_netif_objects.c.obj	a2932ad58d80839a
 54371	57311	7724357909256574	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/bta/gatt/bta_gattc_api.c.obj	1b8636b1792039e7
-19424	21806	7724357559780631	esp-idf/lwip/CMakeFiles/__idf_lwip.dir/apps/dhcpserver/dhcpserver.c.obj	28a332e594c2f35b
 284	1029	7724084532303277	partition_table/partition-table.bin	859c7dfdacbc4425
+19424	21806	7724357559780631	esp-idf/lwip/CMakeFiles/__idf_lwip.dir/apps/dhcpserver/dhcpserver.c.obj	28a332e594c2f35b
 75044	77960	7724358115985817	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/avrc/avrc_bld_tg.c.obj	ac8d5dee08f00939
 199	311	7724357368578636	esp-idf/esp_system/ld/memory.ld	a94d47c105309256
 105187	108801	7724358417419980	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/floor.cc.obj	641bce25a277455c
@@ -172,7 +172,7 @@
 2201	3408	7724357387575410	esp-idf/esp_adc/CMakeFiles/__idf_esp_adc.dir/adc_oneshot.c.obj	c8daf1e58349dee5
 112952	117068	7724358495076030	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/reshape.cc.obj	a226d634141f5aa0
 33112	33891	7724357696670505	esp-idf/heap/CMakeFiles/__idf_heap.dir/heap_caps_init.c.obj	587890874c6f4645
-967	1173	7725191308086746	esp-idf/main/libmain.a	30ae495542684c4b
+1399	1657	7725986318940249	esp-idf/main/libmain.a	9217ca18ffc1bb77
 3521	4420	7724357400758691	esp-idf/esp_wifi/CMakeFiles/__idf_esp_wifi.dir/src/wifi_default_ap.c.obj	b0a81e777cecb2ca
 2455	3688	7724357390102864	esp-idf/esp_adc/CMakeFiles/__idf_esp_adc.dir/adc_monitor.c.obj	41b66bdd76bd0652
 32780	32846	7724357693350652	esp-idf/soc/CMakeFiles/__idf_soc.dir/esp32s3/sdm_periph.c.obj	f9d18b5f67e332e
@@ -216,7 +216,7 @@
 3639	5621	7724357401944566	esp-idf/esp_wifi/CMakeFiles/__idf_esp_wifi.dir/src/smartconfig_ack.c.obj	f95d6f1082a6ccca
 124878	124971	7724358614332067	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/signal/src/filter_bank_log.cc.obj	e0efd15e70a9a101
 31219	32148	7724357677734558	esp-idf/esp_hw_support/CMakeFiles/__idf_esp_hw_support.dir/spi_share_hw_ctrl.c.obj	8a334ff442ff8d81
-222	458	7725191300629507	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+279	491	7725986307740038	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
 3601	5501	7724357401560550	esp-idf/esp_wifi/CMakeFiles/__idf_esp_wifi.dir/esp32s3/esp_adapter.c.obj	5327fba4a948c4e0
 36930	37849	7724357734852695	esp-idf/esp_system/CMakeFiles/__idf_esp_system.dir/port/soc/esp32s3/apb_backup_dma.c.obj	5c3afc3f457e68f8
 128358	128590	7724358649127825	esp-idf/esp_eth/libesp_eth.a	14cf98d1fbc061ed
@@ -394,7 +394,7 @@
 9851	11318	7724357464063093	esp-idf/wpa_supplicant/CMakeFiles/__idf_wpa_supplicant.dir/esp_supplicant/src/esp_owe.c.obj	906684d60f28c130
 47042	47454	7724357835966568	esp-idf/esp_pm/CMakeFiles/__idf_esp_pm.dir/pm_trace.c.obj	cab0df7aa9d4f323
 9902	11394	7724357464572254	esp-idf/wpa_supplicant/CMakeFiles/__idf_wpa_supplicant.dir/esp_supplicant/src/esp_hostap.c.obj	68f57a1045c1b439
-132736	134624	7724358692906013	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/display.c.obj	36ab58d1d8f53981
+331	1460	7725955724992259	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/display.c.obj	36ab58d1d8f53981
 64172	67367	7724358007267157	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/btc/profile/std/a2dp/btc_a2dp_control.c.obj	907691d587b97d8a
 24612	25530	7724357611671297	esp-idf/esp_driver_mcpwm/CMakeFiles/__idf_esp_driver_mcpwm.dir/src/mcpwm_timer.c.obj	9010744fd2b63ea9
 34698	35289	7724357712531444	esp-idf/hal/CMakeFiles/__idf_hal.dir/spi_slave_hd_hal.c.obj	3853d4f43e909178
@@ -509,8 +509,8 @@
 16337	17596	7724357528970994	esp-idf/lwip/CMakeFiles/__idf_lwip.dir/lwip/src/netif/ppp/chap_ms.c.obj	970c0644f0a9654
 14701	15905	7724357512553921	esp-idf/lwip/CMakeFiles/__idf_lwip.dir/lwip/src/core/ipv4/etharp.c.obj	255dd462fae96c95
 45477	46311	7724357820319488	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/__/__/port/sha/dma/esp_sha1.c.obj	3ed80870f78825d1
-96115	97674	7724358326699226	esp-idf/esp32-camera/CMakeFiles/__idf_esp32-camera.dir/sensors/bf3005.c.obj	11ae8edde5b50ff4
 63708	66889	7724358002633621	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/btc/profile/std/a2dp/bta_av_co.c.obj	4e624bef3c2aa417
+96115	97674	7724358326699226	esp-idf/esp32-camera/CMakeFiles/__idf_esp32-camera.dir/sensors/bf3005.c.obj	11ae8edde5b50ff4
 14798	16042	7724357513537013	esp-idf/lwip/CMakeFiles/__idf_lwip.dir/lwip/src/core/ipv4/igmp.c.obj	19e3e81da66d9dfd
 14730	15988	7724357512851144	esp-idf/lwip/CMakeFiles/__idf_lwip.dir/lwip/src/core/ipv4/icmp.c.obj	c81fe9c0aeb4cbe7
 80531	83664	7724358170865772	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/gap/gap_api.c.obj	705f8ade97f44cb
@@ -571,7 +571,7 @@
 32863	32943	7724357694179036	esp-idf/soc/CMakeFiles/__idf_soc.dir/esp32s3/lcd_periph.c.obj	8f25130a3688abb5
 28465	29434	7724357650201108	esp-idf/pthread/CMakeFiles/__idf_pthread.dir/pthread_semaphore.c.obj	e4fa2320bd0da1c7
 25236	28136	7724357617937613	esp-idf/nvs_flash/CMakeFiles/__idf_nvs_flash.dir/src/nvs_page.cpp.obj	86b64bd8324df378
-222	458	7725191300629507	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+279	491	7725986307740038	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
 16636	17852	7724357531917690	esp-idf/lwip/CMakeFiles/__idf_lwip.dir/lwip/src/netif/ppp/ipv6cp.c.obj	80150324537a5b9a
 40387	41038	7724357769424553	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedtls.dir/ssl_tls13_server.c.obj	444c2c3bea6cbe13
 232	478	7724360229322137	esp-idf/esp32-camera-master/libesp32-camera-master.a	e7a0aba4df46a55b
@@ -730,7 +730,7 @@
 26491	27405	7724357630450405	esp-idf/esp_event/CMakeFiles/__idf_esp_event.dir/esp_event.c.obj	e890e4db8e8c19d6
 27093	28294	7724357636491365	esp-idf/esp_driver_uart/CMakeFiles/__idf_esp_driver_uart.dir/src/uart_vfs.c.obj	6af4a3dddbd74fc
 41949	42682	7724357785042028	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/ccm.c.obj	875a70e1a63fcba2
-516	609	7725191304427641	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+545	651	7725986311374521	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
 25115	27992	7724357616697700	esp-idf/nvs_flash/CMakeFiles/__idf_nvs_flash.dir/src/nvs_cxx_api.cpp.obj	4d866282adc1e310
 27449	28311	7724357640038223	esp-idf/esp_driver_gptimer/CMakeFiles/__idf_esp_driver_gptimer.dir/src/gptimer_common.c.obj	3c3eb9fe74734502
 37148	37766	7724357737034742	esp-idf/spi_flash/CMakeFiles/__idf_spi_flash.dir/spi_flash_chip_drivers.c.obj	5d97a3d98b046fd5
@@ -774,7 +774,7 @@
 134379	137592	7724358709340870	esp-idf/main/CMakeFiles/__idf_main.dir/ml/ml_test.cpp.obj	f07e5a9b7e573301
 29135	29561	7724357656928031	esp-idf/newlib/CMakeFiles/__idf_newlib.dir/termios.c.obj	63420be6666474b0
 64579	67686	7724358011341179	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/btc/profile/std/avrc/btc_avrc.c.obj	b3ef6c782eb01c66
-222	458	7725191300629507	bootloader/bootloader.elf	74242a8008610cd9
+279	491	7725986307740038	bootloader/bootloader.elf	74242a8008610cd9
 34431	34745	7724357709870446	esp-idf/hal/CMakeFiles/__idf_hal.dir/sdm_hal.c.obj	69055e3a99f253d1
 25624	28565	7724357621804962	esp-idf/nvs_flash/CMakeFiles/__idf_nvs_flash.dir/src/nvs_types.cpp.obj	5aed75946b711b12
 29367	29855	7724357659222319	esp-idf/newlib/CMakeFiles/__idf_newlib.dir/scandir.c.obj	9eb9fcc5af9f2e9a
@@ -786,7 +786,7 @@
 129891	130959	7724358664468796	esp-idf/fatfs/CMakeFiles/__idf_fatfs.dir/port/freertos/ffsystem.c.obj	bd0c3355bbdcddf5
 98808	102316	7724358353632214	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/assign_variable.cc.obj	1423fffdb5cce5d3
 29454	30381	7724357660101567	esp-idf/freertos/CMakeFiles/__idf_freertos.dir/port_common.c.obj	d3eac650ecb37c65
-41662	41859	7724357782169880	esp-idf/esp_app_format/libesp_app_format.a	337164afc2afe126
+682	828	7725884273828558	esp-idf/esp_app_format/libesp_app_format.a	337164afc2afe126
 30584	32023	7724357671385203	esp-idf/esp_hw_support/CMakeFiles/__idf_esp_hw_support.dir/sleep_modes.c.obj	2ea6b1cda7cbe65d
 44884	45529	7724357814400237	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/__/__/port/sha/dma/esp_sha_gdma_impl.c.obj	a191cce16602673f
 29435	30367	7724357659904586	esp-idf/freertos/CMakeFiles/__idf_freertos.dir/app_startup.c.obj	2f58198a08b6091f
@@ -812,7 +812,7 @@
 30494	30896	7724357670491434	esp-idf/esp_hw_support/CMakeFiles/__idf_esp_hw_support.dir/revision.c.obj	c93620a280986522
 34863	35358	7724357714177129	esp-idf/hal/CMakeFiles/__idf_hal.dir/usb_serial_jtag_hal.c.obj	84371568d4a36f6
 30444	31028	7724357669987002	esp-idf/esp_hw_support/CMakeFiles/__idf_esp_hw_support.dir/mac_addr.c.obj	3b9f48d9434f946a
-195	653	7725189913353247	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/audio.c.obj	40fc260d775b7176
+267	1398	7725986307624471	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/audio.c.obj	40fc260d775b7176
 29546	30508	7724357661007326	esp-idf/freertos/CMakeFiles/__idf_freertos.dir/FreeRTOS-Kernel/tasks.c.obj	10bb059f9b9aa5ce
 92755	93757	7724358293101761	esp-idf/esp_lcd/CMakeFiles/__idf_esp_lcd.dir/src/esp_lcd_panel_io.c.obj	e65c6a483508bf15
 30648	31218	7724357672028411	esp-idf/esp_hw_support/CMakeFiles/__idf_esp_hw_support.dir/sleep_console.c.obj	9f9f5b62f102fe60
@@ -920,7 +920,7 @@
 34302	34685	7724357708567918	esp-idf/hal/CMakeFiles/__idf_hal.dir/twai_hal_iram.c.obj	2d979a60e145bdb1
 34265	34650	7724357708195864	esp-idf/hal/CMakeFiles/__idf_hal.dir/twai_hal.c.obj	b4b3391406e7d587
 34225	34606	7724357707807310	esp-idf/hal/CMakeFiles/__idf_hal.dir/mcpwm_hal.c.obj	a2f5cfead91f4547
-18203	18306	7725191480441711	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+20811	20925	7725986513065447	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
 34376	34698	7724357709308694	esp-idf/hal/CMakeFiles/__idf_hal.dir/gdma_hal_top.c.obj	ded2916f73490f42
 58352	61271	7724357949080183	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/bta/jv/bta_jv_cfg.c.obj	ea5e208c2a0d9b8e
 91049	91739	7724358276042604	esp-idf/console/CMakeFiles/__idf_console.dir/argtable3/arg_dbl.c.obj	db5d291fa639e204
@@ -1057,7 +1057,7 @@
 45445	46290	7724357820007338	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/__/__/port/bignum/bignum_alt.c.obj	4d1fe30d14baa822
 75957	79137	7724358125114977	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/hid/hidh_conn.c.obj	b04b572918bbdfa4
 39389	40111	7724357759442305	esp-idf/efuse/CMakeFiles/__idf_efuse.dir/esp32s3/esp_efuse_utility.c.obj	a4b4871ae03c99a8
-99	14552	7725225961903081	build.ninja	31a0992e358641cd
+113	16827	7726068291249689	build.ninja	31a0992e358641cd
 39437	40137	7724357759936117	esp-idf/efuse/CMakeFiles/__idf_efuse.dir/src/esp_efuse_fields.c.obj	573d004aff83a1ba
 76011	79168	7724358125667349	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/btm/btm_ble.c.obj	a59d3d37da8102f0
 39931	40889	7724357764857506	esp-idf/esp_bootloader_format/CMakeFiles/__idf_esp_bootloader_format.dir/esp_bootloader_desc.c.obj	6600ae95fdb5d5f9
@@ -1077,7 +1077,7 @@
 40045	40535	7724357765993702	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedtls.dir/mps_trace.c.obj	c719745cfe9e657b
 45243	46014	7724357817969986	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/__/__/port/aes/esp_aes_common.c.obj	fbd51415b70b7204
 42806	43747	7724357793617875	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/md.c.obj	ea5b1b1fd446edc8
-39946	41235	7724357765009340	esp-idf/esp_app_format/CMakeFiles/__idf_esp_app_format.dir/esp_app_desc.c.obj	33741b3905a15f9b
+253	681	7725884269543185	esp-idf/esp_app_format/CMakeFiles/__idf_esp_app_format.dir/esp_app_desc.c.obj	e4354a775321eda3
 40059	40813	7724357766134670	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedtls.dir/ssl_cache.c.obj	f41437fca5489e02
 65402	68688	7724358019574015	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/btc/profile/std/gap/btc_gap_ble.c.obj	a4c5bae5abd6a2
 43479	44307	7724357800337443	esp-idf/mbedtls/mbedtls/library/CMakeFiles/mbedcrypto.dir/platform_util.c.obj	4d071c6efad2cdc3
@@ -1183,7 +1183,7 @@
 45799	46395	7724357823538227	esp-idf/mbedtls/mbedtls/3rdparty/p256-m/CMakeFiles/p256m.dir/p256-m/p256-m.c.obj	be47309d50de61c4
 47786	47906	7724085006617138	bootloader-prefix/src/bootloader-stamp/bootloader-update	de786e7fe0511c4e
 47786	47906	7724085006617138	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-update	de786e7fe0511c4e
-222	458	7725191300629507	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+279	491	7725986307740038	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
 41465	41662	7724357780203262	esp-idf/esp_bootloader_format/libesp_bootloader_format.a	7eb6fdf46ea71c6b
 45614	45898	7724357821688670	esp-idf/mbedtls/mbedtls/library/libmbedx509.a	4a7c9d287f864fa7
 97531	101122	7724358340899125	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/micro_context.cc.obj	b0543750417896cb
@@ -1349,7 +1349,7 @@
 77264	80531	7724358138185756	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/btm/btm_ble_adv_filter.c.obj	3309a2819966fc74
 77387	80593	7724358139420501	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/btm/btm_ble_bgconn.c.obj	b87ed172c9dd71c4
 78614	81854	7724358151695112	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/btm/btm_main.c.obj	cc96f39383d2310b
-516	609	7725191304427641	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+545	651	7725986311374521	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
 78053	81412	7724358146074373	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/btm/btm_ble_privacy.c.obj	c9077a381bbb586b
 117515	121226	7724358540703144	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/unidirectional_sequence_lstm.cc.obj	c688941902aa9ba
 78778	82071	7724358153383686	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/btm/btm_pm.c.obj	cf968f986daec6ff
@@ -1380,7 +1380,7 @@
 84490	86542	7724358210459507	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/obex/obex_api.c.obj	68055f97c2ac6b89
 84358	87574	7724358209124478	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/l2cap/l2c_main.c.obj	1d39d4c6dc5f31eb
 85083	88175	7724358216371523	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/rfcomm/rfc_l2cap_if.c.obj	1f24506f48ce34d6
-228	1290	7725178661203350	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
+289	361	7725985173872128	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
 84838	88042	7724358213926051	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/rfcomm/port_utils.c.obj	f51708acdfed2443
 84717	87946	7724358212723907	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/rfcomm/port_api.c.obj	39df57da80b91f3e
 84754	87919	7724358213095648	esp-idf/bt/CMakeFiles/__idf_bt.dir/host/bluedroid/stack/rfcomm/port_rfc.c.obj	723ca6b9e78dc1ee
@@ -1507,7 +1507,7 @@
 101287	105187	7724358378424659	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/circular_buffer.cc.obj	6d52f375ae32c401
 102017	105791	7724358385727170	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/dequantize.cc.obj	6fdabe2f2fcad62
 101771	105622	7724358383263742	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/depth_to_space.cc.obj	b78560e7cf63e94
-459	516	7725191303009788	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+492	545	7725986309865995	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
 101350	105203	7724358379049148	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/circular_buffer_common.cc.obj	833825278ecfb557
 102316	106075	7724358388717390	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/dequantize_common.cc.obj	bed13455da1e9a0b
 100632	104365	7724358371870554	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/batch_matmul.cc.obj	3a5bd02d870aeba
@@ -1547,7 +1547,7 @@
 113329	117229	7724358498835644	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/shape.cc.obj	30ac45c33ab3748e
 117088	120974	7724358536426346	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/transpose.cc.obj	25749612a38300e
 113152	117172	7724358497069229	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/round.cc.obj	b5b8fc83aa4f7af1
-135414	137924	7724358719687790	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/power_task.c.obj	6a60fe7026a82215
+275	1134	7725893406910568	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/power_task.c.obj	6a60fe7026a82215
 127444	128403	7724358639989934	esp-idf/app_trace/CMakeFiles/__idf_app_trace.dir/host_file_io.c.obj	d94763a484247cd7
 115520	119437	7724358520746783	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/split.cc.obj	83834782ddf8dc94
 115992	119816	7724358525475997	esp-idf/esp-tflite-micro/CMakeFiles/__idf_esp-tflite-micro.dir/tensorflow/lite/micro/kernels/squeeze.cc.obj	1b8c2d2688e39960
@@ -1612,8 +1612,8 @@
 129201	130439	7724358657560140	esp-idf/esp_local_ctrl/CMakeFiles/__idf_esp_local_ctrl.dir/src/esp_local_ctrl_transport_ble.c.obj	75fa93931b187e0a
 128914	129886	7724358654684050	esp-idf/esp_local_ctrl/CMakeFiles/__idf_esp_local_ctrl.dir/src/esp_local_ctrl.c.obj	cbe4057706e2ab2d
 129405	130739	7724358659586495	esp-idf/espcoredump/CMakeFiles/__idf_espcoredump.dir/src/core_dump_flash.c.obj	54f304d84ce3edb8
-12254	17844	7725191420958753	glove-system.elf	ae676e3b56759347
-135280	137862	7724358718346324	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/communication_task.c.obj	192594106eebb24c
+14251	20436	7725986447455244	glove-system.elf	ae676e3b56759347
+313	1419	7725892154712348	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/communication_task.c.obj	192594106eebb24c
 129754	130096	7724358663105535	esp-idf/wear_levelling/libwear_levelling.a	adaacb299667743d
 129632	130859	7724358661869878	esp-idf/espcoredump/CMakeFiles/__idf_espcoredump.dir/src/port/xtensa/core_dump_port.c.obj	f940f7961afc0366
 130507	130802	7724358670629004	esp-idf/json/libjson.a	f9b19e759c87fcd5
@@ -1646,13 +1646,13 @@
 132247	133401	7724358688028489	esp-idf/wifi_provisioning/CMakeFiles/__idf_wifi_provisioning.dir/src/scheme_softap.c.obj	161c1194689aff44
 132266	133546	7724358688220751	esp-idf/wifi_provisioning/CMakeFiles/__idf_wifi_provisioning.dir/src/scheme_ble.c.obj	19b1991d374da335
 132427	135279	7724358689821813	esp-idf/main/CMakeFiles/__idf_main.dir/config/system_config.c.obj	243a9d5b87a81eda
-132451	135888	7724358690068352	esp-idf/main/CMakeFiles/__idf_main.dir/core/power_management.c.obj	2a915cf0df807249
+299	1443	7725892154571621	esp-idf/main/CMakeFiles/__idf_main.dir/core/power_management.c.obj	2a915cf0df807249
 132484	135856	7724358690391340	esp-idf/main/CMakeFiles/__idf_main.dir/core/system_monitor.c.obj	4a9b5701efaf75a2
 132555	134402	7724358691096796	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/imu.c.obj	4aa2774a6008996
-132614	134379	7724358691691257	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/ble_camera.c.obj	afbee9cbcb3a4356
+293	1395	7725262311647529	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/ble_camera.c.obj	afbee9cbcb3a4356
 211	1139	7725171354686860	esp-idf/main/CMakeFiles/__idf_main.dir/processing/sensor_fusion.c.obj	e50eacb892caffa4
 133330	136637	7724358698840863	esp-idf/main/CMakeFiles/__idf_main.dir/processing/gesture_detection.c.obj	85cc6b3b2e406904
-134403	135413	7724358709578389	esp-idf/main/CMakeFiles/__idf_main.dir/communication/ble_service.c.obj	f4642eb68da00968
+281	1262	7725778762679941	esp-idf/main/CMakeFiles/__idf_main.dir/communication/ble_service.c.obj	f4642eb68da00968
 134431	137429	7724358709865636	esp-idf/main/CMakeFiles/__idf_main.dir/output/text_generation.c.obj	9e8b71bacfd902d8
 134624	137778	7724358711796039	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/processing_task.c.obj	75fb43106e3c29f6
 283	1073	7724364677487625	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/output_task.c.obj	3f7d4a930a79cea
@@ -1677,509 +1677,590 @@
 2039	2316	7724359615698943	esp-idf/usb/libusb.a	4a03d04ac8109ebd
 2222	2371	7724359617519784	esp-idf/i2cdev/libi2cdev.a	2b969f091606efd4
 132313	134653	7724358688675411	esp-idf/esp-tflite-micro/libesp-tflite-micro.a	b5ad4487cd41dcea
-222	458	7725191300629507	bootloader/bootloader.bin	74242a8008610cd9
-222	458	7725191300629507	bootloader/bootloader.map	74242a8008610cd9
-516	609	7725191304427641	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-222	458	7725191300629507	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-222	458	7725191300629507	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-459	516	7725191303009788	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-516	609	7725191304427641	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+279	491	7725986307740038	bootloader/bootloader.bin	74242a8008610cd9
+279	491	7725986307740038	bootloader/bootloader.map	74242a8008610cd9
+545	651	7725986311374521	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+279	491	7725986307740038	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+279	491	7725986307740038	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+492	545	7725986309865995	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+545	651	7725986311374521	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
 133401	146186	7724358699557532	esp-idf/main/CMakeFiles/__idf_main.dir/ml/ml_inference.cpp.obj	9c52bf6c7061ea4d
-1173	12253	7725191420464700	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-1173	12253	7725191420464700	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+1658	14249	7725986446928903	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+1658	14249	7725986446928903	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
 12006	12041	7724361760276267	CMakeFiles/glove-system.elf.dir/project_elf_src_esp32s3.c.obj	179181cfdf725742
-17845	18202	7725191480356675	.bin_timestamp	228c157c6d5508ab
-17845	18202	7725191480356675	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
-18203	18306	7725191480441711	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+20436	20811	7725986512985094	.bin_timestamp	228c157c6d5508ab
+20436	20811	7725986512985094	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+20811	20925	7725986513065447	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
 249	586	7725178661414502	CMakeFiles/spiffs_spiffs_bin	67849993bc211207
 249	586	7725178661414502	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/spiffs_spiffs_bin	67849993bc211207
 211	967	7725191300528162	esp-idf/main/CMakeFiles/__idf_main.dir/communication/ble_services.c.obj	32a58e5b88f16064
-116	14713	7725225961903081	build.ninja	31a0992e358641cd
-184	614	7725225964850790	esp-idf/esp_app_format/CMakeFiles/__idf_esp_app_format.dir/esp_app_desc.c.obj	1b5b3cc435efaf8
-615	765	7725225969150570	esp-idf/esp_app_format/libesp_app_format.a	337164afc2afe126
-194	10096	7725225964941082	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-194	10096	7725225964941082	bootloader/bootloader.elf	74242a8008610cd9
-194	10096	7725225964941082	bootloader/bootloader.bin	74242a8008610cd9
-194	10096	7725225964941082	bootloader/bootloader.map	74242a8008610cd9
-194	10096	7725225964941082	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-194	10096	7725225964941082	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-194	10096	7725225964941082	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-194	10096	7725225964941082	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-246	464	7725228470537707	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-246	464	7725228470537707	bootloader/bootloader.elf	74242a8008610cd9
-246	464	7725228470537707	bootloader/bootloader.bin	74242a8008610cd9
-246	464	7725228470537707	bootloader/bootloader.map	74242a8008610cd9
-246	464	7725228470537707	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-246	464	7725228470537707	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-246	464	7725228470537707	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-246	464	7725228470537707	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-465	525	7725228472731910	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-465	525	7725228472731910	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-526	638	7725228474361504	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-526	638	7725228474361504	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-526	638	7725228474361504	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-526	638	7725228474361504	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-199	1591	7725228470067906	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
-355	640	7725228837871853	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-355	640	7725228837871853	bootloader/bootloader.elf	74242a8008610cd9
-355	640	7725228837871853	bootloader/bootloader.bin	74242a8008610cd9
-355	640	7725228837871853	bootloader/bootloader.map	74242a8008610cd9
-355	640	7725228837871853	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-355	640	7725228837871853	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-355	640	7725228837871853	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-355	640	7725228837871853	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-641	713	7725228840737500	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-641	713	7725228840737500	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-714	853	7725228842733313	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-714	853	7725228842733313	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-714	853	7725228842733313	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-714	853	7725228842733313	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-292	2451	7725228837245960	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
-368	634	7725230617085349	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-368	634	7725230617085349	bootloader/bootloader.elf	74242a8008610cd9
-368	634	7725230617085349	bootloader/bootloader.bin	74242a8008610cd9
-368	634	7725230617085349	bootloader/bootloader.map	74242a8008610cd9
-368	634	7725230617085349	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-368	634	7725230617085349	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-368	634	7725230617085349	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-368	634	7725230617085349	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-635	702	7725230619756103	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-635	702	7725230619756103	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-702	839	7725230621688319	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-702	839	7725230621688319	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-702	839	7725230621688319	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-702	839	7725230621688319	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-336	1509	7725230616758602	esp-idf/main/CMakeFiles/__idf_main.dir/communication/ble_service.c.obj	f4642eb68da00968
-354	637	7725231992285321	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-354	637	7725231992285321	bootloader/bootloader.elf	74242a8008610cd9
-354	637	7725231992285321	bootloader/bootloader.bin	74242a8008610cd9
-354	637	7725231992285321	bootloader/bootloader.map	74242a8008610cd9
-354	637	7725231992285321	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-354	637	7725231992285321	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-354	637	7725231992285321	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-354	637	7725231992285321	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-638	705	7725231995128050	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-638	705	7725231995128050	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-705	848	7725231997077974	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-705	848	7725231997077974	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-705	848	7725231997077974	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-705	848	7725231997077974	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-339	601	7725233644074651	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-339	601	7725233644074651	bootloader/bootloader.elf	74242a8008610cd9
-339	601	7725233644074651	bootloader/bootloader.bin	74242a8008610cd9
-339	601	7725233644074651	bootloader/bootloader.map	74242a8008610cd9
-339	601	7725233644074651	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-339	601	7725233644074651	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-339	601	7725233644074651	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-339	601	7725233644074651	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-602	670	7725233646706914	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-602	670	7725233646706914	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-671	803	7725233648604398	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-671	803	7725233648604398	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-671	803	7725233648604398	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-671	803	7725233648604398	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-226	428	7725235227227323	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-226	428	7725235227227323	bootloader/bootloader.elf	74242a8008610cd9
-226	428	7725235227227323	bootloader/bootloader.bin	74242a8008610cd9
-226	428	7725235227227323	bootloader/bootloader.map	74242a8008610cd9
-226	428	7725235227227323	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-226	428	7725235227227323	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-226	428	7725235227227323	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-226	428	7725235227227323	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-429	485	7725235229261767	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-429	485	7725235229261767	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-485	593	7725235230810375	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-485	593	7725235230810375	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-485	593	7725235230810375	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-485	593	7725235230810375	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-220	408	7725237181093162	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-220	408	7725237181093162	bootloader/bootloader.elf	74242a8008610cd9
-220	408	7725237181093162	bootloader/bootloader.bin	74242a8008610cd9
-220	408	7725237181093162	bootloader/bootloader.map	74242a8008610cd9
-220	408	7725237181093162	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-220	408	7725237181093162	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-220	408	7725237181093162	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-220	408	7725237181093162	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-409	459	7725237182982724	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-409	459	7725237182982724	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-459	566	7725237184466932	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-459	566	7725237184466932	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-459	566	7725237184466932	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-459	566	7725237184466932	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-334	605	7725237799796296	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-334	605	7725237799796296	bootloader/bootloader.elf	74242a8008610cd9
-334	605	7725237799796296	bootloader/bootloader.bin	74242a8008610cd9
-334	605	7725237799796296	bootloader/bootloader.map	74242a8008610cd9
-334	605	7725237799796296	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-334	605	7725237799796296	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-334	605	7725237799796296	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-334	605	7725237799796296	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-606	668	7725237802513421	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-606	668	7725237802513421	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-669	796	7725237804307461	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-669	796	7725237804307461	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-669	796	7725237804307461	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-669	796	7725237804307461	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-220	409	7725238015707595	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-220	409	7725238015707595	bootloader/bootloader.elf	74242a8008610cd9
-220	409	7725238015707595	bootloader/bootloader.bin	74242a8008610cd9
-220	409	7725238015707595	bootloader/bootloader.map	74242a8008610cd9
-220	409	7725238015707595	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-220	409	7725238015707595	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-220	409	7725238015707595	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-220	409	7725238015707595	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-410	466	7725238017619004	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-410	466	7725238017619004	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-467	571	7725238019130418	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-467	571	7725238019130418	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-467	571	7725238019130418	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-467	571	7725238019130418	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-340	610	7725239060265012	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-340	610	7725239060265012	bootloader/bootloader.elf	74242a8008610cd9
-340	610	7725239060265012	bootloader/bootloader.bin	74242a8008610cd9
-340	610	7725239060265012	bootloader/bootloader.map	74242a8008610cd9
-340	610	7725239060265012	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-340	610	7725239060265012	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-340	610	7725239060265012	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-340	610	7725239060265012	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-612	681	7725239062983837	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-612	681	7725239062983837	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-681	820	7725239064937740	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-681	820	7725239064937740	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-681	820	7725239064937740	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-681	820	7725239064937740	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-230	452	7725240184767680	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-230	452	7725240184767680	bootloader/bootloader.elf	74242a8008610cd9
-230	452	7725240184767680	bootloader/bootloader.bin	74242a8008610cd9
-230	452	7725240184767680	bootloader/bootloader.map	74242a8008610cd9
-230	452	7725240184767680	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-230	452	7725240184767680	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-230	452	7725240184767680	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-230	452	7725240184767680	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-453	522	7725240187000644	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-453	522	7725240187000644	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-523	673	7725240189047192	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-523	673	7725240189047192	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-523	673	7725240189047192	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-523	673	7725240189047192	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-344	616	7725240840579409	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-344	616	7725240840579409	bootloader/bootloader.elf	74242a8008610cd9
-344	616	7725240840579409	bootloader/bootloader.bin	74242a8008610cd9
-344	616	7725240840579409	bootloader/bootloader.map	74242a8008610cd9
-344	616	7725240840579409	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-344	616	7725240840579409	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-344	616	7725240840579409	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-344	616	7725240840579409	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-617	684	7725240843320289	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-617	684	7725240843320289	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-684	816	7725240845202984	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-684	816	7725240845202984	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-684	816	7725240845202984	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-684	816	7725240845202984	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-328	1384	7725240840432864	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/communication_task.c.obj	192594106eebb24c
-298	1816	7725240840130604	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
-307	540	7725244322654943	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-307	540	7725244322654943	bootloader/bootloader.elf	74242a8008610cd9
-307	540	7725244322654943	bootloader/bootloader.bin	74242a8008610cd9
-307	540	7725244322654943	bootloader/bootloader.map	74242a8008610cd9
-307	540	7725244322654943	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-307	540	7725244322654943	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-307	540	7725244322654943	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-307	540	7725244322654943	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-541	602	7725244324997656	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-541	602	7725244324997656	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-602	711	7725244326608748	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-602	711	7725244326608748	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-602	711	7725244326608748	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-602	711	7725244326608748	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-292	1199	7725244322504101	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/ble_camera.c.obj	afbee9cbcb3a4356
-1200	1430	7725244331574721	esp-idf/main/libmain.a	9217ca18ffc1bb77
-1430	12815	7725244447195960	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-1430	12815	7725244447195960	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-12817	17697	7725244447749933	glove-system.elf	ae676e3b56759347
-17697	18040	7725244499892458	.bin_timestamp	228c157c6d5508ab
-17697	18040	7725244499892458	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
-18040	18141	7725244499977987	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-18040	18141	7725244499977987	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-379	449	7725253778077202	esp-idf/main/CMakeFiles/__idf_main.dir/communication/ble_service.c.obj	f4642eb68da00968
-397	666	7725253778254233	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-397	666	7725253778254233	bootloader/bootloader.elf	74242a8008610cd9
-397	666	7725253778254233	bootloader/bootloader.bin	74242a8008610cd9
-397	666	7725253778254233	bootloader/bootloader.map	74242a8008610cd9
-397	666	7725253778254233	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-397	666	7725253778254233	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-397	666	7725253778254233	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-397	666	7725253778254233	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-667	735	7725253780945919	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-667	735	7725253780945919	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-450	795	7725253778778891	esp-idf/main/libmain.a	9217ca18ffc1bb77
-735	871	7725253782863577	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-735	871	7725253782863577	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-735	871	7725253782863577	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-735	871	7725253782863577	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-795	14032	7725253913964058	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-795	14032	7725253913964058	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-14033	19529	7725253914610413	glove-system.elf	ae676e3b56759347
-19529	19876	7725253972954342	.bin_timestamp	228c157c6d5508ab
-19529	19876	7725253972954342	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
-19876	19982	7725253973041125	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-19876	19982	7725253973041125	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-332	594	7725255894015838	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-332	594	7725255894015838	bootloader/bootloader.elf	74242a8008610cd9
-332	594	7725255894015838	bootloader/bootloader.bin	74242a8008610cd9
-332	594	7725255894015838	bootloader/bootloader.map	74242a8008610cd9
-332	594	7725255894015838	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-332	594	7725255894015838	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-332	594	7725255894015838	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-332	594	7725255894015838	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-595	657	7725255896641639	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-595	657	7725255896641639	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-657	786	7725255898444058	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-657	786	7725255898444058	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-657	786	7725255898444058	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-657	786	7725255898444058	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-314	1795	7725255893837296	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
-1795	2104	7725255908647166	esp-idf/main/libmain.a	9217ca18ffc1bb77
-2104	15260	7725256042802020	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-2104	15260	7725256042802020	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-15261	20240	7725256043303455	glove-system.elf	ae676e3b56759347
-20241	20560	7725256096224547	.bin_timestamp	228c157c6d5508ab
-20241	20560	7725256096224547	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
-20561	20669	7725256096299695	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-20561	20669	7725256096299695	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-228	290	7725259929743938	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/ble_camera.c.obj	afbee9cbcb3a4356
-242	447	7725259929879245	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-242	447	7725259929879245	bootloader/bootloader.elf	74242a8008610cd9
-242	447	7725259929879245	bootloader/bootloader.bin	74242a8008610cd9
-242	447	7725259929879245	bootloader/bootloader.map	74242a8008610cd9
-242	447	7725259929879245	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-242	447	7725259929879245	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-242	447	7725259929879245	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-242	447	7725259929879245	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-448	499	7725259931936778	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-448	499	7725259931936778	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-500	604	7725259933408046	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-500	604	7725259933408046	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-500	604	7725259933408046	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-500	604	7725259933408046	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-217	1344	7725259929633626	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
-1344	1587	7725259940896635	esp-idf/main/libmain.a	9217ca18ffc1bb77
-1588	12623	7725260053174741	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-1588	12623	7725260053174741	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-12625	17669	7725260053704220	glove-system.elf	ae676e3b56759347
-17670	18000	7725260107352000	.bin_timestamp	228c157c6d5508ab
-17670	18000	7725260107352000	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
-18001	18110	7725260107457259	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-18001	18110	7725260107457259	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-309	554	7725262311804445	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-309	554	7725262311804445	bootloader/bootloader.elf	74242a8008610cd9
-309	554	7725262311804445	bootloader/bootloader.bin	74242a8008610cd9
-309	554	7725262311804445	bootloader/bootloader.map	74242a8008610cd9
-309	554	7725262311804445	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-309	554	7725262311804445	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-309	554	7725262311804445	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-309	554	7725262311804445	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-556	617	7725262314271955	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-556	617	7725262314271955	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-618	749	7725262316107843	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-618	749	7725262316107843	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-618	749	7725262316107843	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-618	749	7725262316107843	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-293	1395	7725262311647529	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/ble_camera.c.obj	afbee9cbcb3a4356
-1395	1687	7725262322665274	esp-idf/main/libmain.a	9217ca18ffc1bb77
-1687	14594	7725262454181080	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-1687	14594	7725262454181080	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-14595	19459	7725262454658757	glove-system.elf	ae676e3b56759347
-19459	19772	7725262506347884	.bin_timestamp	228c157c6d5508ab
-19459	19772	7725262506347884	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
-19772	19871	7725262506433655	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-19772	19871	7725262506433655	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-340	628	7725264559438426	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-340	628	7725264559438426	bootloader/bootloader.elf	74242a8008610cd9
-340	628	7725264559438426	bootloader/bootloader.bin	74242a8008610cd9
-340	628	7725264559438426	bootloader/bootloader.map	74242a8008610cd9
-340	628	7725264559438426	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-340	628	7725264559438426	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-340	628	7725264559438426	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-340	628	7725264559438426	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-630	703	7725264562332984	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-630	703	7725264562332984	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-703	850	7725264564391134	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-703	850	7725264564391134	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-703	850	7725264564391134	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-703	850	7725264564391134	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-317	1513	7725264559196534	esp-idf/main/CMakeFiles/__idf_main.dir/communication/ble_service.c.obj	f4642eb68da00968
-1514	1866	7725264571166542	esp-idf/main/libmain.a	9217ca18ffc1bb77
-1866	14014	7725264695655521	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-1866	14014	7725264695655521	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-14015	19085	7725264696182017	glove-system.elf	ae676e3b56759347
-19086	19402	7725264749972875	.bin_timestamp	228c157c6d5508ab
-19086	19402	7725264749972875	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
-19403	19503	7725264750053735	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-19403	19503	7725264750053735	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-345	599	7725265209897516	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-345	599	7725265209897516	bootloader/bootloader.elf	74242a8008610cd9
-345	599	7725265209897516	bootloader/bootloader.bin	74242a8008610cd9
-345	599	7725265209897516	bootloader/bootloader.map	74242a8008610cd9
-345	599	7725265209897516	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-345	599	7725265209897516	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-345	599	7725265209897516	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-345	599	7725265209897516	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-601	672	7725265212447138	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-601	672	7725265212447138	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-672	812	7725265214456773	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-672	812	7725265214456773	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-672	812	7725265214456773	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-672	812	7725265214456773	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-317	573	7725265939955356	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-317	573	7725265939955356	bootloader/bootloader.elf	74242a8008610cd9
-317	573	7725265939955356	bootloader/bootloader.bin	74242a8008610cd9
-317	573	7725265939955356	bootloader/bootloader.map	74242a8008610cd9
-317	573	7725265939955356	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-317	573	7725265939955356	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-317	573	7725265939955356	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-317	573	7725265939955356	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-574	633	7725265942523884	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-574	633	7725265942523884	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-633	760	7725265944288800	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-633	760	7725265944288800	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-633	760	7725265944288800	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-633	760	7725265944288800	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-301	1324	7725265939799690	esp-idf/main/CMakeFiles/__idf_main.dir/communication/ble_service.c.obj	f4642eb68da00968
-1324	1563	7725265950025443	esp-idf/main/libmain.a	9217ca18ffc1bb77
-1564	12456	7725266060867958	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-1564	12456	7725266060867958	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-12457	17835	7725266061363651	glove-system.elf	ae676e3b56759347
-17836	18160	7725266118281856	.bin_timestamp	228c157c6d5508ab
-17836	18160	7725266118281856	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
-18160	18265	7725266118392259	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-18160	18265	7725266118392259	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-362	629	7725267943876656	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-362	629	7725267943876656	bootloader/bootloader.elf	74242a8008610cd9
-362	629	7725267943876656	bootloader/bootloader.bin	74242a8008610cd9
-362	629	7725267943876656	bootloader/bootloader.map	74242a8008610cd9
-362	629	7725267943876656	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-362	629	7725267943876656	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-362	629	7725267943876656	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-362	629	7725267943876656	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-630	701	7725267946553203	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-630	701	7725267946553203	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-702	842	7725267948572486	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-702	842	7725267948572486	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-702	842	7725267948572486	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-702	842	7725267948572486	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-346	1861	7725267943713866	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
-1862	2176	7725267958873793	esp-idf/main/libmain.a	9217ca18ffc1bb77
-2177	13367	7725268073436157	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-2177	13367	7725268073436157	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-13368	19178	7725268073929154	glove-system.elf	ae676e3b56759347
-19179	19510	7725268135268134	.bin_timestamp	228c157c6d5508ab
-19179	19510	7725268135268134	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
-19511	19613	7725268135353496	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-19511	19613	7725268135353496	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-229	421	7725269692749118	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-229	421	7725269692749118	bootloader/bootloader.elf	74242a8008610cd9
-229	421	7725269692749118	bootloader/bootloader.bin	74242a8008610cd9
-229	421	7725269692749118	bootloader/bootloader.map	74242a8008610cd9
-229	421	7725269692749118	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-229	421	7725269692749118	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-229	421	7725269692749118	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-229	421	7725269692749118	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-421	464	7725269694668969	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-421	464	7725269694668969	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-465	560	7725269695989491	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-465	560	7725269695989491	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-465	560	7725269695989491	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-465	560	7725269695989491	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-217	1226	7725269692623430	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
-1227	1438	7725269702723167	esp-idf/main/libmain.a	9217ca18ffc1bb77
-1438	12454	7725269814541977	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-1438	12454	7725269814541977	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-12456	17975	7725269815021419	glove-system.elf	ae676e3b56759347
-17975	18297	7725269873346515	.bin_timestamp	228c157c6d5508ab
-17975	18297	7725269873346515	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
-18298	18411	7725269873441699	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-18298	18411	7725269873441699	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-211	395	7725274118567650	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-211	395	7725274118567650	bootloader/bootloader.elf	74242a8008610cd9
-211	395	7725274118567650	bootloader/bootloader.bin	74242a8008610cd9
-211	395	7725274118567650	bootloader/bootloader.map	74242a8008610cd9
-211	395	7725274118567650	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-211	395	7725274118567650	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-211	395	7725274118567650	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-211	395	7725274118567650	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-396	442	7725274120418379	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-396	442	7725274120418379	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-442	547	7725274121842435	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-442	547	7725274121842435	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-442	547	7725274121842435	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-442	547	7725274121842435	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-200	869	7725274118452090	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/communication_task.c.obj	192594106eebb24c
-870	1075	7725274125150879	esp-idf/main/libmain.a	9217ca18ffc1bb77
-1075	11951	7725274235440392	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-1075	11951	7725274235440392	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-11952	17767	7725274235973568	glove-system.elf	ae676e3b56759347
-17767	18098	7725274297358480	.bin_timestamp	228c157c6d5508ab
-17767	18098	7725274297358480	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
-18099	18197	7725274297443742	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-18099	18197	7725274297443742	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-293	507	7725778762801870	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-293	507	7725778762801870	bootloader/bootloader.elf	74242a8008610cd9
-293	507	7725778762801870	bootloader/bootloader.bin	74242a8008610cd9
-293	507	7725778762801870	bootloader/bootloader.map	74242a8008610cd9
-293	507	7725778762801870	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-293	507	7725778762801870	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-293	507	7725778762801870	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-293	507	7725778762801870	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-508	565	7725778764951116	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-508	565	7725778764951116	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-565	671	7725778766496604	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-565	671	7725778766496604	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-565	671	7725778766496604	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-565	671	7725778766496604	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-281	1262	7725778762679941	esp-idf/main/CMakeFiles/__idf_main.dir/communication/ble_service.c.obj	f4642eb68da00968
-1262	1530	7725778772497377	esp-idf/main/libmain.a	9217ca18ffc1bb77
-1530	14799	7725778907340133	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-1530	14799	7725778907340133	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-14801	21764	7725778907871561	glove-system.elf	ae676e3b56759347
-21766	22149	7725778981280409	.bin_timestamp	228c157c6d5508ab
-21766	22149	7725778981280409	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
-22149	22262	7725778981365697	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-22149	22262	7725778981365697	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-293	505	7725779924085489	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-293	505	7725779924085489	bootloader/bootloader.elf	74242a8008610cd9
-293	505	7725779924085489	bootloader/bootloader.bin	74242a8008610cd9
-293	505	7725779924085489	bootloader/bootloader.map	74242a8008610cd9
-293	505	7725779924085489	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-293	505	7725779924085489	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-293	505	7725779924085489	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-293	505	7725779924085489	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-506	578	7725779926218483	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-506	578	7725779926218483	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-578	704	7725779928116891	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-578	704	7725779928116891	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-578	704	7725779928116891	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-578	704	7725779928116891	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-309	534	7725780736823854	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-309	534	7725780736823854	bootloader/bootloader.elf	74242a8008610cd9
-309	534	7725780736823854	bootloader/bootloader.bin	74242a8008610cd9
-309	534	7725780736823854	bootloader/bootloader.map	74242a8008610cd9
-309	534	7725780736823854	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
-309	534	7725780736823854	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
-309	534	7725780736823854	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
-309	534	7725780736823854	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
-535	604	7725780739096019	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-535	604	7725780739096019	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
-605	720	7725780740860729	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-605	720	7725780740860729	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-605	720	7725780740860729	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
-605	720	7725780740860729	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
-295	1800	7725780736696607	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
-1801	2072	7725780751740959	esp-idf/main/libmain.a	9217ca18ffc1bb77
-2072	16584	7725780898922885	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-2072	16584	7725780898922885	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
-16586	24153	7725780899606865	glove-system.elf	ae676e3b56759347
-24154	24716	7725780980820714	.bin_timestamp	228c157c6d5508ab
-24154	24716	7725780980820714	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
-24716	24851	7725780980906099	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
-24716	24851	7725780980906099	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+110	15475	7726068291249689	build.ninja	31a0992e358641cd
+238	438	7726068294573320	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+238	438	7726068294573320	bootloader/bootloader.elf	74242a8008610cd9
+238	438	7726068294573320	bootloader/bootloader.bin	74242a8008610cd9
+238	438	7726068294573320	bootloader/bootloader.map	74242a8008610cd9
+238	438	7726068294573320	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+238	438	7726068294573320	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+238	438	7726068294573320	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+238	438	7726068294573320	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+439	486	7726068296583552	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+439	486	7726068296583552	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+486	585	7726068297951784	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+486	585	7726068297951784	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+486	585	7726068297951784	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+486	585	7726068297951784	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+216	1598	7726068294358433	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
+333	533	7726071171228999	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+333	533	7726071171228999	bootloader/bootloader.elf	74242a8008610cd9
+333	533	7726071171228999	bootloader/bootloader.bin	74242a8008610cd9
+333	533	7726071171228999	bootloader/bootloader.map	74242a8008610cd9
+333	533	7726071171228999	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+333	533	7726071171228999	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+333	533	7726071171228999	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+333	533	7726071171228999	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+534	584	7726071173237412	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+534	584	7726071173237412	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+585	684	7726071174664381	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+585	684	7726071174664381	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+585	684	7726071174664381	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+585	684	7726071174664381	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+305	496	7726071553558058	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+305	496	7726071553558058	bootloader/bootloader.elf	74242a8008610cd9
+305	496	7726071553558058	bootloader/bootloader.bin	74242a8008610cd9
+305	496	7726071553558058	bootloader/bootloader.map	74242a8008610cd9
+305	496	7726071553558058	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+305	496	7726071553558058	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+305	496	7726071553558058	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+305	496	7726071553558058	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+497	543	7726071555480206	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+497	543	7726071555480206	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+544	644	7726071556867467	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+544	644	7726071556867467	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+544	644	7726071556867467	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+544	644	7726071556867467	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+248	442	7726071812111597	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+248	442	7726071812111597	bootloader/bootloader.elf	74242a8008610cd9
+248	442	7726071812111597	bootloader/bootloader.bin	74242a8008610cd9
+248	442	7726071812111597	bootloader/bootloader.map	74242a8008610cd9
+248	442	7726071812111597	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+248	442	7726071812111597	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+248	442	7726071812111597	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+248	442	7726071812111597	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+443	487	7726071814062186	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+443	487	7726071814062186	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+487	586	7726071815425367	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+487	586	7726071815425367	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+487	586	7726071815425367	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+487	586	7726071815425367	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+236	978	7726071811991126	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/output_task.c.obj	3f7d4a930a79cea
+978	1200	7726071819403607	esp-idf/main/libmain.a	f044c20365999b0
+1200	12476	7726071933870618	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+1200	12476	7726071933870618	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+12478	18031	7726071934404421	glove-system.elf	ae676e3b56759347
+18031	18376	7726071993311957	.bin_timestamp	228c157c6d5508ab
+18031	18376	7726071993311957	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+18376	18482	7726071993397103	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+18376	18482	7726071993397103	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+266	464	7726081998520768	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+266	464	7726081998520768	bootloader/bootloader.elf	74242a8008610cd9
+266	464	7726081998520768	bootloader/bootloader.bin	74242a8008610cd9
+266	464	7726081998520768	bootloader/bootloader.map	74242a8008610cd9
+266	464	7726081998520768	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+266	464	7726081998520768	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+266	464	7726081998520768	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+266	464	7726081998520768	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+465	509	7726082000514148	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+465	509	7726082000514148	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+509	607	7726082001855593	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+509	607	7726082001855593	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+509	607	7726082001855593	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+509	607	7726082001855593	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+255	1214	7726081998414822	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/audio.c.obj	40fc260d775b7176
+1214	1417	7726082008004133	esp-idf/main/libmain.a	f044c20365999b0
+1418	12277	7726082118154256	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+1418	12277	7726082118154256	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+12279	17456	7726082118644347	glove-system.elf	ae676e3b56759347
+17456	17786	7726082173633755	.bin_timestamp	228c157c6d5508ab
+17456	17786	7726082173633755	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+17786	17882	7726082173719381	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+17786	17882	7726082173719381	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+284	472	7726083259294215	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+284	472	7726083259294215	bootloader/bootloader.elf	74242a8008610cd9
+284	472	7726083259294215	bootloader/bootloader.bin	74242a8008610cd9
+284	472	7726083259294215	bootloader/bootloader.map	74242a8008610cd9
+284	472	7726083259294215	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+284	472	7726083259294215	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+284	472	7726083259294215	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+284	472	7726083259294215	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+473	520	7726083261192397	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+473	520	7726083261192397	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+521	628	7726083262652446	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+521	628	7726083262652446	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+521	628	7726083262652446	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+521	628	7726083262652446	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+273	1311	7726083259188666	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/audio.c.obj	40fc260d775b7176
+261	1503	7726083259073272	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
+1503	1728	7726083271487945	esp-idf/main/libmain.a	f044c20365999b0
+1728	12920	7726083385191848	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+1728	12920	7726083385191848	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+12921	18816	7726083385669038	glove-system.elf	ae676e3b56759347
+18816	19189	7726083448288664	.bin_timestamp	228c157c6d5508ab
+18816	19189	7726083448288664	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+19190	19291	7726083448363856	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+19190	19291	7726083448363856	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+373	613	7726088760981676	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+373	613	7726088760981676	bootloader/bootloader.elf	74242a8008610cd9
+373	613	7726088760981676	bootloader/bootloader.bin	74242a8008610cd9
+373	613	7726088760981676	bootloader/bootloader.map	74242a8008610cd9
+373	613	7726088760981676	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+373	613	7726088760981676	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+373	613	7726088760981676	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+373	613	7726088760981676	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+614	668	7726088763400785	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+614	668	7726088763400785	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+668	795	7726088765106174	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+668	795	7726088765106174	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+668	795	7726088765106174	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+668	795	7726088765106174	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+360	1663	7726088760845604	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
+1664	1894	7726088773884014	esp-idf/main/libmain.a	f044c20365999b0
+1895	13347	7726088890198256	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+1895	13347	7726088890198256	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+13349	19609	7726088890743569	glove-system.elf	ae676e3b56759347
+19610	19956	7726088956708320	.bin_timestamp	228c157c6d5508ab
+19610	19956	7726088956708320	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+19956	20070	7726088956808745	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+19956	20070	7726088956808745	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+258	451	7726089586761271	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+258	451	7726089586761271	bootloader/bootloader.elf	74242a8008610cd9
+258	451	7726089586761271	bootloader/bootloader.bin	74242a8008610cd9
+258	451	7726089586761271	bootloader/bootloader.map	74242a8008610cd9
+258	451	7726089586761271	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+258	451	7726089586761271	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+258	451	7726089586761271	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+258	451	7726089586761271	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+453	505	7726089588698224	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+453	505	7726089588698224	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+505	619	7726089590254050	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+505	619	7726089590254050	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+505	619	7726089590254050	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+505	619	7726089590254050	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+246	1549	7726089586641083	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
+1550	1778	7726089599683891	esp-idf/main/libmain.a	f044c20365999b0
+1778	12975	7726089713403513	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+1778	12975	7726089713403513	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+12976	18841	7726089713945703	glove-system.elf	ae676e3b56759347
+18841	19185	7726089775929380	.bin_timestamp	228c157c6d5508ab
+18841	19185	7726089775929380	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+19185	19296	7726089776035866	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+19185	19296	7726089776035866	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+288	477	7726091396514917	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+288	477	7726091396514917	bootloader/bootloader.elf	74242a8008610cd9
+288	477	7726091396514917	bootloader/bootloader.bin	74242a8008610cd9
+288	477	7726091396514917	bootloader/bootloader.map	74242a8008610cd9
+288	477	7726091396514917	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+288	477	7726091396514917	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+288	477	7726091396514917	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+288	477	7726091396514917	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+478	531	7726091398413963	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+478	531	7726091398413963	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+531	639	7726091399935394	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+531	639	7726091399935394	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+531	639	7726091399935394	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+531	639	7726091399935394	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+251	467	7726091567331738	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+251	467	7726091567331738	bootloader/bootloader.elf	74242a8008610cd9
+251	467	7726091567331738	bootloader/bootloader.bin	74242a8008610cd9
+251	467	7726091567331738	bootloader/bootloader.map	74242a8008610cd9
+251	467	7726091567331738	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+251	467	7726091567331738	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+251	467	7726091567331738	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+251	467	7726091567331738	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+468	516	7726091569505970	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+468	516	7726091569505970	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+517	617	7726091570903010	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+517	617	7726091570903010	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+517	617	7726091570903010	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+517	617	7726091570903010	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+240	1493	7726091567221445	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
+1494	1707	7726091579764000	esp-idf/main/libmain.a	f044c20365999b0
+1707	12641	7726091690737132	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+1707	12641	7726091690737132	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+12642	17873	7726091691245507	glove-system.elf	ae676e3b56759347
+17873	18202	7726091746755411	.bin_timestamp	228c157c6d5508ab
+17873	18202	7726091746755411	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+18203	18305	7726091746845186	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+18203	18305	7726091746845186	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+240	422	7726093558237397	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+240	422	7726093558237397	bootloader/bootloader.elf	74242a8008610cd9
+240	422	7726093558237397	bootloader/bootloader.bin	74242a8008610cd9
+240	422	7726093558237397	bootloader/bootloader.map	74242a8008610cd9
+240	422	7726093558237397	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+240	422	7726093558237397	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+240	422	7726093558237397	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+240	422	7726093558237397	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+423	469	7726093560067666	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+423	469	7726093560067666	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+469	577	7726093561504271	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+469	577	7726093561504271	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+469	577	7726093561504271	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+469	577	7726093561504271	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+230	1390	7726093558123559	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
+1391	1612	7726093569740111	esp-idf/main/libmain.a	f044c20365999b0
+1612	12676	7726093682026122	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+1612	12676	7726093682026122	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+12678	18180	7726093682604916	glove-system.elf	ae676e3b56759347
+18181	18564	7726093741376871	.bin_timestamp	228c157c6d5508ab
+18181	18564	7726093741376871	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+18564	18670	7726093741472235	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+18564	18670	7726093741472235	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+234	415	7726097977413406	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+234	415	7726097977413406	bootloader/bootloader.elf	74242a8008610cd9
+234	415	7726097977413406	bootloader/bootloader.bin	74242a8008610cd9
+234	415	7726097977413406	bootloader/bootloader.map	74242a8008610cd9
+234	415	7726097977413406	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+234	415	7726097977413406	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+234	415	7726097977413406	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+234	415	7726097977413406	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+416	462	7726097979229148	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+416	462	7726097979229148	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+462	566	7726097980647336	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+462	566	7726097980647336	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+462	566	7726097980647336	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+462	566	7726097980647336	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+223	1434	7726097977302968	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
+1435	1652	7726097989416762	esp-idf/main/libmain.a	f044c20365999b0
+1653	12533	7726098099891327	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+1653	12533	7726098099891327	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+12535	17693	7726098100421857	glove-system.elf	ae676e3b56759347
+17693	18031	7726098155302860	.bin_timestamp	228c157c6d5508ab
+17693	18031	7726098155302860	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+18031	18137	7726098155383254	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+18031	18137	7726098155383254	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+341	561	7726104230726629	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+341	561	7726104230726629	bootloader/bootloader.elf	74242a8008610cd9
+341	561	7726104230726629	bootloader/bootloader.bin	74242a8008610cd9
+341	561	7726104230726629	bootloader/bootloader.map	74242a8008610cd9
+341	561	7726104230726629	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+341	561	7726104230726629	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+341	561	7726104230726629	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+341	561	7726104230726629	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+562	616	7726104232925877	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+562	616	7726104232925877	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+616	734	7726104234567293	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+616	734	7726104234567293	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+616	734	7726104234567293	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+616	734	7726104234567293	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+323	1383	7726104230545099	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/ble_camera.c.obj	afbee9cbcb3a4356
+1383	1621	7726104241146901	esp-idf/main/libmain.a	f044c20365999b0
+1621	13141	7726104358209144	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+1621	13141	7726104358209144	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+13143	18652	7726104358739581	glove-system.elf	ae676e3b56759347
+18653	18989	7726104417108314	.bin_timestamp	228c157c6d5508ab
+18653	18989	7726104417108314	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+18989	19093	7726104417204188	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+18989	19093	7726104417204188	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+238	422	7726107588610829	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+238	422	7726107588610829	bootloader/bootloader.elf	74242a8008610cd9
+238	422	7726107588610829	bootloader/bootloader.bin	74242a8008610cd9
+238	422	7726107588610829	bootloader/bootloader.map	74242a8008610cd9
+238	422	7726107588610829	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+238	422	7726107588610829	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+238	422	7726107588610829	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+238	422	7726107588610829	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+423	469	7726107590456593	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+423	469	7726107590456593	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+469	577	7726107591914578	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+469	577	7726107591914578	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+469	577	7726107591914578	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+469	577	7726107591914578	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+227	1431	7726107588501269	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
+1432	1653	7726107600558293	esp-idf/main/libmain.a	f044c20365999b0
+1653	12713	7726107712867230	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+1653	12713	7726107712867230	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+12715	18329	7726107713375040	glove-system.elf	ae676e3b56759347
+18330	18660	7726107772728864	.bin_timestamp	228c157c6d5508ab
+18330	18660	7726107772728864	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+18660	18769	7726107772834021	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+18660	18769	7726107772834021	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+326	502	7726296163575068	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+326	502	7726296163575068	bootloader/bootloader.elf	74242a8008610cd9
+326	502	7726296163575068	bootloader/bootloader.bin	74242a8008610cd9
+326	502	7726296163575068	bootloader/bootloader.map	74242a8008610cd9
+326	502	7726296163575068	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+326	502	7726296163575068	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+326	502	7726296163575068	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+326	502	7726296163575068	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+503	546	7726296165343559	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+503	546	7726296165343559	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+547	657	7726296166797016	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+547	657	7726296166797016	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+547	657	7726296166797016	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+547	657	7726296166797016	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+315	1415	7726296163468888	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
+1415	1629	7726296174469905	esp-idf/main/libmain.a	f044c20365999b0
+1630	12476	7726296284584705	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+1630	12476	7726296284584705	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+12478	18579	7726296285109560	glove-system.elf	ae676e3b56759347
+18579	18907	7726296349306451	.bin_timestamp	228c157c6d5508ab
+18579	18907	7726296349306451	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+18908	19010	7726296349397278	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+18908	19010	7726296349397278	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+509	942	7726809749522501	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+509	942	7726809749522501	bootloader/bootloader.elf	74242a8008610cd9
+509	942	7726809749522501	bootloader/bootloader.bin	74242a8008610cd9
+509	942	7726809749522501	bootloader/bootloader.map	74242a8008610cd9
+509	942	7726809749522501	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+509	942	7726809749522501	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+509	942	7726809749522501	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+509	942	7726809749522501	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+944	1027	7726809753869953	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+944	1027	7726809753869953	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+1027	1234	7726809756635407	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+1027	1234	7726809756635407	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+1027	1234	7726809756635407	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+1027	1234	7726809756635407	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+406	1453	7726809748480895	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/touch.c.obj	9af9682a17236c68
+366	1456	7726809748080888	esp-idf/main/CMakeFiles/__idf_main.dir/core/power_management.c.obj	2a915cf0df807249
+379	1464	7726809748210825	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/flex_sensor.c.obj	5b877d729ed0321a
+454	1498	7726809748971642	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/haptic.c.obj	72bdb9b821bda093
+393	1501	7726809748350999	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/imu.c.obj	4aa2774a6008996
+419	1560	7726809748616177	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/display.c.obj	36ab58d1d8f53981
+473	1561	7726809749156981	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/sensor_task.c.obj	309744964de9c900
+491	1578	7726809749336981	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/processing_task.c.obj	75fb43106e3c29f6
+351	1679	7726809747934210	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
+438	2214	7726809748796259	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/audio.c.obj	40fc260d775b7176
+2214	2461	7726809766569622	esp-idf/main/libmain.a	f044c20365999b0
+2461	13877	7726809882699046	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+2461	13877	7726809882699046	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+13878	19356	7726809883199968	glove-system.elf	ae676e3b56759347
+19357	19747	7726809941802333	.bin_timestamp	228c157c6d5508ab
+19357	19747	7726809941802333	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+19747	19857	7726809941902364	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+19747	19857	7726809941902364	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+266	458	7726816507088659	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+266	458	7726816507088659	bootloader/bootloader.elf	74242a8008610cd9
+266	458	7726816507088659	bootloader/bootloader.bin	74242a8008610cd9
+266	458	7726816507088659	bootloader/bootloader.map	74242a8008610cd9
+266	458	7726816507088659	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+266	458	7726816507088659	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+266	458	7726816507088659	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+266	458	7726816507088659	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+459	505	7726816509006113	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+459	505	7726816509006113	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+505	643	7726816510734247	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+505	643	7726816510734247	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+505	643	7726816510734247	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+505	643	7726816510734247	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+304	498	7726816807157506	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+304	498	7726816807157506	bootloader/bootloader.elf	74242a8008610cd9
+304	498	7726816807157506	bootloader/bootloader.bin	74242a8008610cd9
+304	498	7726816807157506	bootloader/bootloader.map	74242a8008610cd9
+304	498	7726816807157506	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+304	498	7726816807157506	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+304	498	7726816807157506	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+304	498	7726816807157506	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+499	545	7726816809097893	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+499	545	7726816809097893	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+545	649	7726816810522964	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+545	649	7726816810522964	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+545	649	7726816810522964	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+545	649	7726816810522964	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+290	1175	7726816807010987	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/flex_sensor.c.obj	5b877d729ed0321a
+1176	1403	7726816815865677	esp-idf/main/libmain.a	f044c20365999b0
+1403	12632	7726816929952012	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+1403	12632	7726816929952012	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+12633	18191	7726816930437188	glove-system.elf	ae676e3b56759347
+18192	18519	7726816989213470	.bin_timestamp	228c157c6d5508ab
+18192	18519	7726816989213470	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+18519	18614	7726816989303883	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+18519	18614	7726816989303883	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+381	664	7726818208173946	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+381	664	7726818208173946	bootloader/bootloader.elf	74242a8008610cd9
+381	664	7726818208173946	bootloader/bootloader.bin	74242a8008610cd9
+381	664	7726818208173946	bootloader/bootloader.map	74242a8008610cd9
+381	664	7726818208173946	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+381	664	7726818208173946	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+381	664	7726818208173946	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+381	664	7726818208173946	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+665	728	7726818211025046	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+665	728	7726818211025046	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+728	874	7726818212967535	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+728	874	7726818212967535	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+728	874	7726818212967535	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+728	874	7726818212967535	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+361	2266	7726818207967326	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
+2268	2612	7726818227035413	esp-idf/main/libmain.a	f044c20365999b0
+2612	14326	7726818347125313	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+2612	14326	7726818347125313	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+14327	19353	7726818347630429	glove-system.elf	ae676e3b56759347
+19353	19669	7726818400974532	.bin_timestamp	228c157c6d5508ab
+19353	19669	7726818400974532	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+19669	19776	7726818401049893	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+19669	19776	7726818401049893	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+391	685	7726818855878492	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+391	685	7726818855878492	bootloader/bootloader.elf	74242a8008610cd9
+391	685	7726818855878492	bootloader/bootloader.bin	74242a8008610cd9
+391	685	7726818855878492	bootloader/bootloader.map	74242a8008610cd9
+391	685	7726818855878492	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+391	685	7726818855878492	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+391	685	7726818855878492	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+391	685	7726818855878492	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+687	745	7726818858826083	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+687	745	7726818858826083	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+745	908	7726818860915028	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+745	908	7726818860915028	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+745	908	7726818860915028	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+745	908	7726818860915028	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+375	2494	7726818855721476	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
+2496	2912	7726818876924974	esp-idf/main/libmain.a	f044c20365999b0
+2912	14431	7726818995748025	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+2912	14431	7726818995748025	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+14432	19575	7726818996284382	glove-system.elf	ae676e3b56759347
+19575	19929	7726819051159757	.bin_timestamp	228c157c6d5508ab
+19575	19929	7726819051159757	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+19929	20038	7726819051255419	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+19929	20038	7726819051255419	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+353	573	7726866639614661	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+353	573	7726866639614661	bootloader/bootloader.elf	74242a8008610cd9
+353	573	7726866639614661	bootloader/bootloader.bin	74242a8008610cd9
+353	573	7726866639614661	bootloader/bootloader.map	74242a8008610cd9
+353	573	7726866639614661	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+353	573	7726866639614661	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+353	573	7726866639614661	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+353	573	7726866639614661	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+574	619	7726866641819077	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+574	619	7726866641819077	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+619	722	7726866643224878	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+619	722	7726866643224878	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+619	722	7726866643224878	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+619	722	7726866643224878	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+270	459	7726868120868456	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+270	459	7726868120868456	bootloader/bootloader.elf	74242a8008610cd9
+270	459	7726868120868456	bootloader/bootloader.bin	74242a8008610cd9
+270	459	7726868120868456	bootloader/bootloader.map	74242a8008610cd9
+270	459	7726868120868456	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+270	459	7726868120868456	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+270	459	7726868120868456	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+270	459	7726868120868456	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+460	505	7726868122759889	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+460	505	7726868122759889	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+505	597	7726868124056600	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+505	597	7726868124056600	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+505	597	7726868124056600	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+505	597	7726868124056600	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+289	478	7726868475762920	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+289	478	7726868475762920	bootloader/bootloader.elf	74242a8008610cd9
+289	478	7726868475762920	bootloader/bootloader.bin	74242a8008610cd9
+289	478	7726868475762920	bootloader/bootloader.map	74242a8008610cd9
+289	478	7726868475762920	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+289	478	7726868475762920	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+289	478	7726868475762920	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+289	478	7726868475762920	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+479	529	7726868477653076	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+479	529	7726868477653076	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+529	635	7726868479129572	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+529	635	7726868479129572	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+529	635	7726868479129572	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+529	635	7726868479129572	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+278	1202	7726868475642483	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/flex_sensor.c.obj	5b877d729ed0321a
+1203	1418	7726868484884435	esp-idf/main/libmain.a	f044c20365999b0
+1418	12328	7726868595650626	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+1418	12328	7726868595650626	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+12329	17405	7726868596153646	glove-system.elf	ae676e3b56759347
+17405	17736	7726868650140213	.bin_timestamp	228c157c6d5508ab
+17405	17736	7726868650140213	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+17736	17838	7726868650225516	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+17736	17838	7726868650225516	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+418	705	7726872643076974	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+418	705	7726872643076974	bootloader/bootloader.elf	74242a8008610cd9
+418	705	7726872643076974	bootloader/bootloader.bin	74242a8008610cd9
+418	705	7726872643076974	bootloader/bootloader.map	74242a8008610cd9
+418	705	7726872643076974	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+418	705	7726872643076974	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+418	705	7726872643076974	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+418	705	7726872643076974	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+706	773	7726872645969057	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+706	773	7726872645969057	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+774	907	7726872647857478	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+774	907	7726872647857478	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+774	907	7726872647857478	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+774	907	7726872647857478	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+403	678	7726872911545503	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+403	678	7726872911545503	bootloader/bootloader.elf	74242a8008610cd9
+403	678	7726872911545503	bootloader/bootloader.bin	74242a8008610cd9
+403	678	7726872911545503	bootloader/bootloader.map	74242a8008610cd9
+403	678	7726872911545503	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+403	678	7726872911545503	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+403	678	7726872911545503	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+403	678	7726872911545503	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+679	747	7726872914310655	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+679	747	7726872914310655	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+748	879	7726872916200903	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+748	879	7726872916200903	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+748	879	7726872916200903	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+748	879	7726872916200903	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+386	1783	7726872911380288	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/flex_sensor.c.obj	5b877d729ed0321a
+1784	2107	7726872925357723	esp-idf/main/libmain.a	f044c20365999b0
+2107	13473	7726873041728419	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+2107	13473	7726873041728419	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+13475	18920	7726873042264035	glove-system.elf	ae676e3b56759347
+18921	19253	7726873099954771	.bin_timestamp	228c157c6d5508ab
+18921	19253	7726873099954771	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+19253	19378	7726873100050361	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+19253	19378	7726873100050361	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+388	754	7726876915784338	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+388	754	7726876915784338	bootloader/bootloader.elf	74242a8008610cd9
+388	754	7726876915784338	bootloader/bootloader.bin	74242a8008610cd9
+388	754	7726876915784338	bootloader/bootloader.map	74242a8008610cd9
+388	754	7726876915784338	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+388	754	7726876915784338	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+388	754	7726876915784338	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+388	754	7726876915784338	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+757	831	7726876919462068	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+757	831	7726876919462068	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+832	985	7726876921620514	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+832	985	7726876921620514	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+832	985	7726876921620514	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+832	985	7726876921620514	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+245	1132	7726876914349060	esp-idf/main/CMakeFiles/__idf_main.dir/core/power_management.c.obj	2a915cf0df807249
+288	1158	7726876914777352	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/touch.c.obj	9af9682a17236c68
+273	1180	7726876914630412	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/imu.c.obj	4aa2774a6008996
+334	1182	7726876915245158	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/haptic.c.obj	72bdb9b821bda093
+304	1220	7726876914942694	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/display.c.obj	36ab58d1d8f53981
+351	1237	7726876915412850	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/sensor_task.c.obj	309744964de9c900
+367	1248	7726876915562107	esp-idf/main/CMakeFiles/__idf_main.dir/tasks/processing_task.c.obj	75fb43106e3c29f6
+320	1325	7726876915098846	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/audio.c.obj	40fc260d775b7176
+232	1326	7726876914221368	esp-idf/main/CMakeFiles/__idf_main.dir/app_main.c.obj	7215cdc454a9471c
+259	1722	7726876914484595	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/flex_sensor.c.obj	5b877d729ed0321a
+1723	1967	7726876929125170	esp-idf/main/libmain.a	f044c20365999b0
+1967	13021	7726877041611830	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+1967	13021	7726877041611830	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+13024	18572	7726877042130879	glove-system.elf	ae676e3b56759347
+18573	18904	7726877100850070	.bin_timestamp	228c157c6d5508ab
+18573	18904	7726877100850070	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+18905	19021	7726877100945060	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+18905	19021	7726877100945060	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+306	502	7726877812778345	bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+306	502	7726877812778345	bootloader/bootloader.elf	74242a8008610cd9
+306	502	7726877812778345	bootloader/bootloader.bin	74242a8008610cd9
+306	502	7726877812778345	bootloader/bootloader.map	74242a8008610cd9
+306	502	7726877812778345	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-build	74242a8008610cd9
+306	502	7726877812778345	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.elf	74242a8008610cd9
+306	502	7726877812778345	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.bin	74242a8008610cd9
+306	502	7726877812778345	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader/bootloader.map	74242a8008610cd9
+503	552	7726877814763508	bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+503	552	7726877814763508	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-install	b32ed7ffa5fb91a3
+552	656	7726877816200405	CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+552	656	7726877816200405	bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+552	656	7726877816200405	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/CMakeFiles/bootloader-complete	9d70cd94cb431e3e
+552	656	7726877816200405	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/bootloader-prefix/src/bootloader-stamp/bootloader-done	9d70cd94cb431e3e
+294	1219	7726877812662853	esp-idf/main/CMakeFiles/__idf_main.dir/drivers/flex_sensor.c.obj	5b877d729ed0321a
+1220	1466	7726877821931651	esp-idf/main/libmain.a	f044c20365999b0
+1467	12545	7726877934634830	esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+1467	12545	7726877934634830	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esp_system/ld/sections.ld	c4fd679949794cde
+12547	18298	7726877935189752	glove-system.elf	ae676e3b56759347
+18299	18631	7726877995960485	.bin_timestamp	228c157c6d5508ab
+18299	18631	7726877995960485	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/.bin_timestamp	228c157c6d5508ab
+18632	18739	7726877996045740	esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0
+18632	18739	7726877996045740	C:/Users/MostafaHussein/Desktop/Embedded Systems Project/glove-system/build/esp-idf/esptool_py/CMakeFiles/app_check_size	3d230d6b26e80da0

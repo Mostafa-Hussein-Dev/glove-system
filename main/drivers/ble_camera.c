@@ -454,7 +454,11 @@ static void gattc_event_handler(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_
                 camera_status = BLE_CAMERA_STATUS_CONNECTED;
                 ESP_LOGI(TAG, "Connected to ESP32-CAM, starting service discovery...");
                 
+                memcpy(remote_bda, param->open.remote_bda, sizeof(esp_bd_addr_t));
+
+                
                 // Start service discovery
+                ESP_LOGI(TAG, "Connected to ESP32-CAM, starting service discovery...");
                 esp_ble_gattc_search_service(gattc_if, conn_id, NULL);
             } else {
                 ESP_LOGE(TAG, "Failed to connect to ESP32-CAM: %d", param->open.status);
@@ -564,11 +568,10 @@ static void gap_event_handler(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param
 
 static esp_err_t send_camera_command(uint8_t cmd, uint8_t *data, size_t len) {
     // Check connection state
-    if (conn_id == 0) {
-        ESP_LOGE(TAG, "No active connection (conn_id = 0)");
-        camera_status = BLE_CAMERA_STATUS_DISCONNECTED;
-        return ESP_ERR_INVALID_STATE;
-    }
+    if (camera_status != BLE_CAMERA_STATUS_CONNECTED && camera_status != BLE_CAMERA_STATUS_STREAMING) {
+    ESP_LOGE(TAG, "Camera not in connected state: %d", camera_status);
+    return ESP_ERR_INVALID_STATE;
+}
 
     if (gattc_if == ESP_GATT_IF_NONE) {
         ESP_LOGE(TAG, "GATT interface not established");

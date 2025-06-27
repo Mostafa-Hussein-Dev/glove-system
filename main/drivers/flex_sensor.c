@@ -139,6 +139,8 @@ static esp_err_t detect_sensor_direction(finger_t finger);
 static void calculate_calibration_factors(void);
 static bool validate_adc_value(finger_t finger, uint16_t value);
 void flex_sensor_test_calibration_math(finger_t finger);
+esp_err_t flex_sensor_set_direction(uint8_t finger, sensor_direction_t direction);
+esp_err_t flex_sensor_force_calibration(void);
 
 
 esp_err_t flex_sensor_init(void) {
@@ -164,7 +166,7 @@ esp_err_t flex_sensor_init(void) {
         ESP_LOGE(TAG, "Failed to initialize calibration: %s", esp_err_to_name(ret));
         return ret;
     }
-    
+
     // Initialize filter buffers with actual readings
     ESP_LOGI(TAG, "Initializing filter buffers...");
     for (int i = 0; i < FINGER_COUNT; i++) {
@@ -204,6 +206,21 @@ esp_err_t flex_sensor_init(void) {
     
     driver_initialized = true;
     ESP_LOGI(TAG, "Flex sensors initialized successfully");
+
+        ESP_LOGI(TAG, "Configuring sensor directions...");
+    flex_sensor_set_direction(0, SENSOR_DIRECTION_DECREASING);  // Thumb
+    flex_sensor_set_direction(1, SENSOR_DIRECTION_DECREASING);  // Index
+    flex_sensor_set_direction(2, SENSOR_DIRECTION_DECREASING);  // Middle
+    flex_sensor_set_direction(3, SENSOR_DIRECTION_DECREASING);  // Ring
+    flex_sensor_set_direction(4, SENSOR_DIRECTION_DECREASING);  // Pinky
+
+    ESP_LOGI(TAG, "Performing automatic force calibration...");
+    esp_err_t cal_ret = flex_sensor_force_calibration();
+    if (cal_ret != ESP_OK) {
+        ESP_LOGW(TAG, "Force calibration failed, sensors may not work properly");
+    }
+
+
     return ESP_OK;
 }
 
@@ -400,6 +417,7 @@ accept_value:
     return (uint16_t)(weighted_sum / weight_total);
 }
 
+/*
 esp_err_t flex_sensor_read_raw(uint16_t* raw_values) {
    if (!driver_initialized || raw_values == NULL) {
        return ESP_ERR_INVALID_STATE;
@@ -430,7 +448,7 @@ esp_err_t flex_sensor_read_raw(uint16_t* raw_values) {
         }
     }
     
-    /*
+    
     for (int i = 0; i < FINGER_COUNT; i++) {
        int temp_value;
        esp_err_t ret = adc_oneshot_read(adc_handle, adc_channels[i], &temp_value);
@@ -445,9 +463,38 @@ esp_err_t flex_sensor_read_raw(uint16_t* raw_values) {
            overall_result = ESP_FAIL;
         }
     }
-    */
+    
    
    return overall_result;
+}
+*/
+
+
+esp_err_t flex_sensor_read_raw(uint16_t* raw_values) {
+    if (!driver_initialized || raw_values == NULL) {
+        return ESP_ERR_INVALID_STATE;
+    }
+    
+    esp_err_t overall_result = ESP_OK;
+    
+    for (int i = 0; i < FINGER_COUNT; i++) {
+        int temp_value;
+        esp_err_t ret = adc_oneshot_read(adc_handle, adc_channels[i], &temp_value);
+        
+        if (ret == ESP_OK) {
+            raw_values[i] = apply_filter(i, (uint16_t)temp_value);
+            sensor_health.sensor_connected[i] = true;
+        } else {
+            raw_values[i] = filter_filled[i] ?
+                apply_filter(i, filter_buffers[i][filter_index[i]]) :
+                sensor_calibration.flat_value[i];
+            sensor_health.read_errors[i]++;
+            sensor_health.sensor_connected[i] = false;
+            overall_result = ESP_FAIL;
+        }
+    }
+    
+    return overall_result;
 }
 
 esp_err_t flex_sensor_read_angles(float* angles) {
@@ -963,6 +1010,40 @@ esp_err_t flex_sensor_deinit(void) {
     
     driver_initialized = false;
     ESP_LOGI(TAG, "Flex sensor driver deinitialized");
+    return ESP_OK;
+}
+
+esp_err_t flex_sensor_set_direction(uint8_t finger, sensor_direction_t direction) {
+    if (finger >= FINGER_COUNT) {
+        return ESP_ERR_INVALID_ARG;
+    }
+    
+    sensor_calibration.direction[finger] = direction;
+    ESP_LOGI(TAG, "Finger %d direction set to %s", finger, 
+             direction == SENSOR_DIRECTION_INCREASING ? "INCREASING" : "DECREASING");
+    
+    return ESP_OK;
+}
+
+esp_err_t flex_sensor_force_calibration(void) {
+    ESP_LOGI(TAG, "Force calibrating all sensors with current readings...");
+    
+    // Read current values as "flat" reference
+    uint16_t raw_values[FINGER_COUNT];
+    flex_sensor_read_raw(raw_values);
+    
+    for (int i = 0; i < FINGER_COUNT; i++) {
+        // Set current reading as flat, and estimate bent value
+        sensor_calibration.flat_value[i] = raw_values[i];
+        sensor_calibration.bent_value[i] = (raw_values[i] > 1000) ? 
+            raw_values[i] - 800 : raw_values[i] + 800;  // Estimate bent value
+        
+        sensor_calibration.calibrated[i] = true;  // ← FORCE CALIBRATED!
+        ESP_LOGI(TAG, "Finger %d: forced flat=%d, bent=%d", 
+                 i, sensor_calibration.flat_value[i], sensor_calibration.bent_value[i]);
+    }
+    
+    calculate_calibration_factors();
     return ESP_OK;
 }
 
